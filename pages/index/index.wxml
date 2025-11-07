@@ -16,6 +16,18 @@
       <view class="welcome-subtitle">按住按钮，说出你的想法</view>
     </view>
     
+    <!-- 功能入口 -->
+    <view class="feature-section">
+      <view class="feature-card" bindtap="goToMeetingList">
+        <view class="feature-icon">📋</view>
+        <view class="feature-info">
+          <view class="feature-name">会议纪要</view>
+          <view class="feature-desc">上传会议音频，自动生成纪要</view>
+        </view>
+        <view class="feature-arrow">›</view>
+      </view>
+    </view>
+    
     <!-- 录音按钮 -->
     <view class="record-section">
       <record-button 

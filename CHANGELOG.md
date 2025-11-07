@@ -5,6 +5,193 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-11-07
+
+### 🚀 会议纪要功能全面上线
+
+这是一个重大功能更新版本，实现了完整的会议纪要功能，集成了阿里云通义听悟的高级AI能力。
+
+### Added - 新增功能
+
+#### 会议纪要核心功能
+- 📋 **会议音频上传**
+  - 支持 mp3/m4a/wav 格式
+  - 最大支持 500MB 文件
+  - 自动上传至阿里云 OSS
+
+- 🎯 **语音转写**
+  - 高精度语音识别
+  - 支持中文、英语、粤语等多语种
+  - 完整的转写文本输出
+
+- 👥 **说话人分离**（Speaker Diarization）
+  - 自动识别不同发言人
+  - 支持不定人数自动识别
+  - 按发言人组织转写内容
+
+- 📑 **章节划分**（Auto Chapters）
+  - 自动识别会议不同议题
+  - 生成章节目录和时间戳
+  - 每个章节包含标题和摘要
+  - 适合 30 分钟以上的长会议
+
+- 📝 **5种智能摘要** ✨
+  1. **段落摘要**（Paragraph）- 整体会议概括
+  2. **发言总结**（Conversational）- 按发言人汇总观点
+  3. **思维导图**（MindMap）- 结构化主题展示
+  4. **问答总结**（QuestionsAnswering）- Q&A 提炼
+  5. **章节摘要** - 按章节提供详细摘要
+
+- ✅ **行动项识别**（Action Items）
+  - 智能识别待办事项
+  - 自动提取行动计划
+  - 支持手动补充和编辑
+
+- 💡 **会议要点提取**
+  - 三层提取策略：章节模式 → 段落模式 → 兜底模式
+  - 自动生成会议讨论要点
+  - 包含时间戳、发言人、主题、内容
+
+#### 前端页面
+- 📱 **会议列表页**（`pages/meeting/list`）
+  - 会议列表展示
+  - 状态筛选（处理中/已完成/失败）
+  - 下拉刷新
+  - 删除确认
+
+- 📤 **会议上传页**（`pages/meeting/upload`）
+  - 音频文件选择
+  - 会议信息输入（标题、参会人、日期）
+  - 实时进度显示
+  - 处理状态轮询
+
+- 📄 **会议详情页**（`pages/meeting/detail`）
+  - 多 Tab 展示：摘要/要点/行动项/全文
+  - 发言总结和思维导图展示
+  - 音频播放控制
+  - 编辑和删除功能
+
+#### 后端 API
+- 🔌 **会议纪要接口**
+  - `POST /api/v1/meeting/create` - 创建会议纪要
+  - `GET /api/v1/meeting/list` - 获取会议列表
+  - `GET /api/v1/meeting/{id}` - 获取会议详情
+  - `PUT /api/v1/meeting/{id}` - 更新会议纪要
+  - `DELETE /api/v1/meeting/{id}` - 删除会议纪要
+  - `GET /api/v1/meeting/{id}/status` - 查询处理状态
+
+#### 数据库模型
+- 🗄️ **Meeting 表**
+  - 基础信息：标题、参会人、日期、音频
+  - 转写结果：transcript（转写文本）
+  - 多维度摘要：
+    - `summary` - 段落摘要
+    - `conversational_summary` - 发言总结 ✨
+    - `mind_map` - 思维导图 ✨
+  - 结构化数据：
+    - `key_points` - 会议要点（JSON）
+    - `action_items` - 行动项（JSON）
+  - 状态管理：pending/processing/completed/failed
+
+#### AI 服务增强
+- 🤖 **通义听悟集成优化**
+  - 完整的参数配置支持
+  - 多种摘要类型同时生成
+  - 说话人分离配置
+  - 章节划分配置
+  - 会议助手配置
+
+- ⚡ **异步处理**
+  - 独立的会议处理器（`meeting_processor.py`）
+  - 后台线程处理，不阻塞用户
+  - 最长等待时间 60 分钟
+  - 实时状态更新
+
+### Fixed - 问题修复
+
+- ✅ 修复前端 API 响应格式不一致问题
+  - 统一 `upload` 和 `request` 函数的数据解包方式
+  - 所有 API 统一返回解包后的数据
+
+- ✅ 修复 AI 服务参数未正确传递的问题
+  - `summarization_types` 正确传递给 API
+  - `enable_speaker_diarization` 正确配置
+  - `enable_chapters` 正确配置
+  - `enable_meeting_assistance` 正确配置
+
+- ✅ 完善错误处理和日志记录
+  - 添加详细的错误堆栈信息（`exc_info=True`）
+  - 关键步骤的日志输出
+  - 便于问题排查
+
+### Changed - 变更
+
+#### 架构优化
+- 🏗️ **服务分层**
+  - 区分闪记处理器（`ai_processor.py`）和会议处理器（`meeting_processor.py`）
+  - 不同场景使用不同的 AI 配置
+  - 便于独立维护和优化
+
+- 📊 **数据模型扩展**
+  - Meeting 模型增加多个摘要字段
+  - 支持更丰富的会议信息存储
+  - 向后兼容旧数据
+
+#### 功能对比
+
+| 功能 | 闪记 | 会议纪要 |
+|------|------|----------|
+| 语音转写 | ✅ | ✅ |
+| 段落摘要 | ✅ | ✅ |
+| 关键词提取 | ✅ | ✅ |
+| 发言总结 | ❌ | ✅ |
+| 思维导图 | ❌ | ✅ |
+| 说话人分离 | ❌ | ✅ |
+| 章节划分 | ❌ | ✅ |
+| 行动项识别 | ❌ | ✅ |
+
+### Documentation - 文档
+
+- 📚 **新增文档**
+  - `backend/MEETING_FEATURE_UPDATE.md` - 会议纪要功能详细说明
+  - `backend/DEPLOY_NEW_FEATURES.md` - 部署指南
+  - `backend/TROUBLESHOOTING.md` - 问题排查指南
+  - `backend/migrations/add_meeting_summary_types.py` - 数据库迁移脚本
+
+- 📝 **更新文档**
+  - `README.md` - 添加会议纪要功能说明
+  - `backend/README.md` - 更新 API 接口文档
+
+### Technical Highlights - 技术亮点
+
+- **通义听悟深度集成**
+  - 完整实现语音转写、说话人分离、章节划分、会议助手等功能
+  - 支持 5 种智能摘要类型同时生成
+  - 灵活的参数配置
+
+- **智能要点提取**
+  - 三层策略：章节 → 段落 → 兜底
+  - 自适应不同会议场景
+  - 确保任何情况下都有可用的要点
+
+- **完整的前端体验**
+  - 实时进度显示
+  - 轮询机制确保状态同步
+  - 多 Tab 展示，清晰呈现多维度信息
+
+### Migration Guide - 迁移指南
+
+升级到 0.2.0 版本需要执行数据库迁移：
+
+```bash
+cd backend
+python migrations/add_meeting_summary_types.py
+```
+
+详细说明请参考 `backend/DEPLOY_NEW_FEATURES.md`。
+
+---
+
 ## [0.1.0] - 2025-11-07
 
 ### 🎉 首个 MVP 版本发布
@@ -120,7 +307,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known Issues - 已知问题
 
-- ⚠️ 会议纪要功能尚未实现
 - ⚠️ 搜索功能待开发
 - ⚠️ 数据导出功能待开发
 - ⚠️ 标签系统待开发
@@ -137,7 +323,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 未来计划
 
 ### Phase 2 规划
-- [ ] 会议纪要模式（长时间录音）
+- [x] 会议纪要模式（长时间录音）✅ v0.2.0
 - [ ] 全文搜索功能
 - [ ] 数据导出（Markdown/PDF）
 - [ ] 个人中心
@@ -160,4 +346,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **次版本号（Minor）**：新增功能
 - **修订号（Patch）**：bug 修复和小优化
 
+[0.2.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.1.0

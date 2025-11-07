@@ -388,5 +388,14 @@ Page({
       path: '/pages/index/index',
       imageUrl: '' // TODO: 添加分享图片
     }
+  },
+
+  /**
+   * 跳转到会议纪要列表
+   */
+  goToMeetingList() {
+    wx.navigateTo({
+      url: '/pages/meeting/list'
+    })
   }
 })

@@ -121,6 +121,15 @@ class MeetingCreate(BaseModel):
     participants: Optional[List[str]] = None
     meeting_date: Optional[datetime] = None
     audio_url: str = Field(..., description="音频文件URL")
+    audio_duration: Optional[int] = None
+
+
+class MeetingUpdate(BaseModel):
+    """更新会议纪要请求"""
+    title: Optional[str] = None
+    participants: Optional[List[str]] = None
+    meeting_date: Optional[datetime] = None
+    summary: Optional[str] = None
 
 
 class MeetingResponse(BaseModel):
@@ -131,7 +140,10 @@ class MeetingResponse(BaseModel):
     meeting_date: Optional[datetime]
     audio_url: str
     audio_duration: Optional[int]
-    summary: Optional[str]
+    transcript: Optional[str]
+    summary: Optional[str]  # 段落摘要
+    conversational_summary: Optional[str] = None  # 发言总结 ✨新增
+    mind_map: Optional[str] = None  # 思维导图 ✨新增
     key_points: Optional[List[dict]]
     action_items: Optional[List[dict]]
     status: str
@@ -139,6 +151,28 @@ class MeetingResponse(BaseModel):
     
     class Config:
         from_attributes = True
+    
+    @classmethod
+    def from_orm(cls, obj):
+        """从 ORM 对象转换，处理 JSON 字段"""
+        import json
+        data = {
+            "id": obj.id,
+            "title": obj.title,
+            "participants": json.loads(obj.participants) if obj.participants else None,
+            "meeting_date": obj.meeting_date,
+            "audio_url": obj.audio_url,
+            "audio_duration": obj.audio_duration,
+            "transcript": obj.transcript,
+            "summary": obj.summary,
+            "conversational_summary": obj.conversational_summary if hasattr(obj, 'conversational_summary') else None,
+            "mind_map": obj.mind_map if hasattr(obj, 'mind_map') else None,
+            "key_points": json.loads(obj.key_points) if obj.key_points else None,
+            "action_items": json.loads(obj.action_items) if obj.action_items else None,
+            "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,
+            "created_at": obj.created_at
+        }
+        return cls(**data)
 
 
 class MeetingListResponse(BaseModel):
@@ -147,6 +181,15 @@ class MeetingListResponse(BaseModel):
     page: int
     page_size: int
     items: List[MeetingResponse]
+
+
+class MeetingStatusResponse(BaseModel):
+    """会议处理状态响应"""
+    meeting_id: str
+    status: str
+    progress: Optional[int] = None
+    message: Optional[str] = None
+    error: Optional[str] = None
 
 
 # ============ 搜索相关 ============

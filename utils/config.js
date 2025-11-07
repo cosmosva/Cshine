@@ -29,6 +29,14 @@ const API_ENDPOINTS = {
   FLASH_FAVORITE: '/api/v1/flash/',  // 需要拼接 ID/favorite
   FLASH_AI_STATUS: '/api/v1/flash/',  // 需要拼接 ID/ai-status
   
+  // 会议纪要相关
+  MEETING_CREATE: '/api/v1/meeting/create',
+  MEETING_LIST: '/api/v1/meeting/list',
+  MEETING_DETAIL: '/api/v1/meeting/',  // 需要拼接 ID
+  MEETING_UPDATE: '/api/v1/meeting/',  // 需要拼接 ID
+  MEETING_DELETE: '/api/v1/meeting/',  // 需要拼接 ID
+  MEETING_STATUS: '/api/v1/meeting/',  // 需要拼接 ID/status
+  
   // 文件上传
   UPLOAD_AUDIO: '/api/v1/upload/audio'
 }

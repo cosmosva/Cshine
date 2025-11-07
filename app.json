@@ -2,7 +2,10 @@
   "pages": [
     "pages/index/index",
     "pages/detail/detail",
-    "pages/edit/edit"
+    "pages/edit/edit",
+    "pages/meeting/list",
+    "pages/meeting/upload",
+    "pages/meeting/detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",

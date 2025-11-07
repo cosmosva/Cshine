@@ -202,19 +202,33 @@ function upload(url, filePath, formData = {}, options = {}) {
         'Authorization': `Bearer ${token}`
       } : {},
       success: (res) => {
+        console.log('[Upload] 上传响应:', res)
+        
         if (showLoad) {
           hideLoading()
         }
 
-        const data = JSON.parse(res.data)
-        if (data.code === 200) {
-          resolve(data.data)
-        } else {
-          showError(data.message || '上传失败')
-          reject(new Error(data.message))
+        try {
+          const data = JSON.parse(res.data)
+          console.log('[Upload] 解析后数据:', data)
+          
+          if (data.code === 200) {
+            // 返回解包后的数据，与其他 API 保持一致
+            resolve(data.data)
+          } else {
+            const errorMsg = data.message || '上传失败'
+            showError(errorMsg)
+            reject(new Error(errorMsg))
+          }
+        } catch (error) {
+          console.error('[Upload] 解析响应失败:', error)
+          showError('响应解析失败')
+          reject(error)
         }
       },
       fail: (err) => {
+        console.error('[Upload] 上传失败:', err)
+        
         if (showLoad) {
           hideLoading()
         }

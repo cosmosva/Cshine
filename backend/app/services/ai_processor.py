@@ -56,12 +56,14 @@ def _process_flash_ai(flash_id: str, audio_url: str):
         # 2. 提交通义听悟任务
         logger.info(f"提交通义听悟任务: flash_id={flash_id}, audio_url={audio_url}")
         
+        # 闪记配置：不需要说话人分离
         task_result = tingwu_service.create_task(
             file_url=audio_url,
             source_language="cn",  # 中文
             enable_summarization=True,
             enable_chapters=False,  # 短音频不需要章节
-            enable_meeting_assistance=True  # 开启会议助手获取关键句
+            enable_meeting_assistance=True,  # 开启会议助手获取关键句
+            enable_speaker_diarization=False  # 闪记不需要说话人分离
         )
         
         task_id = task_result['task_id']

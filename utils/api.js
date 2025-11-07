@@ -108,6 +108,63 @@ function uploadAudio(filePath) {
 }
 
 /**
+ * ==================== 会议纪要相关 ====================
+ */
+
+/**
+ * 创建会议纪要
+ * @param {object} data 会议数据
+ */
+function createMeeting(data) {
+  return post(API_ENDPOINTS.MEETING_CREATE, data, { showLoad: true })
+}
+
+/**
+ * 获取会议纪要列表
+ * @param {object} params 查询参数
+ */
+function getMeetingList(params = {}) {
+  const defaultParams = {
+    page: 1,
+    page_size: 20
+  }
+  return get(API_ENDPOINTS.MEETING_LIST, { ...defaultParams, ...params })
+}
+
+/**
+ * 获取会议纪要详情
+ * @param {string} meetingId 会议ID
+ */
+function getMeetingDetail(meetingId) {
+  return get(API_ENDPOINTS.MEETING_DETAIL + meetingId)
+}
+
+/**
+ * 更新会议纪要
+ * @param {string} meetingId 会议ID
+ * @param {object} data 更新的数据
+ */
+function updateMeeting(meetingId, data) {
+  return put(API_ENDPOINTS.MEETING_UPDATE + meetingId, data)
+}
+
+/**
+ * 删除会议纪要
+ * @param {string} meetingId 会议ID
+ */
+function deleteMeeting(meetingId) {
+  return del(API_ENDPOINTS.MEETING_DELETE + meetingId)
+}
+
+/**
+ * 查询会议处理状态
+ * @param {string} meetingId 会议ID
+ */
+function getMeetingStatus(meetingId) {
+  return get(API_ENDPOINTS.MEETING_STATUS + meetingId + '/status')
+}
+
+/**
  * ==================== 导出 ====================
  */
 
@@ -124,6 +181,14 @@ module.exports = {
   deleteFlash,
   toggleFavorite,
   getAIStatus,
+  
+  // 会议纪要
+  createMeeting,
+  getMeetingList,
+  getMeetingDetail,
+  updateMeeting,
+  deleteMeeting,
+  getMeetingStatus,
   
   // 文件上传
   uploadAudio

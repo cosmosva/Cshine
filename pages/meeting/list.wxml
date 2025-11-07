@@ -1,0 +1,122 @@
+<!--会议纪要列表页-->
+<view class="meeting-list-page">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="会议纪要" />
+
+  <!-- 主内容区 -->
+  <view class="page-content">
+    <!-- 顶部操作区 -->
+    <view class="top-section">
+      <!-- 统计信息 -->
+      <view class="stats-info">
+        <text class="stats-number">{{total}}</text>
+        <text class="stats-label">个会议</text>
+      </view>
+
+      <!-- 上传按钮 -->
+      <view class="upload-btn" bindtap="goToUpload">
+        <text class="icon">📁</text>
+        <text class="label">上传会议</text>
+      </view>
+    </view>
+
+    <!-- 状态筛选器 -->
+    <view class="status-filter">
+      <view 
+        class="filter-item {{statusFilter === item.value ? 'active' : ''}}"
+        wx:for="{{statusOptions}}"
+        wx:key="value"
+        data-status="{{item.value}}"
+        bindtap="onStatusChange"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <!-- 会议列表 -->
+    <scroll-view 
+      class="meeting-scroll"
+      scroll-y
+      enhanced
+      show-scrollbar="{{false}}"
+      enable-back-to-top
+      refresher-enabled
+      refresher-triggered="{{loading}}"
+      bindrefresherrefresh="onPullDownRefresh"
+      bindscrolltolower="onReachBottom"
+    >
+      <!-- 列表内容 -->
+      <view class="meeting-list">
+        <view 
+          class="meeting-card"
+          wx:for="{{meetingList}}"
+          wx:key="id"
+          bindtap="viewMeeting"
+          data-id="{{item.id}}"
+          data-status="{{item.status}}"
+        >
+          <!-- 状态标签 -->
+          <view class="status-tag" style="background-color: {{statusColorMap[item.status]}};">
+            {{statusTextMap[item.status]}}
+          </view>
+
+          <!-- 会议信息 -->
+          <view class="meeting-info">
+            <view class="meeting-title">{{item.title}}</view>
+            
+            <view class="meeting-meta">
+              <text class="meta-item" wx:if="{{item.meeting_date}}">
+                📅 {{formatTime(item.meeting_date)}}
+              </text>
+              <text class="meta-item" wx:if="{{item.audio_duration}}">
+                ⏱️ {{formatDuration(item.audio_duration)}}
+              </text>
+              <text class="meta-item" wx:if="{{item.participants && item.participants.length > 0}}">
+                👥 {{item.participants.length}}人
+              </text>
+            </view>
+
+            <!-- 摘要预览 -->
+            <view class="meeting-summary" wx:if="{{item.summary && item.status === 'completed'}}">
+              {{item.summary}}
+            </view>
+
+            <!-- 处理中提示 -->
+            <view class="processing-tip" wx:if="{{item.status === 'processing'}}">
+              🔄 正在处理中，预计需要几分钟...
+            </view>
+
+            <!-- 失败提示 -->
+            <view class="error-tip" wx:if="{{item.status === 'failed'}}">
+              ⚠️ 处理失败，请重新上传
+            </view>
+          </view>
+
+          <!-- 操作按钮 -->
+          <view class="meeting-actions" catchtap="stop">
+            <view class="action-btn delete" bindtap="deleteMeeting" data-id="{{item.id}}">
+              🗑️
+            </view>
+          </view>
+        </view>
+
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{meetingList.length === 0 && !loading}}">
+          <text class="empty-icon">📋</text>
+          <text class="empty-text">暂无会议纪要</text>
+          <text class="empty-hint">点击上方「上传会议」按钮开始</text>
+        </view>
+
+        <!-- 加载提示 -->
+        <view class="load-more" wx:if="{{loading}}">
+          <text class="loading-text">加载中...</text>
+        </view>
+
+        <view class="load-more" wx:if="{{!loading && !hasMore && meetingList.length > 0}}">
+          <text class="no-more-text">没有更多了</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+

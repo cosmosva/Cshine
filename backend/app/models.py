@@ -95,7 +95,9 @@ class Meeting(Base):
     audio_url = Column(Text, nullable=True)
     audio_duration = Column(Integer, nullable=True)  # 秒
     transcript = Column(Text, nullable=True)
-    summary = Column(Text, nullable=True)
+    summary = Column(Text, nullable=True)  # 段落摘要
+    conversational_summary = Column(Text, nullable=True)  # 发言总结 ✨新增
+    mind_map = Column(Text, nullable=True)  # 思维导图 ✨新增
     key_points = Column(Text, nullable=True)  # 存储为 JSON 字符串
     action_items = Column(Text, nullable=True)  # 存储为 JSON 字符串
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

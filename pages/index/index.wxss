@@ -50,6 +50,63 @@
   animation: fadeIn 0.6s ease;
 }
 
+/* ==================== 功能入口 ==================== */
+
+.feature-section {
+  padding: 0 var(--spacing-lg) var(--spacing-md);
+}
+
+.feature-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(74, 111, 232, 0.05) 0%, rgba(123, 97, 255, 0.05) 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(74, 111, 232, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-card:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(74, 111, 232, 0.1) 0%, rgba(123, 97, 255, 0.1) 100%);
+}
+
+.feature-icon {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8rpx 24rpx rgba(74, 111, 232, 0.2);
+}
+
+.feature-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.feature-name {
+  font-size: 30rpx;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.feature-desc {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.feature-arrow {
+  font-size: 48rpx;
+  color: var(--color-text-tertiary);
+}
+
 .welcome-subtitle {
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
