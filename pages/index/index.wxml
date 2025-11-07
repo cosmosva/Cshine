@@ -1,0 +1,78 @@
+<!--index.wxml-->
+<view class="page">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="Cshine" back="{{false}}" color="black" background="#FFF">
+    <view slot="right" class="nav-help" bindtap="onShowHelp">
+      <text class="help-icon">?</text>
+    </view>
+  </navigation-bar>
+  
+  <!-- 主内容区域 -->
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}" refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onRefresh">
+    
+    <!-- 欢迎区域 -->
+    <view class="welcome-section">
+      <view class="welcome-title">Let Your Ideas Shine ✨</view>
+      <view class="welcome-subtitle">按住按钮，说出你的想法</view>
+    </view>
+    
+    <!-- 录音按钮 -->
+    <view class="record-section">
+      <record-button 
+        maxDuration="{{300}}"
+        bind:recordstart="onRecordStart"
+        bind:recordend="onRecordEnd"
+        bind:recordcancel="onRecordCancel"
+        bind:recorderror="onRecordError"
+      />
+    </view>
+    
+    <!-- 统计信息 -->
+    <view class="stats-section">
+      <text class="stats-text">今天已记录 {{todayCount}} 条灵感</text>
+    </view>
+    
+    <!-- 筛选器 -->
+    <view class="filter-section">
+      <view class="filter-tabs">
+        <view 
+          class="filter-tab {{activeFilter === item ? 'active' : ''}}" 
+          wx:for="{{filterOptions}}" 
+          wx:key="item"
+          bindtap="onFilterChange"
+          data-filter="{{item}}"
+        >
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 闪记列表 -->
+    <view class="flash-list">
+      <!-- 加载状态 -->
+      <view class="loading-container" wx:if="{{isLoading}}">
+        <text class="loading-text">加载中...</text>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-container" wx:elif="{{flashList.length === 0}}">
+        <text class="empty-icon">💡</text>
+        <text class="empty-text">还没有记录，快来记录你的第一个灵感吧~</text>
+      </view>
+      
+      <!-- 列表 -->
+      <view class="flash-list-content" wx:else>
+        <flash-card 
+          wx:for="{{flashList}}" 
+          wx:key="id"
+          item="{{item}}"
+          bind:cardtap="onCardTap"
+          bind:favorite="onFavorite"
+        />
+      </view>
+    </view>
+    
+    <!-- 底部安全区域 -->
+    <view class="safe-area-bottom"></view>
+  </scroll-view>
+</view>

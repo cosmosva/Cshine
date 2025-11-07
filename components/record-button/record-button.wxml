@@ -1,0 +1,40 @@
+<!-- 录音按钮组件 -->
+<view class="record-button-wrapper">
+  <!-- 主录音按钮 -->
+  <view
+    class="record-button {{isRecording ? 'recording' : ''}}"
+    catchtouchstart="onTouchStart"
+    catchtouchmove="onTouchMove"
+    catchtouchend="onTouchEnd"
+    catchtouchcancel="onTouchCancel"
+  >
+    <!-- 波形动画容器 -->
+    <view class="wave-container" wx:if="{{isRecording}}">
+      <view class="wave wave-1" style="animation-delay: 0s;"></view>
+      <view class="wave wave-2" style="animation-delay: 0.1s;"></view>
+      <view class="wave wave-3" style="animation-delay: 0.2s;"></view>
+    </view>
+
+    <!-- 渐变背景 -->
+    <view class="button-gradient"></view>
+
+    <!-- 图标 -->
+    <view class="button-icon">
+      <text wx:if="{{!isRecording}}" class="icon-mic">🎙️</text>
+      <view wx:else class="recording-dot"></view>
+    </view>
+
+    <!-- 文字提示 -->
+    <view class="button-text">
+      <text wx:if="{{!isRecording}}">按住说话</text>
+      <text wx:else>{{recordingTime}}</text>
+    </view>
+  </view>
+  
+  <!-- 取消提示 -->
+  <view class="cancel-hint" wx:if="{{isRecording}}">
+    <text class="hint-arrow">↑</text>
+    <text class="hint-text">{{isCanceling ? '松开取消' : '上滑取消'}}</text>
+  </view>
+</view>
+

@@ -1,0 +1,45 @@
+<!-- 闪记卡片组件 -->
+<view class="flash-card" bindtap="onCardTap">
+  <!-- 顶部信息栏 -->
+  <view class="card-header">
+    <view class="category-tag" data-category="{{item.category}}">
+      <text>{{categoryIcon}} {{item.category}}</text>
+    </view>
+    <view class="time-text">{{displayTime}}</view>
+  </view>
+  
+  <!-- 标题 -->
+  <view class="card-title">
+    <text>{{item.title}}</text>
+  </view>
+  
+  <!-- 摘要内容 -->
+  <view class="card-summary" wx:if="{{item.summary}}">
+    <text>{{item.summary}}</text>
+  </view>
+  
+  <!-- 底部信息 -->
+  <view class="card-footer">
+    <!-- 关键词标签 -->
+    <view class="keywords" wx:if="{{item.keywords && item.keywords.length > 0}}">
+      <view class="keyword-tag" wx:for="{{item.keywords}}" wx:key="index" wx:if="{{index < 3}}">
+        <text>#{{item}}</text>
+      </view>
+    </view>
+    
+    <!-- 右侧操作区 -->
+    <view class="actions">
+      <!-- 音频时长 -->
+      <view class="duration-info" wx:if="{{item.audio_duration}}">
+        <text class="icon">🎵</text>
+        <text class="duration-text">{{formattedDuration}}</text>
+      </view>
+      
+      <!-- 收藏图标 -->
+      <view class="favorite-icon {{item.is_favorite ? 'active' : ''}}" catchtap="onFavorite">
+        <text>{{item.is_favorite ? '⭐' : '☆'}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+

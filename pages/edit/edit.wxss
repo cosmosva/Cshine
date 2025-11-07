@@ -1,0 +1,240 @@
+/* 编辑闪记页面样式 */
+@import '/styles/variables.wxss';
+
+.edit-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==================== 自定义导航栏 ==================== */
+
+.custom-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 88rpx;
+  background-color: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.navbar-back {
+  width: 80rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: var(--color-text-primary);
+  font-weight: 300;
+}
+
+.navbar-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-title text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.navbar-placeholder {
+  width: 80rpx;
+}
+
+/* ==================== 加载状态 ==================== */
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.loading-text {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== 编辑表单 ==================== */
+
+.edit-form {
+  flex: 1;
+  padding: var(--spacing-lg);
+  /* 为底部固定按钮留出空间（按钮高度 88rpx + padding 32rpx + 安全区域） */
+  padding-bottom: calc(88rpx + var(--spacing-lg) * 2 + 80rpx);
+}
+
+.form-item {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.required {
+  color: var(--color-error);
+}
+
+.label-tag {
+  padding: 4rpx 12rpx;
+  background-color: #F0F5FF;
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+}
+
+/* 输入框 */
+.form-input {
+  width: 100%;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm) 0;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 400rpx;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  line-height: 1.8;
+}
+
+.char-count {
+  margin-top: var(--spacing-sm);
+  text-align: right;
+}
+
+.char-count text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== 分类选择器 ==================== */
+
+.category-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.category-option {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-bg-secondary);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.category-option.active {
+  background-color: #E6F7FF;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ==================== 摘要和关键词显示 ==================== */
+
+.summary-display {
+  padding: var(--spacing-md);
+  background-color: #FFFBF0;
+  border-radius: var(--radius-md);
+  line-height: 1.6;
+}
+
+.summary-display text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.keywords-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.keyword-tag {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: #F0F5FF;
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+/* ==================== 底部操作按钮 ==================== */
+
+.edit-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  padding-bottom: calc(var(--spacing-lg) + constant(safe-area-inset-bottom));
+  padding-bottom: calc(var(--spacing-lg) + env(safe-area-inset-bottom));
+  background-color: var(--color-bg-primary);
+  border-top: 1rpx solid var(--color-border);
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}
+
+.cancel-btn {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.save-btn {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  box-shadow: 0 4rpx 16rpx rgba(74, 111, 232, 0.3);
+}
+

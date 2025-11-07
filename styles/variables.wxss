@@ -1,0 +1,172 @@
+/**
+ * Cshine 全局变量定义
+ * 基于 PRD v1.0 - 第12.1节 视觉设计规范
+ */
+
+/* ==================== 色彩系统 ==================== */
+
+/* 主色调 */
+page {
+  --color-primary: #4A6FE8;        /* 天蓝色 - 灵感 */
+  --color-secondary: #7B61FF;       /* 宇宙紫 - 思考 */
+  
+  /* 渐变色 */
+  --gradient-primary: linear-gradient(135deg, #4A6FE8 0%, #7B61FF 100%);
+  --gradient-light: linear-gradient(135deg, rgba(74, 111, 232, 0.1) 0%, rgba(123, 97, 255, 0.1) 100%);
+  
+  /* 背景色 */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F9FA;
+  --color-bg-tertiary: #F2F3F5;
+  
+  /* 文字颜色 */
+  --color-text-primary: #1C1C1E;
+  --color-text-secondary: #86868B;
+  --color-text-tertiary: #C7C7CC;
+  --color-text-inverse: #FFFFFF;
+  
+  /* 边框颜色 */
+  --color-border: #E5E5E5;             /* 默认边框色 */
+  --color-border-light: #E5E5E5;
+  --color-border-medium: #D1D1D6;
+  --color-border-dark: #C7C7CC;
+  
+  /* 功能色 */
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-error: #FF3B30;
+  --color-info: #007AFF;
+
+  /* 阴影色 */
+  --color-shadow-light: rgba(0, 0, 0, 0.05);
+  --color-shadow-medium: rgba(0, 0, 0, 0.1);
+  --color-shadow-dark: rgba(0, 0, 0, 0.2);
+
+  /* 分类颜色 - 统一定义（工作/生活/学习/灵感/其他）*/
+  /* 工作 */
+  --category-work-bg: #E8F4FD;
+  --category-work-color: #1890FF;
+
+  /* 生活 */
+  --category-life-bg: #FFF7E6;
+  --category-life-color: #FA8C16;
+
+  /* 学习 */
+  --category-study-bg: #F6FFED;
+  --category-study-color: #52C41A;
+
+  /* 灵感 */
+  --category-inspiration-bg: #FFF0F6;
+  --category-inspiration-color: #EB2F96;
+
+  /* 其他 */
+  --category-other-bg: #F5F5F5;
+  --category-other-color: #8C8C8C;
+}
+
+
+/* ==================== 尺寸系统 ==================== */
+
+page {
+  /* 字号 */
+  --font-size-xs: 24rpx;      /* 12px - 说明文字 */
+  --font-size-sm: 28rpx;      /* 14px - 辅助文字 */
+  --font-size-base: 32rpx;    /* 16px - 正文 */
+  --font-size-lg: 36rpx;      /* 18px - 次标题 */
+  --font-size-xl: 40rpx;      /* 20px - 标题 */
+  --font-size-xxl: 48rpx;     /* 24px - 大标题 */
+  --font-size-xxxl: 64rpx;    /* 32px - 特大标题 */
+  
+  /* 字重 */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 行高 */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.8;
+  
+  /* 间距 */
+  --spacing-xs: 8rpx;       /* 4px */
+  --spacing-sm: 16rpx;      /* 8px */
+  --spacing-md: 24rpx;      /* 12px */
+  --spacing-lg: 32rpx;      /* 16px */
+  --spacing-xl: 48rpx;      /* 24px */
+  --spacing-xxl: 64rpx;     /* 32px */
+  --spacing-xxxl: 96rpx;    /* 48px */
+  
+  /* 圆角 */
+  --radius-xs: 8rpx;        /* 4px - 小圆角 */
+  --radius-sm: 12rpx;       /* 6px */
+  --radius-md: 16rpx;       /* 8px - 按钮、标签 */
+  --radius-lg: 24rpx;       /* 12px - 卡片 */
+  --radius-xl: 32rpx;       /* 16px - 大卡片 */
+  --radius-xxl: 48rpx;      /* 24px - 弹窗 */
+  --radius-full: 9999rpx;   /* 圆形 */
+  
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx var(--color-shadow-light);
+  --shadow-md: 0 4rpx 16rpx var(--color-shadow-medium);
+  --shadow-lg: 0 8rpx 24rpx var(--color-shadow-medium);
+  --shadow-xl: 0 12rpx 48rpx var(--color-shadow-dark);
+  
+  /* 过渡动画 */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-index 层级 */
+  --z-index-base: 1;
+  --z-index-dropdown: 10;
+  --z-index-sticky: 100;
+  --z-index-fixed: 1000;
+  --z-index-modal: 2000;
+  --z-index-toast: 3000;
+}
+
+
+/* ==================== 布局常量 ==================== */
+
+page {
+  /* 页面边距 */
+  --page-padding-h: 32rpx;    /* 水平边距 16px */
+  --page-padding-v: 24rpx;    /* 垂直边距 12px */
+  
+  /* 导航栏高度 */
+  --navbar-height: 88rpx;     /* 44px */
+  
+  /* 底部标签栏高度 */
+  --tabbar-height: 100rpx;    /* 50px */
+  
+  /* 安全区域 */
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
+}
+
+
+/* ==================== 组件尺寸 ==================== */
+
+page {
+  /* 按钮高度 */
+  --button-height-sm: 56rpx;   /* 28px */
+  --button-height-md: 72rpx;   /* 36px */
+  --button-height-lg: 88rpx;   /* 44px */
+  
+  /* 输入框高度 */
+  --input-height: 72rpx;       /* 36px */
+  
+  /* 卡片间距 */
+  --card-spacing: 24rpx;       /* 12px */
+  
+  /* 图标尺寸 */
+  --icon-size-xs: 32rpx;       /* 16px */
+  --icon-size-sm: 40rpx;       /* 20px */
+  --icon-size-md: 48rpx;       /* 24px */
+  --icon-size-lg: 64rpx;       /* 32px */
+  --icon-size-xl: 96rpx;       /* 48px */
+}
+

@@ -1,0 +1,114 @@
+<!-- 闪记详情页 -->
+<view class="detail-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <view class="navbar-back" catchtap="onBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="navbar-title">
+      <text>闪记详情</text>
+    </view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 详情内容 - 可滚动 -->
+  <scroll-view class="detail-scroll" scroll-y="{{true}}" wx:else>
+    <view class="detail-content">
+      <!-- 头部信息 -->
+      <view class="detail-header">
+        <!-- 分类标签 -->
+        <view class="category-tag" data-category="{{flash.category}}">
+          <text>{{flash.category}}</text>
+        </view>
+
+        <!-- 时间 -->
+        <view class="time-info">
+          <text class="time-text">{{flash.created_at}}</text>
+        </view>
+      </view>
+
+      <!-- 音频播放器 -->
+      <view class="audio-player" wx:if="{{flash.audio_url}}">
+        <view class="player-control">
+          <view class="play-btn" catchtap="togglePlay">
+            <text class="play-icon">{{isPlaying ? '⏸' : '▶️'}}</text>
+          </view>
+          <view class="player-info">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{playProgress}}%"></view>
+            </view>
+            <view class="time-display">
+              <text class="current-time">{{currentTimeText}}</text>
+              <text class="duration">{{durationText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- AI 处理状态 -->
+      <view class="ai-status" wx:if="{{flash.ai_status === 'processing'}}">
+        <text class="status-icon">🤖</text>
+        <text class="status-text">AI 正在处理...</text>
+      </view>
+
+      <!-- 标题 -->
+      <view class="detail-title" wx:if="{{flash.title}}">
+        <text>{{flash.title}}</text>
+      </view>
+
+      <!-- 主要内容 -->
+      <view class="detail-body">
+        <text class="content-text" user-select="true">{{flash.content}}</text>
+      </view>
+
+      <!-- 摘要 -->
+      <view class="detail-summary" wx:if="{{flash.summary}}">
+        <view class="section-title">
+          <text>📝 智能摘要</text>
+        </view>
+        <view class="summary-content">
+          <text user-select="true">{{flash.summary}}</text>
+        </view>
+      </view>
+
+      <!-- 关键词 -->
+      <view class="detail-keywords" wx:if="{{flash.keywords && flash.keywords.length > 0}}">
+        <view class="section-title">
+          <text>🔑 关键词</text>
+        </view>
+        <view class="keywords-list">
+          <view class="keyword-item" wx:for="{{flash.keywords}}" wx:key="index">
+            <text>{{item}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部操作栏 -->
+      <view class="detail-actions">
+        <view class="action-btn" catchtap="onEdit">
+          <text class="btn-icon">✏️</text>
+          <text class="btn-text">编辑</text>
+        </view>
+
+        <view class="action-btn" catchtap="onToggleFavorite">
+          <text class="btn-icon">{{flash.is_favorite ? '⭐️' : '☆'}}</text>
+          <text class="btn-text">{{flash.is_favorite ? '已收藏' : '收藏'}}</text>
+        </view>
+
+        <view class="action-btn delete-btn" catchtap="onDelete">
+          <text class="btn-icon">🗑️</text>
+          <text class="btn-text">删除</text>
+        </view>
+      </view>
+
+      <!-- 安全区域底部占位 -->
+      <view class="safe-area-bottom"></view>
+    </view>
+  </scroll-view>
+</view>
+

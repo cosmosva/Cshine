@@ -1,0 +1,187 @@
+/* 闪记卡片组件样式 */
+
+.flash-card {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.flash-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-md);
+}
+
+/* ==================== 卡片头部 ==================== */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+/* 分类标签 */
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 44rpx;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.category-tag text {
+  letter-spacing: 1rpx;
+}
+
+/* 不同分类的颜色 - 使用全局变量 */
+.category-tag[data-category="工作"],
+.category-tag.work {
+  background-color: var(--category-work-bg);
+  color: var(--category-work-color);
+}
+
+.category-tag[data-category="生活"],
+.category-tag.life {
+  background-color: var(--category-life-bg);
+  color: var(--category-life-color);
+}
+
+.category-tag[data-category="学习"],
+.category-tag.study {
+  background-color: var(--category-study-bg);
+  color: var(--category-study-color);
+}
+
+.category-tag[data-category="灵感"],
+.category-tag.inspiration {
+  background-color: var(--category-inspiration-bg);
+  color: var(--category-inspiration-color);
+}
+
+.category-tag[data-category="其他"],
+.category-tag.other {
+  background-color: var(--category-other-bg);
+  color: var(--category-other-color);
+}
+
+/* 时间文字 */
+.time-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ==================== 卡片标题 ==================== */
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-sm);
+  
+  /* 最多显示2行 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== 摘要内容 ==================== */
+
+.card-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-md);
+  
+  /* 最多显示3行 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== 卡片底部 ==================== */
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+}
+
+/* 关键词区域 */
+.keywords {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  flex: 1;
+  margin-right: var(--spacing-md);
+}
+
+.keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 var(--spacing-sm);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-bg-secondary);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* 操作区域 */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+/* 音频时长 */
+.duration-info {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.duration-info .icon {
+  font-size: var(--font-size-sm);
+}
+
+.duration-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* 收藏图标 */
+.favorite-icon {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  padding: var(--spacing-xs);
+  margin: calc(-1 * var(--spacing-xs)); /* 扩大点击区域 */
+}
+
+.favorite-icon.active {
+  color: var(--color-warning);
+  animation: heartBeat 0.3s ease;
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+

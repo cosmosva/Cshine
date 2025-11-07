@@ -1,0 +1,107 @@
+<!-- 编辑闪记页面 -->
+<view class="edit-page">
+  <!-- 自定义导航栏 -->
+  <view class="custom-navbar">
+    <view class="navbar-back" catchtap="onCancel">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="navbar-title">
+      <text>编辑闪记</text>
+    </view>
+    <view class="navbar-placeholder"></view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 编辑表单 -->
+  <view class="edit-form" wx:else>
+    <!-- 标题输入 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>标题</text>
+      </view>
+      <input 
+        class="form-input" 
+        value="{{title}}" 
+        placeholder="请输入标题（可选）"
+        bindinput="onTitleInput"
+        maxlength="50"
+      />
+    </view>
+
+    <!-- 内容输入 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>内容</text>
+        <text class="required">*</text>
+      </view>
+      <textarea 
+        class="form-textarea" 
+        value="{{content}}" 
+        placeholder="请输入内容"
+        bindinput="onContentInput"
+        maxlength="5000"
+        auto-height
+      />
+      <view class="char-count">
+        <text>{{content.length}} / 5000</text>
+      </view>
+    </view>
+
+    <!-- 分类选择 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text>分类</text>
+      </view>
+      <view class="category-selector">
+        <view 
+          class="category-option {{category === item ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="index"
+          data-category="{{item}}"
+          catchtap="onCategorySelect"
+        >
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 摘要（只读，显示 AI 生成的） -->
+    <view class="form-item" wx:if="{{summary}}">
+      <view class="form-label">
+        <text>智能摘要</text>
+        <text class="label-tag">AI 生成</text>
+      </view>
+      <view class="summary-display">
+        <text>{{summary}}</text>
+      </view>
+    </view>
+
+    <!-- 关键词（只读，显示 AI 生成的） -->
+    <view class="form-item" wx:if="{{keywords && keywords.length > 0}}">
+      <view class="form-label">
+        <text>关键词</text>
+        <text class="label-tag">AI 生成</text>
+      </view>
+      <view class="keywords-display">
+        <view class="keyword-tag" wx:for="{{keywords}}" wx:key="index">
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <view class="edit-actions" wx:if="{{!isLoading}}">
+    <view class="action-btn cancel-btn" catchtap="onCancel">
+      <text>取消</text>
+    </view>
+    <view class="action-btn save-btn" catchtap="onSave">
+      <text>保存</text>
+    </view>
+  </view>
+</view>
+

@@ -1,0 +1,196 @@
+/* index.wxss */
+
+/* 注意：.page 样式由全局 app.wxss 和 common.wxss 定义，这里不再重复 */
+
+/* 首页特定的 .page-content 样式（覆盖 common.wxss 的默认样式）*/
+.page-content {
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+  margin: 0;
+  padding: 0; /* 首页不需要全局的 padding，每个区域自行控制 */
+}
+
+/* ==================== 导航栏右侧 ==================== */
+
+.nav-help {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56rpx;
+  height: 56rpx;
+}
+
+.help-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background-color: var(--color-bg-secondary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== 欢迎区域 ==================== */
+
+.welcome-section {
+  padding: var(--spacing-xxl) var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+}
+
+.welcome-title {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: 2rpx;
+  animation: fadeIn 0.6s ease;
+}
+
+.welcome-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  animation: fadeIn 0.8s ease;
+}
+
+/* ==================== 录音区域 ==================== */
+
+.record-section {
+  display: flex;
+  justify-content: center;
+  padding: calc(var(--spacing-lg) + 60rpx) 0;
+  width: 100%;
+  overflow: visible;
+}
+
+/* ==================== 统计区域 ==================== */
+
+.stats-section {
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.stats-text {
+  display: inline-flex;
+  align-items: center;
+  height: 56rpx;
+  padding: 0 var(--spacing-lg);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==================== 筛选器 ==================== */
+
+.filter-section {
+  padding: 0 var(--spacing-lg) var(--spacing-md);
+}
+
+.filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab {
+  flex-shrink: 0;
+  height: 60rpx;
+  padding: 0 var(--spacing-lg);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.filter-tab.active {
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.filter-tab:active {
+  transform: scale(0.95);
+}
+
+/* ==================== 闪记列表 ==================== */
+
+.flash-list {
+  padding: 0 var(--spacing-lg);
+  min-height: 400rpx;
+}
+
+.flash-list-content {
+  animation: fadeIn 0.5s ease;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxxl) 0;
+}
+
+.loading-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-md);
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxxl) var(--spacing-lg);
+}
+
+.empty-icon {
+  font-size: 128rpx;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: var(--line-height-loose);
+}
+
+/* 底部安全区域 */
+.safe-area-bottom {
+  height: calc(var(--safe-area-bottom) + var(--spacing-lg));
+}
+
+/* ==================== 动画 ==================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

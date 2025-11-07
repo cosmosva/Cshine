@@ -1,0 +1,110 @@
+# ==================== 微信小程序 ====================
+
+# 开发工具相关
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+
+# 微信开发者工具
+.idea/
+.vscode/
+*.sublime-*
+
+# 临时文件
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 小程序打包文件
+miniprogram_npm/
+.npm/
+
+# ==================== Python 后端 ====================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 虚拟环境
+backend/venv/
+backend/env/
+backend/ENV/
+backend/.venv/
+
+# 数据库
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/cshine.db
+
+# 环境变量
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# 日志文件
+backend/logs/
+backend/*.log
+
+# IDE
+backend/.idea/
+backend/.vscode/
+backend/*.sublime-*
+
+# 测试
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.tox/
+
+# 打包文件
+backend/dist/
+backend/build/
+backend/*.egg-info/
+
+# ==================== 项目特定 ====================
+
+# 敏感配置文件
+config/secrets.json
+utils/config.local.js
+
+# 阿里云配置
+backend/config/aliyun.json
+
+# 临时上传文件
+backend/uploads/
+backend/temp/
+
+# 备份文件
+*.bak
+*.backup
+*.tmp
+
+# 文档草稿
+docs/draft/
+
+# ==================== 系统文件 ====================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*

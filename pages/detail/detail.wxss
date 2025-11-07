@@ -1,0 +1,358 @@
+/* 闪记详情页样式 */
+@import '/styles/variables.wxss';
+
+.detail-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+/* ==================== 自定义导航栏 ==================== */
+
+.custom-navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 88rpx;
+  background-color: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.navbar-back {
+  width: 80rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: var(--color-text-primary);
+  font-weight: 300;
+}
+
+.navbar-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-title text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.navbar-placeholder {
+  width: 80rpx;
+}
+
+/* ==================== 加载状态 ==================== */
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.loading-text {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== 详情内容滚动容器 ==================== */
+
+.detail-scroll {
+  height: calc(100vh - 88rpx - constant(safe-area-inset-top));
+  height: calc(100vh - 88rpx - env(safe-area-inset-top));
+  overflow-y: auto;
+}
+
+.detail-content {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin: var(--spacing-lg);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 底部安全区域占位 */
+.safe-area-bottom {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
+  min-height: var(--spacing-xl);
+}
+
+/* ==================== 头部信息 ==================== */
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.category-tag {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 分类标签颜色 - 使用全局变量 */
+.category-tag[data-category="工作"] {
+  background-color: var(--category-work-bg);
+  color: var(--category-work-color);
+}
+
+.category-tag[data-category="生活"] {
+  background-color: var(--category-life-bg);
+  color: var(--category-life-color);
+}
+
+.category-tag[data-category="学习"] {
+  background-color: var(--category-study-bg);
+  color: var(--category-study-color);
+}
+
+.category-tag[data-category="灵感"] {
+  background-color: var(--category-inspiration-bg);
+  color: var(--category-inspiration-color);
+}
+
+.category-tag[data-category="其他"] {
+  background-color: var(--category-other-bg);
+  color: var(--category-other-color);
+}
+
+.time-info {
+  display: flex;
+  align-items: center;
+}
+
+.time-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== 音频播放器 ==================== */
+
+.audio-player {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.player-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.play-btn {
+  width: 96rpx;
+  height: 96rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.play-btn:active {
+  transform: scale(0.95);
+}
+
+.play-icon {
+  font-size: 48rpx;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.progress-bar {
+  height: 8rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: white;
+  border-radius: var(--radius-sm);
+  transition: width 0.3s ease;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current-time,
+.duration {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ==================== AI 状态 ==================== */
+
+.ai-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: #F0F9FF;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.status-icon {
+  font-size: var(--font-size-lg);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+}
+
+/* ==================== 标题 ==================== */
+
+.detail-title {
+  margin-bottom: var(--spacing-lg);
+}
+
+.detail-title text {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+/* ==================== 主要内容 ==================== */
+
+.detail-body {
+  margin-bottom: var(--spacing-xl);
+}
+
+.content-text {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ==================== 摘要区域 ==================== */
+
+.detail-summary {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: #FFFBF0;
+  border-left: 4rpx solid #FAAD14;
+  border-radius: var(--radius-md);
+}
+
+.section-title {
+  margin-bottom: var(--spacing-md);
+}
+
+.section-title text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.summary-content text {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ==================== 关键词区域 ==================== */
+
+.detail-keywords {
+  margin-bottom: var(--spacing-xl);
+}
+
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.keyword-item {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: #F0F5FF;
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+/* ==================== 底部操作栏 ==================== */
+
+.detail-actions {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1rpx solid var(--color-border);
+  margin-top: var(--spacing-xl);
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  transition: transform 0.2s ease;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.btn-icon {
+  font-size: 48rpx;
+}
+
+.btn-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.delete-btn .btn-text {
+  color: var(--color-error);
+}
+
