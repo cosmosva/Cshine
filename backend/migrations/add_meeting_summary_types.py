@@ -14,9 +14,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy import create_engine, text
-from config import get_settings
-
-settings = get_settings()
+from config import settings
 
 
 def run_migration():

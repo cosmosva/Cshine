@@ -1,0 +1,98 @@
+<!--pages/profile/profile.wxml-->
+<view class="profile-container">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="我的" />
+
+  <view class="profile-content">
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view wx:if="{{isLogin}}" class="user-info">
+        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <view class="user-details">
+          <text class="nickname">{{userInfo.nickName}}</text>
+          <text class="user-id">ID: {{userInfo.openid || 'xxx'}}</text>
+        </view>
+        <view class="logout-btn" bindtap="handleLogout">退出</view>
+      </view>
+      
+      <view wx:else class="login-prompt">
+        <image class="avatar-placeholder" src="/assets/images/avatar-placeholder.png" mode="aspectFill" />
+        <text class="login-text">登录后体验完整功能</text>
+        <button class="login-btn" bindtap="handleLogin">微信登录</button>
+      </view>
+    </view>
+
+    <!-- 数据统计 -->
+    <view wx:if="{{isLogin}}" class="stats-section">
+      <view class="section-title">数据统计</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{stats.flashCount}}</text>
+          <text class="stat-label">闪记数量</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.meetingCount}}</text>
+          <text class="stat-label">会议纪要</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.todayCount}}</text>
+          <text class="stat-label">今日新增</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{stats.totalDuration}}</text>
+          <text class="stat-label">总时长(秒)</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 功能列表 -->
+    <view class="menu-section">
+      <view class="menu-item" bindtap="goToSettings">
+        <view class="menu-left">
+          <text class="menu-icon">⚙️</text>
+          <text class="menu-label">设置</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="handleExport">
+        <view class="menu-left">
+          <text class="menu-icon">📤</text>
+          <text class="menu-label">数据导出</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="handleClearCache">
+        <view class="menu-left">
+          <text class="menu-icon">🗑️</text>
+          <text class="menu-label">清除缓存</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToHelp">
+        <view class="menu-left">
+          <text class="menu-icon">❓</text>
+          <text class="menu-label">帮助中心</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToAbout">
+        <view class="menu-left">
+          <text class="menu-icon">ℹ️</text>
+          <text class="menu-label">关于 Cshine</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 版本信息 -->
+    <view class="version-info">
+      <text class="version-text">Cshine v0.2.5</text>
+      <text class="copyright">© 2025 Cosmos. All rights reserved.</text>
+    </view>
+  </view>
+</view>
+

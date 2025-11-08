@@ -1,13 +1,13 @@
 # Cshine 微信小程序
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/cosmosva/Cshine)
+[![Version](https://img.shields.io/badge/version-0.2.5-blue.svg)](https://github.com/cosmosva/Cshine)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-07C160.svg)](https://mp.weixin.qq.com/)
 
 > **Let Your Ideas Shine. ✨**
 > AI 驱动的语音记录与灵感管理工具
 >
-> **当前版本**: v0.1.0 | **发布日期**: 2025-11-07
+> **当前版本**: v0.2.5 | **发布日期**: 2025-11-08
 
 ## 📱 项目简介
 
@@ -40,6 +40,10 @@ Cshine 是一款基于微信小程序的智能语音记录工具，帮助用户�
 
 ## 🎨 设计特色
 
+- **三 Tab 导航**：清晰的功能分区
+  - 📚 知识库：会议纪要管理
+  - ⚡ Cshine：快速闪记录制
+  - 👤 我的：个人中心和设置
 - **极简设计**：清爽的界面，专注核心体验
 - **渐变配色**：天蓝色 + 宇宙紫的品牌渐变色
 - **流畅动画**：呼吸动画、波形效果、卡片交互
@@ -80,13 +84,14 @@ Cshine/
 │   ├── record-button/      # 录音按钮组件（支持长按、波形动画）
 │   └── flash-card/         # 闪记卡片组件
 ├── pages/                  # 页面目录
-│   ├── index/              # 首页（列表、录音、筛选）
-│   ├── detail/             # 详情页（查看、播放、操作）
+│   ├── index/              # Cshine 主页（列表、录音、筛选）✨ Tab
+│   ├── detail/             # 闪记详情页（查看、播放、操作）
 │   ├── edit/               # 编辑页（修改内容）
-│   └── meeting/            # 会议纪要页面
-│       ├── list/           # 会议列表
-│       ├── upload/         # 上传会议音频
-│       └── detail/         # 会议详情
+│   ├── meeting/            # 会议纪要页面
+│   │   ├── list/           # 知识库页面（会议列表）✨ Tab
+│   │   ├── upload/         # 上传会议音频
+│   │   └── detail/         # 会议详情
+│   └── profile/            # 我的页面（个人中心）✨ Tab
 ├── styles/                 # 样式系统
 │   ├── variables.wxss      # 全局变量（色彩、尺寸等）
 │   └── common.wxss         # 通用样式（工具类）

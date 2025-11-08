@@ -5,6 +5,119 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2025-11-08
+
+### 🎨 UI/UX 重大更新
+
+这是一个重要的用户体验优化版本，添加了底部 TabBar 导航和个人中心页面。
+
+### Added - 新增功能
+
+#### 底部 TabBar 导航 ✨
+- 📱 **三 Tab 设计**
+  - 📚 知识库：会议纪要管理和查看
+  - ⚡ Cshine：快速语音录制和闪记管理
+  - 👤 我的：个人中心和设置
+
+- 🎨 **统一设计规范**
+  - 品牌色选中态（#4A6FE8）
+  - 灰色未选中态（#999999）
+  - 流畅的切换动画
+
+#### 个人中心页面
+- 📱 **"我的"页面**（`pages/profile/`）
+  - 用户信息展示（头像、昵称、ID）
+  - 登录/退出功能
+  - 数据统计卡片（闪记数、会议数、今日新增、总时长）
+  - 功能菜单（设置、导出、清除缓存、帮助、关于）
+  - 版本信息显示
+
+#### 图标资源
+- 🎨 **TabBar 图标**
+  - 6个图标（3个功能 × 2个状态）
+  - 自动生成脚本
+  - 占位图标支持
+
+- 👤 **头像占位图**
+  - 圆形透明背景
+  - 自适应设计
+
+### Fixed - 问题修复
+
+- ✅ 修复后端类型导入错误（tingwu_service.py 缺少 List 导入）
+- ✅ 修复数据库迁移脚本的导入问题
+- ✅ 修复页面跳转方法（TabBar 页面使用 wx.switchTab）
+- ✅ 完成数据库迁移（添加 conversational_summary 和 mind_map 字段）
+
+### Changed - 变更
+
+#### 项目结构优化
+- 🗂️ **新增目录**
+  - `assets/icons/` - TabBar 图标资源
+  - `assets/images/` - 图片资源
+  - `pages/profile/` - 个人中心页面
+
+- 📁 **页面重组**
+  - 主页改为 TabBar 模式
+  - 会议列表页改为 TabBar 模式
+  - 新增个人中心 TabBar 页
+
+#### 配置更新
+- 🔧 `app.json` 添加 tabBar 配置
+- 🔧 更新 `.gitignore` 规则
+- 🔧 优化项目文件组织
+
+### Documentation - 文档
+
+- 📚 **新增文档**
+  - `TABBAR_DESIGN.md` - TabBar 设计完整文档
+  - `TABBAR_SETUP_GUIDE.md` - TabBar 设置详细指南
+
+- 📝 **更新文档**
+  - `README.md` - 添加 TabBar 功能说明
+  - 更新项目结构图
+
+### Maintenance - 维护
+
+- 🧹 **项目清理**
+  - 删除临时日志文件
+  - 删除测试文件
+  - 清理 Python 缓存
+  - 清理系统文件（.DS_Store）
+  - 更新 .gitignore 规则
+
+### Technical Details - 技术细节
+
+**TabBar 实现**
+- 使用微信小程序原生 TabBar
+- 自定义图标（81×81 px PNG）
+- 品牌色一致性
+
+**个人中心实现**
+- 本地数据统计
+- 微信登录集成（getUserProfile）
+- 响应式卡片设计
+
+**数据库更新**
+- 成功执行迁移脚本
+- 添加新字段支持多维度摘要
+
+### Migration Guide - 迁移指南
+
+从 v0.2.0 升级到 v0.2.5：
+
+1. **拉取最新代码**
+2. **准备图标资源**（参考 TABBAR_SETUP_GUIDE.md）
+3. **数据库已迁移**（自动完成）
+4. **重新编译小程序**
+
+### Known Issues - 已知问题
+
+- ⚠️ 个人中心的部分功能为占位（设置、帮助、关于等）
+- ⚠️ 当前使用占位图标，建议后续替换为专业设计图标
+
+---
+
 ## [0.2.0] - 2025-11-07
 
 ### 🚀 会议纪要功能全面上线
@@ -346,5 +459,6 @@ python migrations/add_meeting_summary_types.py
 - **次版本号（Minor）**：新增功能
 - **修订号（Patch）**：bug 修复和小优化
 
+[0.2.5]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.5
 [0.2.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.1.0

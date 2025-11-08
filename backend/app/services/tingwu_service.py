@@ -5,7 +5,7 @@
 
 import os
 import time
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from loguru import logger
 from alibabacloud_tingwu20230930 import models as tingwu_models
 from alibabacloud_tingwu20230930.client import Client as TingwuClient

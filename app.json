@@ -1,15 +1,42 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/meeting/list",
+    "pages/profile/profile",
     "pages/detail/detail",
     "pages/edit/edit",
-    "pages/meeting/list",
     "pages/meeting/upload",
     "pages/meeting/detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
+  },
+  "tabBar": {
+    "color": "#86868B",
+    "selectedColor": "#4A6FE8",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/meeting/list",
+        "text": "知识库",
+        "iconPath": "assets/icons/knowledge.png",
+        "selectedIconPath": "assets/icons/knowledge-active.png"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "Cshine",
+        "iconPath": "assets/icons/flash.png",
+        "selectedIconPath": "assets/icons/flash-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile-active.png"
+      }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

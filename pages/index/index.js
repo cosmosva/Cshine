@@ -394,7 +394,7 @@ Page({
    * 跳转到会议纪要列表
    */
   goToMeetingList() {
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/meeting/list'
     })
   }
