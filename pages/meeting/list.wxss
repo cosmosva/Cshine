@@ -1,252 +1,456 @@
-/* 会议纪要列表页样式 */
+/* 会议纪要列表页样式 - 知识库（参考截图标准）v2 */
+
+/* CSS 变量定义 */
+page {
+  --status-bar-height: env(safe-area-inset-top);
+  --brand-bar-height: 56px;
+  --nav-height: 44px;
+  --tabbar-height: 50px;
+  --header-total-height: calc(var(--brand-bar-height) + var(--nav-height) + var(--status-bar-height) + 8px);
+}
+
 .meeting-list-page {
   width: 100%;
   height: 100vh;
-  background-color: var(--color-background);
+  background-color: #FFFFFF;
   display: flex;
   flex-direction: column;
 }
 
+/* ========== 品牌栏（第一层导航 - TicNote 风格） ========== */
+.brand-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: calc(var(--brand-bar-height) + var(--status-bar-height));
+  padding: 0 16px 10px 16px;
+  background-color: #FFFFFF;
+}
+
+.brand-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4A6FE8 0%, #7B5FE8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A1A1A;
+  letter-spacing: -0.3px;
+}
+
+.record-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  background-color: #FFEBEB;
+  border-radius: 14px;
+  margin-left: 6px;
+}
+
+.record-icon {
+  font-size: 11px;
+  color: #FF3B30;
+  line-height: 1;
+}
+
+.record-text {
+  font-size: 13px;
+  color: #FF3B30;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+.brand-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.icon-btn {
+  font-size: 19px;
+  color: #1A1A1A;
+  padding: 4px;
+  line-height: 1;
+}
+
+/* ========== 二级导航栏（TicNote 风格） ========== */
+.header {
+  position: fixed;
+  top: calc(var(--brand-bar-height) + var(--status-bar-height) + 8px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--nav-height);
+  padding: 0 16px;
+  background-color: #F5F7FA;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -24px 0 0 #FFFFFF;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-left .icon {
+  font-size: 19px;
+  color: #3C3C43;
+  line-height: 1;
+}
+
+.header-left .title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1A1A1A;
+  letter-spacing: -0.2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.filter-btn .label {
+  font-size: 14px;
+  color: #3C3C43;
+  font-weight: 400;
+  letter-spacing: -0.1px;
+}
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.sort-btn .icon {
+  font-size: 17px;
+  color: #3C3C43;
+  line-height: 1;
+}
+
+/* ========== 主内容区 ========== */
 .page-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-top: var(--header-total-height);
+  background-color: #F5F7FA;
 }
 
-/* ========== 顶部操作区 ========== */
-.top-section {
-  padding: var(--spacing-lg) var(--spacing-md);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-  color: #fff;
-}
-
-.stats-info {
-  display: flex;
-  align-items: baseline;
-  gap: var(--spacing-xs);
-}
-
-.stats-number {
-  font-size: 32px;
-  font-weight: bold;
-}
-
-.stats-label {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.upload-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-full);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.upload-btn:active {
-  transform: scale(0.95);
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.upload-btn .icon {
-  font-size: 18px;
-}
-
-.upload-btn .label {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* ========== 状态筛选器 ========== */
-.status-filter {
-  display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background-color: #fff;
-  border-bottom: 1px solid var(--color-border);
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.filter-item {
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-full);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  background-color: var(--color-background);
-  transition: all 0.3s ease;
-}
-
-.filter-item.active {
-  color: #fff;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-  font-weight: 500;
-}
-
-/* ========== 会议列表 ========== */
 .meeting-scroll {
   flex: 1;
-  background-color: var(--color-background);
+  background-color: #F5F7FA;
 }
 
 .meeting-list {
-  padding: var(--spacing-md);
+  padding: 12px 0;
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16px);
 }
 
+/* ========== 会议卡片 ========== */
 .meeting-card {
-  position: relative;
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  background-color: #fff;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
 }
 
 .meeting-card:active {
-  transform: scale(0.98);
-  box-shadow: var(--shadow-md);
+  background-color: #F8F8F8;
 }
 
-/* 状态标签 */
-.status-tag {
-  position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  color: #fff;
-  font-weight: 500;
-}
-
-/* 会议信息 */
-.meeting-info {
+/* 第一行：标题 + 收藏（TicNote 布局 - 同一行） */
+.card-row-1 {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-right: 80px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  min-height: 22px;
 }
 
-.meeting-title {
+.title {
   font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  line-height: 1.5;
-}
-
-.meeting-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-}
-
-.meta-item {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-.meeting-summary {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
+  font-weight: 400;
+  color: #1A1A1A;
+  line-height: 1.4;
+  letter-spacing: -0.1px;
+  margin-right: 8px;
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
 }
 
-.processing-tip,
-.error-tip {
-  font-size: 13px;
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-md);
-  line-height: 1.5;
+.star-btn {
+  padding: 2px;
+  margin: -2px;
+  flex-shrink: 0;
 }
 
-.processing-tip {
-  color: var(--color-primary);
-  background-color: rgba(74, 111, 232, 0.1);
+.star-icon {
+  font-size: 16px;
+  line-height: 1;
+  color: #C7C7CC;
 }
 
-.error-tip {
-  color: #FF3B30;
-  background-color: rgba(255, 59, 48, 0.1);
-}
-
-/* 操作按钮 */
-.meeting-actions {
-  position: absolute;
-  bottom: var(--spacing-md);
-  right: var(--spacing-md);
+/* 第二行：录音时间 + 录音时长（TicNote 布局） */
+.card-row-2 {
   display: flex;
-  gap: var(--spacing-xs);
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-.action-btn {
-  width: 36px;
-  height: 36px;
+.timestamp {
+  font-size: 12px;
+  color: #C7C7CC;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.05px;
+}
+
+.duration {
+  font-size: 12px;
+  color: #C7C7CC;
+  white-space: nowrap;
+  font-weight: 400;
+  letter-spacing: -0.05px;
+  flex-shrink: 0;
+}
+
+/* 第三行：扬声器图标 + 来源 + 标签（TicNote 布局） */
+.card-row-3 {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  font-size: 18px;
-  transition: all 0.3s ease;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
-.action-btn.delete {
-  background-color: rgba(255, 59, 48, 0.1);
+.audio-icon {
+  font-size: 12px;
+  color: #8E8E93;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
-.action-btn:active {
-  transform: scale(0.9);
+.source-label {
+  font-size: 11px;
+  color: #8E8E93;
+  flex-shrink: 0;
+  font-weight: 400;
+  letter-spacing: -0.05px;
 }
 
-/* ========== 空状态 ========== */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.tag {
+  padding: 2px 8px;
+  background-color: #F2F2F7;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #3C3C43;
+  white-space: nowrap;
+  font-weight: 400;
+  letter-spacing: -0.05px;
+}
+
+/* ========== 空状态（TicNote 风格） ========== */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 32px;
+  padding: 100px 32px 80px 32px;
   text-align: center;
 }
 
 .empty-icon {
-  font-size: 64px;
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
 }
 
 .empty-text {
   font-size: 16px;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xs);
+  color: #8E8E93;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
 }
 
 .empty-hint {
-  font-size: 13px;
-  color: var(--color-text-tertiary);
+  font-size: 14px;
+  color: #C7C7CC;
+  font-weight: 400;
+  letter-spacing: -0.1px;
 }
 
-/* ========== 加载提示 ========== */
+/* ========== 加载提示（TicNote 风格） ========== */
 .load-more {
-  padding: var(--spacing-md);
+  padding: 20px 16px;
   text-align: center;
 }
 
 .loading-text,
 .no-more-text {
   font-size: 13px;
-  color: var(--color-text-tertiary);
+  color: #C7C7CC;
+  font-weight: 400;
+  letter-spacing: -0.05px;
 }
 
+/* ========== 筛选/排序菜单（TicNote 风格） ========== */
+.action-sheet-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.action-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #FFFFFF;
+  border-radius: 14px 14px 0 0;
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+}
+
+.action-sheet.show {
+  transform: translateY(calc(-1 * var(--tabbar-height)));
+}
+
+.action-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 16px;
+  border-bottom: 0.5px solid #EBEBEB;
+}
+
+.action-sheet-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A1A1A;
+  letter-spacing: -0.3px;
+}
+
+.action-sheet-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: #8E8E93;
+  border-radius: 16px;
+  transition: background-color 0.15s ease;
+  line-height: 1;
+}
+
+.action-sheet-close:active {
+  background-color: #F2F2F7;
+}
+
+.action-sheet-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid #F2F2F7;
+  transition: background-color 0.15s ease;
+}
+
+.action-item:active {
+  background-color: #F8F8F8;
+}
+
+.action-item.active {
+  background-color: rgba(74, 111, 232, 0.04);
+}
+
+.action-label {
+  font-size: 16px;
+  color: #1A1A1A;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+}
+
+.action-item.active .action-label {
+  color: #4A6FE8;
+  font-weight: 500;
+}
+
+.action-check {
+  font-size: 17px;
+  color: #4A6FE8;
+  font-weight: 700;
+  line-height: 1;
+}

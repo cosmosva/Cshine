@@ -1,38 +1,40 @@
-<!--会议纪要列表页-->
+<!--会议纪要列表页 - 知识库 v2-->
+<wxs module="utils" src="./list.wxs"></wxs>
 <view class="meeting-list-page">
-  <!-- 自定义导航栏 -->
-  <navigation-bar title="会议纪要" />
+  <!-- 品牌栏（第一层导航） -->
+  <view class="brand-bar">
+    <view class="brand-left">
+      <view class="logo-circle">C</view>
+      <text class="brand-name">Cshine</text>
+      <view class="record-btn" bindtap="goToRecord">
+        <text class="record-icon">●</text>
+        <text class="record-text">录音</text>
+      </view>
+    </view>
+    <view class="brand-right">
+      <text class="icon-btn search-icon">🔍</text>
+      <text class="icon-btn add-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 二级导航栏 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="icon">☰</text>
+      <text class="title">录音文件</text>
+    </view>
+    <view class="header-right">
+      <view class="filter-btn" bindtap="showFilterMenu">
+        <text class="label">媒体</text>
+      </view>
+      <view class="sort-btn" bindtap="showSortMenu">
+        <text class="icon">⇅</text>
+      </view>
+    </view>
+  </view>
 
   <!-- 主内容区 -->
   <view class="page-content">
-    <!-- 顶部操作区 -->
-    <view class="top-section">
-      <!-- 统计信息 -->
-      <view class="stats-info">
-        <text class="stats-number">{{total}}</text>
-        <text class="stats-label">个会议</text>
-      </view>
-
-      <!-- 上传按钮 -->
-      <view class="upload-btn" bindtap="goToUpload">
-        <text class="icon">📁</text>
-        <text class="label">上传会议</text>
-      </view>
-    </view>
-
-    <!-- 状态筛选器 -->
-    <view class="status-filter">
-      <view 
-        class="filter-item {{statusFilter === item.value ? 'active' : ''}}"
-        wx:for="{{statusOptions}}"
-        wx:key="value"
-        data-status="{{item.value}}"
-        bindtap="onStatusChange"
-      >
-        {{item.label}}
-      </view>
-    </view>
-
     <!-- 会议列表 -->
     <scroll-view 
       class="meeting-scroll"
@@ -41,11 +43,10 @@
       show-scrollbar="{{false}}"
       enable-back-to-top
       refresher-enabled
-      refresher-triggered="{{loading}}"
+      refresher-triggered="{{refreshing}}"
       bindrefresherrefresh="onPullDownRefresh"
       bindscrolltolower="onReachBottom"
     >
-      <!-- 列表内容 -->
       <view class="meeting-list">
         <view 
           class="meeting-card"
@@ -55,47 +56,26 @@
           data-id="{{item.id}}"
           data-status="{{item.status}}"
         >
-          <!-- 状态标签 -->
-          <view class="status-tag" style="background-color: {{statusColorMap[item.status]}};">
-            {{statusTextMap[item.status]}}
-          </view>
-
-          <!-- 会议信息 -->
-          <view class="meeting-info">
-            <view class="meeting-title">{{item.title}}</view>
-            
-            <view class="meeting-meta">
-              <text class="meta-item" wx:if="{{item.meeting_date}}">
-                📅 {{formatTime(item.meeting_date)}}
-              </text>
-              <text class="meta-item" wx:if="{{item.audio_duration}}">
-                ⏱️ {{formatDuration(item.audio_duration)}}
-              </text>
-              <text class="meta-item" wx:if="{{item.participants && item.participants.length > 0}}">
-                👥 {{item.participants.length}}人
-              </text>
-            </view>
-
-            <!-- 摘要预览 -->
-            <view class="meeting-summary" wx:if="{{item.summary && item.status === 'completed'}}">
-              {{item.summary}}
-            </view>
-
-            <!-- 处理中提示 -->
-            <view class="processing-tip" wx:if="{{item.status === 'processing'}}">
-              🔄 正在处理中，预计需要几分钟...
-            </view>
-
-            <!-- 失败提示 -->
-            <view class="error-tip" wx:if="{{item.status === 'failed'}}">
-              ⚠️ 处理失败，请重新上传
+          <!-- 第一行：标题 + 收藏 -->
+          <view class="card-row-1">
+            <text class="title">{{item.title}}</text>
+            <view class="star-btn" catchtap="toggleFavorite" data-id="{{item.id}}" data-favorite="{{item.is_favorite}}">
+              <text class="star-icon">{{item.is_favorite ? '⭐' : '☆'}}</text>
             </view>
           </view>
 
-          <!-- 操作按钮 -->
-          <view class="meeting-actions" catchtap="stop">
-            <view class="action-btn delete" bindtap="deleteMeeting" data-id="{{item.id}}">
-              🗑️
+          <!-- 第二行：录音时间 + 录音时长 -->
+          <view class="card-row-2">
+            <text class="timestamp">{{utils.formatFullTime(item.created_at)}}</text>
+            <text class="duration" wx:if="{{item.audio_duration}}">{{utils.formatDuration(item.audio_duration)}}</text>
+          </view>
+
+          <!-- 第三行：扬声器图标 + 标签 -->
+          <view class="card-row-3">
+            <text class="audio-icon">🔊</text>
+            <text class="source-label">扬声器</text>
+            <view class="tags-container" wx:if="{{item.tags && item.tags.length > 0}}">
+              <text class="tag" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag">{{tag}}</text>
             </view>
           </view>
         </view>
@@ -103,12 +83,12 @@
         <!-- 空状态 -->
         <view class="empty-state" wx:if="{{meetingList.length === 0 && !loading}}">
           <text class="empty-icon">📋</text>
-          <text class="empty-text">暂无会议纪要</text>
-          <text class="empty-hint">点击上方「上传会议」按钮开始</text>
+          <text class="empty-text">{{emptyText}}</text>
+          <text class="empty-hint">点击右上角上传会议音频开始</text>
         </view>
 
         <!-- 加载提示 -->
-        <view class="load-more" wx:if="{{loading}}">
+        <view class="load-more" wx:if="{{loading && meetingList.length > 0}}">
           <text class="loading-text">加载中...</text>
         </view>
 
@@ -118,5 +98,47 @@
       </view>
     </scroll-view>
   </view>
-</view>
 
+  <!-- 筛选菜单（ActionSheet） -->
+  <view class="action-sheet-mask" wx:if="{{showFilterSheet}}" bindtap="hideFilterSheet" catchtouchmove="preventDefault"></view>
+  <view class="action-sheet {{showFilterSheet ? 'show' : ''}}">
+    <view class="action-sheet-header">
+      <text class="action-sheet-title">筛选</text>
+      <view class="action-sheet-close" bindtap="hideFilterSheet">✕</view>
+    </view>
+    <view class="action-sheet-body">
+      <view 
+        class="action-item {{currentFilter === item.value ? 'active' : ''}}"
+        wx:for="{{filterOptions}}"
+        wx:key="value"
+        bindtap="selectFilter"
+        data-value="{{item.value}}"
+        data-label="{{item.label}}"
+      >
+        <text class="action-label">{{item.label}}</text>
+        <text class="action-check" wx:if="{{currentFilter === item.value}}">✓</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 排序菜单（ActionSheet） -->
+  <view class="action-sheet-mask" wx:if="{{showSortSheet}}" bindtap="hideSortSheet" catchtouchmove="preventDefault"></view>
+  <view class="action-sheet {{showSortSheet ? 'show' : ''}}">
+    <view class="action-sheet-header">
+      <text class="action-sheet-title">排序</text>
+      <view class="action-sheet-close" bindtap="hideSortSheet">✕</view>
+    </view>
+    <view class="action-sheet-body">
+      <view 
+        class="action-item {{currentSort === item.value ? 'active' : ''}}"
+        wx:for="{{sortOptions}}"
+        wx:key="value"
+        bindtap="selectSort"
+        data-value="{{item.value}}"
+      >
+        <text class="action-label">{{item.label}}</text>
+        <text class="action-check" wx:if="{{currentSort === item.value}}">✓</text>
+      </view>
+    </view>
+  </view>
+</view>

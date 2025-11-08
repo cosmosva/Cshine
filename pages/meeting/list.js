@@ -1,5 +1,5 @@
 /**
- * 会议纪要列表页
+ * 会议纪要列表页 - 知识库 v2
  */
 
 const API = require('../../utils/api')
@@ -13,36 +13,53 @@ Page({
     pageSize: 20,
     total: 0,
     loading: false,
+    refreshing: false,  // 下拉刷新状态
     hasMore: true,
     
-    // 筛选器
-    statusFilter: 'all',  // all / pending / processing / completed / failed
-    statusOptions: [
+    // 筛选和排序
+    currentFilter: 'all',  // all / favorite / processing / completed / failed
+    currentSort: 'time',   // time / favorite
+    filterLabel: '全部',
+    
+    filterOptions: [
       { label: '全部', value: 'all' },
+      { label: '收藏', value: 'favorite' },
       { label: '处理中', value: 'processing' },
       { label: '已完成', value: 'completed' },
       { label: '失败', value: 'failed' }
     ],
     
+    sortOptions: [
+      { label: '时间倒序', value: 'time' },
+      { label: '收藏优先', value: 'favorite' }
+    ],
+    
+    // ActionSheet 显示状态
+    showFilterSheet: false,
+    showSortSheet: false,
+    
     // 状态文案映射
     statusTextMap: {
-      'pending': '等待处理',
+      'pending': '等待',
       'processing': '处理中',
-      'completed': '已完成',
-      'failed': '处理失败'
+      'completed': '完成',
+      'failed': '失败'
     },
     
-    // 状态颜色映射
-    statusColorMap: {
-      'pending': '#999',
-      'processing': '#4A6FE8',
-      'completed': '#34C759',
-      'failed': '#FF3B30'
-    }
+    // 空状态文案
+    emptyText: '暂无会议纪要'
   },
 
   onLoad() {
     this.loadMeetingList()
+  },
+
+  onShow() {
+    // 从详情页返回时刷新列表
+    if (this._needRefresh) {
+      this._needRefresh = false
+      this.loadMeetingList(true)
+    }
   },
 
   /**
@@ -70,12 +87,15 @@ Page({
     try {
       const params = {
         page: this.data.page,
-        page_size: this.data.pageSize
+        page_size: this.data.pageSize,
+        sort_by: this.data.currentSort
       }
       
-      // 添加状态筛选
-      if (this.data.statusFilter !== 'all') {
-        params.status = this.data.statusFilter
+      // 添加筛选条件
+      if (this.data.currentFilter === 'favorite') {
+        params.is_favorite = true
+      } else if (this.data.currentFilter !== 'all') {
+        params.status = this.data.currentFilter
       }
       
       const listData = await API.getMeetingList(params)
@@ -102,10 +122,10 @@ Page({
   /**
    * 下拉刷新
    */
-  onPullDownRefresh() {
-    this.loadMeetingList(true).then(() => {
-      wx.stopPullDownRefresh()
-    })
+  async onPullDownRefresh() {
+    this.setData({ refreshing: true })
+    await this.loadMeetingList(true)
+    this.setData({ refreshing: false })
   },
 
   /**
@@ -116,32 +136,115 @@ Page({
   },
 
   /**
-   * 切换状态筛选
+   * 显示筛选菜单
    */
-  onStatusChange(e) {
-    const status = e.currentTarget.dataset.status
-    if (status === this.data.statusFilter) return
+  showFilterMenu() {
+    this.setData({ showFilterSheet: true })
+  },
+
+  /**
+   * 隐藏筛选菜单
+   */
+  hideFilterSheet() {
+    this.setData({ showFilterSheet: false })
+  },
+
+  /**
+   * 选择筛选条件
+   */
+  selectFilter(e) {
+    const value = e.currentTarget.dataset.value
+    const label = e.currentTarget.dataset.label
     
-    this.setData({ statusFilter: status })
+    if (value === this.data.currentFilter) {
+      this.hideFilterSheet()
+      return
+    }
+    
+    this.setData({
+      currentFilter: value,
+      filterLabel: label,
+      showFilterSheet: false,
+      emptyText: value === 'favorite' ? '暂无收藏的会议' : '暂无会议纪要'
+    })
+    
     this.loadMeetingList(true)
   },
 
   /**
-   * 跳转到上传页
+   * 显示排序菜单
    */
-  goToUpload() {
-    wx.navigateTo({
-      url: '/pages/meeting/upload'
+  showSortMenu() {
+    this.setData({ showSortSheet: true })
+  },
+
+  /**
+   * 隐藏排序菜单
+   */
+  hideSortSheet() {
+    this.setData({ showSortSheet: false })
+  },
+
+  /**
+   * 选择排序方式
+   */
+  selectSort(e) {
+    const value = e.currentTarget.dataset.value
+    
+    if (value === this.data.currentSort) {
+      this.hideSortSheet()
+      return
+    }
+    
+    this.setData({
+      currentSort: value,
+      showSortSheet: false
     })
+    
+    this.loadMeetingList(true)
+  },
+
+  /**
+   * 切换收藏
+   */
+  async toggleFavorite(e) {
+    const meetingId = e.currentTarget.dataset.id
+    const isFavorite = e.currentTarget.dataset.favorite
+    
+    try {
+      await API.toggleMeetingFavorite(meetingId)
+      
+      // 更新本地列表
+      const meetingList = this.data.meetingList.map(item => {
+        if (item.id === meetingId) {
+          return { ...item, is_favorite: !isFavorite }
+        }
+        return item
+      })
+      
+      this.setData({ meetingList })
+      
+      showToast(isFavorite ? '已取消收藏' : '已收藏', 'success')
+    } catch (error) {
+      console.error('切换收藏失败:', error)
+      showToast('操作失败，请重试', 'error')
+    }
   },
 
   /**
    * 查看会议详情
    */
+  // 跳转到录音页面
+  goToRecord() {
+    wx.switchTab({
+      url: '/pages/index/index'
+    })
+  },
+
   viewMeeting(e) {
     const meetingId = e.currentTarget.dataset.id
     const status = e.currentTarget.dataset.status
-    
+
     // 如果还在处理中，跳转到上传页查看进度
     if (status === 'processing' || status === 'pending') {
       wx.navigateTo({
@@ -153,65 +256,48 @@ Page({
         url: `/pages/meeting/detail?id=${meetingId}`
       })
     }
+
+    // 标记需要刷新
+    this._needRefresh = true
   },
 
   /**
-   * 删除会议
+   * 格式化完整时间
    */
-  async deleteMeeting(e) {
-    const meetingId = e.currentTarget.dataset.id
-    
-    // 确认对话框
-    const res = await wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这条会议纪要吗？',
-      confirmText: '删除',
-      confirmColor: '#FF3B30'
-    })
-    
-    if (!res.confirm) return
-    
-    showLoading('删除中...')
-    
-    try {
-      await API.deleteMeeting(meetingId)
-      
-      showToast('删除成功', 'success')
-      
-      // 从列表中移除
-      const newList = this.data.meetingList.filter(item => item.id !== meetingId)
-      this.setData({
-        meetingList: newList,
-        total: this.data.total - 1
-      })
-    } catch (error) {
-      console.error('删除会议失败:', error)
-      showToast('删除失败，请重试', 'error')
-    } finally {
-      hideLoading()
-    }
+  formatFullTime(dateStr) {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    const seconds = String(date.getSeconds()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   },
 
   /**
-   * 格式化时间
-   */
-  formatTime(dateStr) {
-    return formatDateTime(dateStr)
-  },
-
-  /**
-   * 格式化时长
+   * 格式化时长（参考截图格式：48m 1s）
    */
   formatDuration(seconds) {
-    if (!seconds) return '未知'
+    if (!seconds) return ''
     const minutes = Math.floor(seconds / 60)
     const secs = seconds % 60
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60)
       const mins = minutes % 60
-      return `${hours}小时${mins}分钟`
+      if (mins > 0) {
+        return `${hours}h ${mins}m ${secs}s`
+      }
+      return `${hours}h ${secs}s`
     }
-    return `${minutes}分${secs}秒`
+    return `${minutes}m ${secs}s`
+  },
+
+  /**
+   * 阻止事件冒泡
+   */
+  preventDefault() {
+    // 空函数，用于阻止滚动穿透
   }
 })
-

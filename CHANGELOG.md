@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-11-08
+
+### 🎨 UI/UX 优化 - 知识库页面视觉升级
+
+这是一个专注于视觉体验优化的版本，重点改进了知识库（会议列表）页面的导航栏设计，实现了更现代、更有层次感的 TicNote 风格界面。
+
+### Changed - 变更
+
+#### 知识库页面导航栏重设计 ✨
+
+- 🎨 **双层导航系统优化**
+  - 品牌栏：白色背景，包含 Logo、品牌名称和录音快捷按钮
+  - 二级导航栏：蓝灰色背景（#F5F7FA）+ 24px 圆角设计
+  - 8px 视觉间隙，创造清晰的层次分离
+
+- 💎 **视觉层次增强**
+  - 圆角设计凸显：二级导航栏采用 24px 圆角（仅顶部两角）
+  - 背景色对比：白色品牌栏区域 + 蓝灰色内容区域
+  - Box-shadow 技术：使用 `box-shadow: 0 -24px 0 0 #FFFFFF` 在圆角外营造白色背景效果
+  - 移除了可能影响圆角显示的 border-bottom
+
+- 📐 **布局优化**
+  - 页面整体背景：白色（#FFFFFF）
+  - 品牌栏区域：白色背景，与页面融为一体
+  - 二级导航栏：蓝灰色带圆角，在白色背景上形成视觉浮动效果
+  - 主内容区：蓝灰色背景（#F5F7FA），与二级导航栏无缝衔接
+  - 会议卡片左右 padding 移除，采用 12px 上下 padding
+
+### Technical Details - 技术细节
+
+**CSS 改进**
+```css
+/* 页面整体白色背景 */
+.meeting-list-page {
+  background-color: #FFFFFF;
+}
+
+/* 二级导航栏圆角 + box-shadow 技巧 */
+.header {
+  background-color: #F5F7FA;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -24px 0 0 #FFFFFF;  /* 关键：填充圆角外白色背景 */
+}
+
+/* 主内容区蓝灰色背景 */
+.page-content {
+  background-color: #F5F7FA;
+}
+```
+
+**设计原理**
+- 利用 box-shadow 实现圆角外的白色背景填充
+- 通过颜色对比突出导航栏的圆角设计
+- 创造"浮动卡片"的视觉效果，提升页面层次感
+
+### Files Modified - 修改的文件
+
+- `pages/meeting/list.wxss` - 导航栏和布局样式优化
+
+---
+
 ## [0.2.5] - 2025-11-08
 
 ### 🎨 UI/UX 重大更新
@@ -459,6 +520,7 @@ python migrations/add_meeting_summary_types.py
 - **次版本号（Minor）**：新增功能
 - **修订号（Patch）**：bug 修复和小优化
 
+[0.3.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.3.0
 [0.2.5]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.5
 [0.2.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.0
 [0.1.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.1.0
