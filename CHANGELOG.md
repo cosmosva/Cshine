@@ -5,6 +5,90 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2025-11-08
+
+### 🐛 Bug Fixes - 抽屉布局修复
+
+这是一个重要的 UI 修复版本，解决了侧边栏抽屉右侧内容被裁剪的问题。
+
+### Fixed - 问题修复
+
+#### 抽屉内容显示完整性修复 ✅
+
+- 🔧 **宽度优化**
+  - 抽屉宽度从 75% 增加到 80%，提供更多内容展示空间
+  - 确保所有卡片内容和图标完整显示
+
+- 📦 **Box-sizing 规范化**
+  - 为 `.drawer-content` 添加 `box-sizing: border-box`
+  - 为 `.drawer-item` 添加 `width: 100%` 和 `box-sizing: border-box`
+  - 确保 padding 不会导致容器宽度溢出
+
+- 🚫 **Overflow 控制优化**
+  - 抽屉容器改为 `overflow: hidden`（移除 `overflow-x: visible`）
+  - 抽屉内容添加 `overflow-x: hidden`
+  - 左侧内容区 `.item-left` 添加 `overflow: hidden`
+  - 防止内容横向溢出
+
+- 🎯 **Flex 布局优化**
+  - `.item-name` 添加 `flex-shrink: 1`，允许文字收缩以适应空间
+  - `.item-count` 添加 `flex-shrink: 0` 和 `white-space: nowrap`，防止数字被压缩
+  - `.more-icon` 添加 `flex-shrink: 0` 和 `white-space: nowrap`，确保图标始终完整显示
+  - `.section-actions` 和 `.action-icon` 添加 `flex-shrink: 0`，防止右侧操作图标被压缩
+
+- 📏 **Padding 微调**
+  - `.more-icon` 的 padding 改为 `0 0 0 12px`（只在左侧留间距）
+  - `.section-header` 的 padding 改为 `0 0 10px 0`（移除左右 padding）
+  - 减少不必要的空间占用
+
+### Technical Details - 技术细节
+
+**关键 CSS 改进**
+```css
+/* 抽屉宽度增加 */
+.drawer {
+  width: 80%;  /* 从 77% 增加到 80% */
+  overflow: hidden;  /* 统一为 hidden */
+}
+
+/* 内容区 box-sizing */
+.drawer-content {
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* 卡片完整性保证 */
+.drawer-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Flex 收缩控制 */
+.item-name {
+  flex-shrink: 1;  /* 允许文字收缩 */
+}
+
+.item-count,
+.more-icon,
+.section-actions,
+.action-icon {
+  flex-shrink: 0;  /* 防止图标和数字被压缩 */
+  white-space: nowrap;  /* 防止换行 */
+}
+```
+
+**修复效果**
+- ✅ 右侧 "⋯" 更多操作图标完整显示
+- ✅ 分组标题区的 "📋" 和 "↕" 图标完整显示
+- ✅ 文件夹名称过长时正确省略，不影响右侧图标
+- ✅ 所有内容在抽屉内正确布局，无溢出
+
+### Files Modified - 修改的文件
+
+- [pages/meeting/list.wxss](pages/meeting/list.wxss) - 抽屉布局样式全面优化
+
+---
+
 ## [0.3.1] - 2025-11-08
 
 ### ✨ 新增功能 - 知识库管理侧边栏抽屉
@@ -660,6 +744,8 @@ python migrations/add_meeting_summary_types.py
 - **次版本号（Minor）**：新增功能
 - **修订号（Patch）**：bug 修复和小优化
 
+[0.3.2]: https://github.com/cosmosva/Cshine/releases/tag/v0.3.2
+[0.3.1]: https://github.com/cosmosva/Cshine/releases/tag/v0.3.1
 [0.3.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.3.0
 [0.2.5]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.5
 [0.2.0]: https://github.com/cosmosva/Cshine/releases/tag/v0.2.0
