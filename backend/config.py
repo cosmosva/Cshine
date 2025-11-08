@@ -97,6 +97,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
+        extra = "ignore"  # 忽略额外的环境变量
 
 
 # 创建全局配置实例
