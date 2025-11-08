@@ -59,7 +59,13 @@ class Settings(BaseSettings):
     OSS_ACCESS_KEY_ID: str = ""
     OSS_ACCESS_KEY_SECRET: str = ""
     OSS_ENDPOINT: str = "oss-cn-guangzhou.aliyuncs.com"  # 华南3（广州）
-    OSS_BUCKET_NAME: str = "cshine-audio"
+    # ⚠️ 开发和生产环境应使用不同的 Bucket
+    # 开发环境：cshine-audio-dev
+    # 生产环境：cshine-audio 或 cshine-audio-prod
+    OSS_BUCKET_NAME: str = Field(
+        default="cshine-audio",
+        description="OSS Bucket 名称（开发环境建议用 cshine-audio-dev）"
+    )
     
     @property
     def oss_base_url(self) -> str:

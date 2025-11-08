@@ -2,9 +2,6 @@
  * API 配置
  */
 
-// 环境配置
-const ENV = 'production'  // 'development' | 'production'
-
 // API 基础地址配置
 const API_CONFIG = {
   development: 'http://192.168.80.50:8000',  // 开发环境（真机测试用）
@@ -12,8 +9,34 @@ const API_CONFIG = {
   production: 'https://cshine.xuyucloud.com'  // 生产环境
 }
 
+/**
+ * 自动检测运行环境
+ * - 开发工具、开发版、体验版 → development
+ * - 正式版 → production
+ */
+function getEnvironment() {
+  const accountInfo = wx.getAccountInfoSync()
+  const envVersion = accountInfo.miniProgram.envVersion
+  
+  // envVersion 可能的值：
+  // 'develop'  - 开发版
+  // 'trial'    - 体验版
+  // 'release'  - 正式版
+  // undefined  - 开发工具
+  
+  if (envVersion === 'release') {
+    return 'production'  // 只有正式版用生产环境
+  } else {
+    return 'development'  // 其他都用开发环境
+  }
+}
+
 // 根据环境选择 API 地址
+const ENV = getEnvironment()
 const API_BASE_URL = API_CONFIG[ENV]
+
+console.log('🌍 当前运行环境:', ENV)
+console.log('🔗 API 地址:', API_BASE_URL)
 
 // 存储键名
 const STORAGE_KEYS = {

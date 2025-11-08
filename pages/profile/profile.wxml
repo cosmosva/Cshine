@@ -6,19 +6,17 @@
   <view class="profile-content">
     <!-- 用户信息卡片 -->
     <view class="user-card">
-      <view wx:if="{{isLogin}}" class="user-info">
-        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+      <view class="user-info">
+        <image class="avatar" src="{{userInfo.avatar || '/assets/images/avatar-placeholder.png'}}" mode="aspectFill" />
         <view class="user-details">
-          <text class="nickname">{{userInfo.nickName}}</text>
-          <text class="user-id">ID: {{userInfo.openid || 'xxx'}}</text>
+          <text class="nickname">{{userInfo.nickname || 'Cshine用户'}}</text>
+          <text class="user-id" wx:if="{{userInfo.id}}">ID: {{userInfo.id.substring(0, 8)}}...</text>
+          <text class="profile-hint" wx:if="{{!userInfo.avatar}}">点击完善头像和昵称</text>
         </view>
-        <view class="logout-btn" bindtap="handleLogout">退出</view>
-      </view>
-      
-      <view wx:else class="login-prompt">
-        <image class="avatar-placeholder" src="/assets/images/avatar-placeholder.png" mode="aspectFill" />
-        <text class="login-text">登录后体验完整功能</text>
-        <button class="login-btn" bindtap="handleLogin">微信登录</button>
+        
+        <!-- 如果有真实头像，显示退出按钮；否则显示完善资料按钮 -->
+        <view wx:if="{{userInfo.avatar && userInfo.avatar.includes('wx.qlogo')}}" class="logout-btn" bindtap="handleLogout">退出</view>
+        <view wx:else class="complete-btn" bindtap="handleLogin">完善资料</view>
       </view>
     </view>
 

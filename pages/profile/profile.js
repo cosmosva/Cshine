@@ -71,12 +71,37 @@ Page({
   },
 
   /**
-   * 登录（完整流程）
+   * 完善资料（获取微信头像和昵称）
+   * ⚠️ 注意：wx.getUserProfile() 必须在用户点击事件的同步上下文中调用
    */
-  async handleLogin() {
+  handleLogin() {
+    // 1. 先同步调用 getUserProfile（必须在点击事件中同步调用）
+    wx.getUserProfile({
+      desc: '用于完善头像和昵称',
+      success: (profileRes) => {
+        // 获取用户信息成功，继续后续异步操作
+        this.doLoginWithUserInfo(profileRes.userInfo)
+      },
+      fail: (err) => {
+        console.error('获取用户信息失败:', err)
+        if (err.errMsg && err.errMsg.includes('auth deny')) {
+          showToast('您取消了授权', 'none')
+        } else {
+          showToast('获取用户信息失败', 'error')
+        }
+      }
+    })
+  },
+
+  /**
+   * 使用用户信息完成登录流程
+   */
+  async doLoginWithUserInfo(userInfo) {
     try {
       // 显示加载状态
-      wx.showLoading({ title: '登录中...', mask: true })
+      wx.showLoading({ title: '更新资料中...', mask: true })
+      
+      console.log('用户信息:', userInfo)
       
       // 1. 获取微信登录凭证（code）
       const loginRes = await new Promise((resolve, reject) => {
@@ -92,19 +117,7 @@ Page({
       
       console.log('微信登录 code:', loginRes.code)
       
-      // 2. 获取用户信息
-      const profileRes = await new Promise((resolve, reject) => {
-        wx.getUserProfile({
-          desc: '用于完善用户资料',
-          success: resolve,
-          fail: reject
-        })
-      })
-      
-      const userInfo = profileRes.userInfo
-      console.log('用户信息:', userInfo)
-      
-      // 3. 调用后端登录接口
+      // 2. 调用后端登录接口
       const loginData = await API.login(loginRes.code, {
         nickname: userInfo.nickName,
         avatar: userInfo.avatarUrl
@@ -112,7 +125,7 @@ Page({
       
       console.log('后端登录成功:', loginData)
       
-      // 4. 保存 Token 和用户信息
+      // 3. 保存 Token 和用户信息
       wx.setStorageSync('token', loginData.token)
       wx.setStorageSync('userInfo', {
         id: loginData.user_id,
@@ -121,7 +134,7 @@ Page({
         isNewUser: loginData.is_new_user
       })
       
-      // 5. 更新页面状态
+      // 4. 更新页面状态
       this.setData({
         isLogin: true,
         userInfo: {
@@ -133,24 +146,22 @@ Page({
       
       wx.hideLoading()
       
-      // 6. 加载统计数据
+      // 5. 加载统计数据
       this.loadUserStats()
       
-      // 7. 提示用户
+      // 6. 提示用户
       if (loginData.is_new_user) {
         showToast('欢迎使用 Cshine！', 'success')
       } else {
-        showToast('登录成功', 'success')
+        showToast('资料已完善', 'success')
       }
       
     } catch (error) {
       wx.hideLoading()
-      console.error('登录失败:', error)
+      console.error('更新资料失败:', error)
       
-      let errorMsg = '登录失败，请重试'
-      if (error.errMsg && error.errMsg.includes('getUserProfile:fail auth deny')) {
-        errorMsg = '您取消了授权'
-      } else if (error.detail) {
+      let errorMsg = '更新资料失败，请重试'
+      if (error.detail) {
         errorMsg = error.detail
       }
       
