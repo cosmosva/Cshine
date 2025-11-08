@@ -9,6 +9,7 @@ from loguru import logger
 
 from app.database import get_db
 from app.models import User
+from app.dependencies import get_current_user
 from app.schemas import WeChatLoginRequest, LoginResponse, ResponseModel, UserResponse
 from app.utils.jwt import create_access_token
 from app.utils.wechat import code2session
@@ -84,13 +85,12 @@ async def wechat_login(
 
 @router.get("/me", response_model=ResponseModel)
 async def get_current_user_info(
-    current_user: User = Depends(get_db)
+    current_user: User = Depends(get_current_user)
 ):
     """
     获取当前登录用户信息
+    需要登录：通过 JWT Token 验证
     """
-    from app.dependencies import get_current_user
-    
     return ResponseModel(
         code=200,
         message="success",

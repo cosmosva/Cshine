@@ -33,8 +33,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7天
     
     # 微信小程序配置
-    WECHAT_APPID: str = ""
-    WECHAT_SECRET: str = ""
+    # ⚠️ 必须配置！从微信公众平台获取：https://mp.weixin.qq.com/
+    # 开发 → 开发管理 → 开发设置
+    WECHAT_APPID: str = Field(
+        default="",
+        description="微信小程序 AppID（必填）"
+    )
+    WECHAT_SECRET: str = Field(
+        default="",
+        description="微信小程序 AppSecret（必填）"
+    )
     
     # Redis 配置
     REDIS_HOST: str = "localhost"

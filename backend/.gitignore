@@ -54,3 +54,5 @@ htmlcov/
 # Alembic
 alembic/versions/*.pyc
 
+server.pid
+server.log
