@@ -1,13 +1,13 @@
 # Cshine 微信小程序
 
-[![Version](https://img.shields.io/badge/version-0.2.5-blue.svg)](https://github.com/cosmosva/Cshine)
+[![Version](https://img.shields.io/badge/version-0.3.5-blue.svg)](https://github.com/cosmosva/Cshine)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-07C160.svg)](https://mp.weixin.qq.com/)
 
 > **Let Your Ideas Shine. ✨**
 > AI 驱动的语音记录与灵感管理工具
 >
-> **当前版本**: v0.2.5 | **发布日期**: 2025-11-08
+> **当前版本**: v0.3.5 | **发布日期**: 2025-11-08
 
 ## 📱 项目简介
 

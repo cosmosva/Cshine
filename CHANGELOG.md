@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2025-11-08
+
+### 🎨 UI/UX 优化 - 知识库抽屉样式精细调整
+
+这是一个专注于细节优化的版本，优化了知识库管理抽屉的视觉层级和交互体验。
+
+### Changed - 变更
+
+#### 知识库管理抽屉优化 🎯
+
+- 📐 **"我创建的"区域样式调整**
+  - 标题字号：从17px调整为**15px**（与卡片文字一致）
+  - 标题字重：从600调整为**400**（不加粗）
+  - 操作图标：从24px调整为**18px**（与卡片图标一致）
+  - 左边距：增加到**16px**，文字向右缩进
+  - 上下边距：各增加到**12px**，呼吸感更好
+
+- 🗑️ **简化抽屉头部**
+  - 删除"知识库管理"标题后的搜索和加号图标
+  - 头部只保留标题，更简洁清爽
+  - 聚焦核心功能，减少视觉干扰
+
+- 🖼️ **汉堡菜单图标PNG化**
+  - 将左上角"☰"emoji替换为PNG图标
+  - 文件：`menu.png`
+  - 尺寸：22px × 22px
+  - 与其他图标风格统一
+
+#### 视觉一致性提升 ✨
+
+- 📏 **统一字体和图标规格**
+  - 抽屉内所有文字：15px / 400字重
+  - 抽屉内所有图标：18px × 18px
+  - 整体视觉层级更协调
+  - 信息密度更合理
+
+### Technical - 技术细节
+
+- 更新 `pages/meeting/list.wxml`：优化抽屉头部结构和菜单图标
+- 更新 `pages/meeting/list.wxss`：精细调整间距、字号和图标尺寸
+- 新增 `assets/icons/menu.png`：汉堡菜单图标
+
 ## [0.3.3] - 2025-11-08
 
 ### 🎨 UI/UX 优化 - 图标系统升级与导航栏优化
