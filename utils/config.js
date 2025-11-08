@@ -11,8 +11,8 @@ const API_CONFIG = {
 
 /**
  * 自动检测运行环境
- * - 开发工具、开发版、体验版 → development
- * - 正式版 → production
+ * - 开发工具、开发版 → development
+ * - 体验版、正式版 → production
  */
 function getEnvironment() {
   const accountInfo = wx.getAccountInfoSync()
@@ -24,10 +24,11 @@ function getEnvironment() {
   // 'release'  - 正式版
   // undefined  - 开发工具
   
-  if (envVersion === 'release') {
-    return 'production'  // 只有正式版用生产环境
+  // 体验版和正式版都使用生产环境
+  if (envVersion === 'release' || envVersion === 'trial') {
+    return 'production'
   } else {
-    return 'development'  // 其他都用开发环境
+    return 'development'  // 开发工具和开发版用开发环境
   }
 }
 
