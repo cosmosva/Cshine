@@ -1,13 +1,13 @@
 # Cshine 微信小程序
 
-[![Version](https://img.shields.io/badge/version-0.3.5-blue.svg)](https://github.com/cosmosva/Cshine)
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/cosmosva/Cshine)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-07C160.svg)](https://mp.weixin.qq.com/)
 
 > **Let Your Ideas Shine. ✨**
 > AI 驱动的语音记录与灵感管理工具
 >
-> **当前版本**: v0.3.5 | **发布日期**: 2025-11-08
+> **当前版本**: v0.4.0 | **发布日期**: 2025-11-08
 
 ## 📱 项目简介
 
@@ -158,9 +158,20 @@ python main.py             # 启动服务
 - 模拟器测试：`http://localhost:8000`
 - 真机测试：`http://<你的IP>:8000`
 
+**登录配置：**
+- 查看 [LOGIN_GUIDE.md](LOGIN_GUIDE.md) 了解完整登录流程
+- 配置微信小程序 AppID 和 AppSecret
+- 小程序启动时自动完成静默登录
+
 ### 5. 当前状态
 
 ✅ **已完成功能**
+
+**用户认证** ✨ 新增
+- **自动登录**：小程序启动时自动静默登录
+- **完整授权**：支持获取用户昵称和头像
+- **Token 管理**：JWT Token 自动携带和失效处理
+- **状态管理**：全局登录状态管理
 
 **闪记功能**
 - **前端页面**：首页、详情页、编辑页
@@ -170,7 +181,7 @@ python main.py             # 启动服务
 - **详情功能**：音频播放、内容查看、操作菜单
 - **编辑功能**：修改标题、内容、分类
 
-**会议纪要功能** ✨
+**会议纪要功能**
 - **前端页面**：会议列表、上传页、详情页
 - **文件上传**：支持选择音频文件上传
 - **状态跟踪**：实时显示处理进度
@@ -179,6 +190,7 @@ python main.py             # 启动服务
 - **操作功能**：删除、分享（开发中）
 
 **后端服务**
+- **认证系统**：微信登录、JWT Token ✨ 已打通
 - **闪记 API**：完整的 CRUD 接口
 - **会议纪要 API**：创建、查询、更新、删除接口
 - **AI 集成**：语音转写、智能摘要、关键词提取、自动分类
@@ -189,10 +201,11 @@ python main.py             # 启动服务
 ⏳ **待开发功能**
 - 搜索功能（全文搜索、语义搜索）
 - 数据导出（导出为 Markdown/PDF）
-- 个人中心（用户设置、统计数据）
+- 个人中心完善（用户设置、统计数据）
 - 标签系统（自定义标签）
 - 分享功能（分享到微信好友）
 - 会议纪要导出与分享
+- 文件夹功能完善（业务逻辑）
 
 ## 📸 界面预览
 

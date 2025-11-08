@@ -5,6 +5,202 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-11-08
+
+### 🔐 重大更新 - 前后端登录流程打通
+
+这是一个重要的基础设施更新，完整实现了微信小程序登录系统，打通了前后端认证流程。
+
+### Added - 新增功能
+
+#### 自动静默登录 ✨
+- 📱 **小程序启动自动登录**
+  - 首次打开自动调用 `wx.login()` 获取 code
+  - 自动调用后端登录接口获取 Token
+  - 用户无感知，快速启动
+  - 无需弹窗授权
+
+- 🔄 **智能登录状态管理**
+  - `app.js` 全局检查登录状态
+  - Token 失效自动重新登录
+  - 全局变量存储用户信息
+
+#### 完整授权登录 ✨
+- 👤 **个人中心主动登录**
+  - 用户点击"登录"按钮触发
+  - 调用 `wx.getUserProfile()` 获取昵称和头像
+  - 保存完整用户信息到本地
+  - 显示友好的登录提示
+
+- 🎨 **登录体验优化**
+  - 显示 Loading 状态："登录中..."
+  - 区分新用户和老用户提示
+  - 错误提示优化（授权拒绝、网络异常等）
+  - 完善的错误处理机制
+
+#### Token 管理系统 🔑
+- 🔐 **自动 Token 携带**
+  - 所有需要认证的 API 自动添加 `Authorization` header
+  - `Bearer Token` 标准格式
+  - 无需手动处理
+
+- ⚠️ **Token 失效处理**
+  - 后端返回 401 自动清除本地数据
+  - 提示用户"登录已过期，请重新登录"
+  - 智能引导用户重新登录
+
+- 💾 **本地存储管理**
+  - 存储 `token`、`userInfo` 到 `wx.storage`
+  - 退出登录清除所有认证数据
+  - 支持跨页面状态同步
+
+### Changed - 变更
+
+#### 前端优化
+- 🔧 **profile.js 重构**
+  - 完整实现 `handleLogin()` 方法
+  - 调用后端 API 进行认证
+  - Promise 风格的异步处理
+  - 详细的日志输出便于调试
+
+- 🌍 **app.js 增强**
+  - `onLaunch` 添加自动登录逻辑
+  - `checkLoginStatus()` 检查本地 Token
+  - `doLogin()` 执行静默登录
+  - `ensureLogin()` 确保已登录
+
+- 📡 **request.js 优化**
+  - 已完善 Token 携带逻辑（无需修改）
+  - 401 错误自动处理
+  - 统一的错误提示
+
+#### 用户体验提升
+- ✅ 首次打开小程序无需手动登录
+- ✅ 用户可选择是否授权昵称和头像
+- ✅ 登录失败友好提示
+- ✅ Token 失效自动处理
+
+### Technical Details - 技术细节
+
+**登录流程（自动）**
+```javascript
+小程序启动
+  ↓
+app.onLaunch() 检查 Token
+  ↓
+Token 不存在
+  ↓
+调用 wx.login() 获取 code
+  ↓
+调用 API.login(code)
+  ↓
+保存 Token 到本地
+  ↓
+全局变量更新
+```
+
+**登录流程（手动）**
+```javascript
+用户点击"登录"
+  ↓
+wx.login() 获取 code
+  ↓
+wx.getUserProfile() 获取用户信息
+  ↓
+API.login(code, userInfo)
+  ↓
+保存 Token 和用户信息
+  ↓
+更新页面状态
+  ↓
+显示登录成功
+```
+
+**API 请求流程**
+```javascript
+发起 API 请求
+  ↓
+request.js 自动添加 Authorization header
+  ↓
+后端验证 Token
+  ↓
+返回数据 or 401
+  ↓
+401 → 清除 Token，提示重新登录
+```
+
+### Documentation - 文档
+
+- 📚 **新增文档**
+  - `LOGIN_GUIDE.md` - 登录功能完整说明文档
+    - 登录流程详解
+    - Token 管理说明
+    - 测试指南
+    - 常见问题解答
+    - 配置说明
+
+- 📝 **更新文档**
+  - `README.md` - 添加登录功能说明
+  - 更新版本号到 v0.4.0
+  - 添加"用户认证"功能模块
+  - 添加登录配置说明
+
+### Testing - 测试
+
+**测试场景覆盖：**
+- ✅ 自动静默登录测试
+- ✅ 完整授权登录测试
+- ✅ 退出登录测试
+- ✅ Token 失效处理测试
+- ✅ 网络异常处理测试
+
+**测试环境：**
+- 微信开发者工具模拟器 ✅
+- 真机测试（待完成）
+
+### Migration Guide - 迁移指南
+
+从 v0.3.5 升级到 v0.4.0：
+
+**后端配置（重要）：**
+```python
+# backend/config.py
+WECHAT_APPID = "your_appid"      # 必须配置
+WECHAT_SECRET = "your_secret"    # 必须配置
+```
+
+**前端配置：**
+```javascript
+// utils/config.js
+const API_BASE_URL = 'http://your-server:8000'
+```
+
+**清除旧数据（可选）：**
+1. 微信开发者工具 → 清缓存 → 全部清除
+2. 重新编译小程序
+
+### Breaking Changes - 破坏性变更
+
+⚠️ **无破坏性变更**
+
+现有功能保持兼容，新增登录功能不影响现有代码。
+
+### Known Issues - 已知问题
+
+- ⚠️ 生产环境需要配置 HTTPS 和域名白名单
+- ⚠️ 真机测试待验证
+- ⚠️ Token 刷新机制待实现（当前 Token 有效期 7 天）
+
+### Security - 安全性
+
+- ✅ JWT Token 认证
+- ✅ Token 本地加密存储
+- ✅ HTTPS 传输（生产环境）
+- ✅ 敏感信息不在日志中输出
+- ⚠️ 建议生产环境修改 JWT_SECRET_KEY
+
+---
+
 ## [0.3.5] - 2025-11-08
 
 ### 🎨 UI/UX 优化 - 知识库抽屉样式精细调整

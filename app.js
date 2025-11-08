@@ -20,8 +20,11 @@ App({
   onLaunch() {
     console.log('Cshine 小程序启动')
     
-    // 检查登录状态
-    this.checkLoginStatus()
+    // 检查登录状态，如果未登录则自动登录
+    if (!this.checkLoginStatus()) {
+      console.log('未登录，执行自动登录...')
+      this.doLogin()
+    }
   },
 
   /**
