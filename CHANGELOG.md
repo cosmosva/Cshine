@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2025-11-09
+
+### 🎉 体验版测试通过 - 登录功能完全正常
+
+### Fixed - 修复
+- 🔧 修复体验版环境配置，体验版和正式版都使用生产环境
+- 🔧 修复 `getUserProfile` 必须在同步上下文调用的问题  
+- 🔧 修复后端 `/api/v1/auth/me` 接口认证依赖问题
+
+### Changed - 优化
+- 💬 个人页面"微信登录"改为"完善资料"，语义更清晰
+- 💬 优化登录交互流程和文案提示
+- ⚙️ 完善环境自动检测逻辑（开发/体验/正式）
+
+### Added - 新增
+- 📦 OSS 环境隔离配置（开发/生产 bucket 分离）
+- 📚 完整的部署和更新文档
+- 📚 环境配置指南和故障排查文档
+
+### Deployed - 部署状态
+- ✅ 后端服务已更新并重启（2025-11-09 02:41）
+- ✅ 体验版已发布并测试通过
+- ✅ 所有登录功能正常工作
+- ✅ 环境自动切换功能验证通过
+
+---
+
 ## [0.4.0] - 2025-11-08
 
 ### 🔐 重大更新 - 前后端登录流程打通
