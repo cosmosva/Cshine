@@ -12,8 +12,6 @@
       </view>
     </view>
     <view class="brand-right">
-      <text class="icon-btn search-icon">🔍</text>
-      <text class="icon-btn add-icon">+</text>
     </view>
   </view>
 
@@ -24,9 +22,8 @@
       <text class="title">录音文件</text>
     </view>
     <view class="header-right">
-      <view class="filter-btn" bindtap="showFilterMenu">
-        <text class="label">媒体</text>
-      </view>
+      <image class="icon-btn search-icon" src="/assets/icons/search.png" mode="aspectFit"></image>
+      <image class="icon-btn add-icon" src="/assets/icons/add.png" mode="aspectFit"></image>
       <view class="sort-btn" bindtap="showSortMenu">
         <text class="icon">⇅</text>
       </view>
@@ -149,7 +146,7 @@
     <view class="drawer-header">
       <text class="drawer-title">知识库管理</text>
       <view class="drawer-icons">
-        <text class="drawer-icon">🔍</text>
+        <image class="drawer-icon" src="/assets/icons/search.png" mode="aspectFit"></image>
         <text class="drawer-icon">+</text>
       </view>
     </view>
@@ -159,7 +156,7 @@
       <!-- 录音文件（全部） -->
       <view class="drawer-item all-files">
         <view class="item-left">
-          <text class="folder-icon">📁</text>
+          <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
           <text class="item-name">录音文件</text>
           <text class="item-count">({{totalCount}})</text>
         </view>
@@ -170,8 +167,8 @@
         <view class="section-header">
           <text class="section-title">我创建的</text>
           <view class="section-actions">
-            <text class="action-icon">📋</text>
-            <text class="action-icon">↕</text>
+            <image class="action-icon" src="/assets/icons/add-folder.png" mode="aspectFit"></image>
+            <image class="action-icon" src="/assets/icons/sort.png" mode="aspectFit"></image>
           </view>
         </view>
 
@@ -184,7 +181,7 @@
           data-id="{{item.id}}"
         >
           <view class="item-left">
-            <text class="folder-icon">📁</text>
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
             <text class="item-name">{{item.name}}</text>
             <text class="item-count">({{item.count}})</text>
           </view>

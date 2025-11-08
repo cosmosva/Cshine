@@ -5,6 +5,130 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2025-11-08
+
+### 🎨 UI/UX 优化 - 图标系统升级与导航栏优化
+
+这是一个专注于视觉优化的版本，将所有emoji图标替换为PNG图标，优化导航栏布局，提升整体视觉一致性和专业度。
+
+### Changed - 变更
+
+#### 图标系统全面升级 🖼️
+
+- 📁 **文件夹图标替换**
+  - 将抽屉中所有文件夹emoji（📁）替换为PNG图标
+  - 文件：`folder.png`
+  - 尺寸：18px × 18px
+  - 透明度：0.7
+
+- ➕ **操作图标PNG化**
+  - 新增文件夹图标：`add-folder.png`（18px）
+  - 排序图标：`sort.png`（18px）
+  - 搜索图标：`search.png`（20px）
+  - 加号图标：`add.png`（20px）
+
+#### 导航栏布局优化 📐
+
+- 🔄 **图标位置调整**
+  - 将搜索（🔍）和加号（+）图标从品牌栏移至二级导航栏
+  - 放置在筛选和排序按钮之前
+  - 更符合常见交互习惯
+
+- 🗑️ **简化导航栏**
+  - 删除"媒体"筛选按钮（暂时不需要）
+  - 保留核心功能：搜索、新增、排序
+  - 界面更简洁清爽
+
+- 📏 **放大标题区域**
+  - ☰ 图标：从19px增大到**22px**，字重500
+  - "录音文件"文字：从16px增大到**18px**，字重600
+  - 图标文字间距：从10px增加到**12px**
+  - 整体视觉层级更清晰
+
+#### 抽屉宽度优化 📱
+
+- 🎯 **宽度调整**
+  - 从70%调整到75%，再调回**75%**
+  - 经过多次测试找到最佳平衡点
+  - 抽屉内容充足，主页面仍可见
+
+- 🔧 **显示完整性修复**
+  - 修复底部内容被TabBar遮挡问题
+  - `padding-bottom` 增加TabBar高度（50px）
+  - 确保最后一个文件夹卡片完全可见
+
+### Technical Details - 技术细节
+
+**图标系统实现**
+```xml
+<!-- 之前：emoji图标 -->
+<text class="folder-icon">📁</text>
+
+<!-- 现在：PNG图标 -->
+<image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
+```
+
+**样式适配**
+```css
+/* 统一图标样式 */
+.folder-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.icon-btn {
+  width: 20px;
+  height: 20px;
+  color: #3C3C43;
+  flex-shrink: 0;
+}
+```
+
+**导航栏布局**
+```xml
+<view class="header-right">
+  <!-- 新增：搜索和加号 -->
+  <image class="icon-btn" src="/assets/icons/search.png"></image>
+  <image class="icon-btn" src="/assets/icons/add.png"></image>
+  
+  <!-- 保留：排序 -->
+  <view class="sort-btn">⇅</view>
+</view>
+```
+
+**抽屉完整显示**
+```css
+.drawer-content {
+  padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16px);
+  /* = 50px + 34px + 16px ≈ 100px */
+}
+```
+
+### 文件清单
+
+**新增图标文件（assets/icons/）：**
+- `folder.png` - 文件夹图标（18px）
+- `add-folder.png` - 新增文件夹图标（18px）
+- `sort.png` - 排序图标（18px）
+- `search.png` - 搜索图标（20px）
+- `add.png` - 加号图标（20px）
+
+### 视觉对比
+
+| 元素 | 之前 | 现在 |
+|------|------|------|
+| 文件夹图标 | 📁 emoji | PNG 18px |
+| 搜索图标位置 | 品牌栏 | 二级导航栏 |
+| 加号图标位置 | 品牌栏 | 二级导航栏 |
+| ☰ 图标大小 | 19px | **22px** |
+| "录音文件"文字 | 16px / 500 | **18px / 600** |
+| 媒体筛选按钮 | 显示 | **已删除** |
+| 抽屉宽度 | 测试中 | **75%** |
+
+---
+
 ## [0.3.2] - 2025-11-08
 
 ### 🐛 Bug Fixes - 抽屉布局修复
