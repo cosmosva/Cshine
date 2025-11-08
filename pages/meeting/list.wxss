@@ -176,18 +176,21 @@ page {
 .meeting-scroll {
   flex: 1;
   background-color: #F5F7FA;
+  padding: 0;
+  margin: 0;
 }
 
 .meeting-list {
-  padding: 12px 0;
+  padding: 12px 0px;
   padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16px);
+  margin: 0;
 }
 
 /* ========== 会议卡片 ========== */
 .meeting-card {
   display: flex;
   flex-direction: column;
-  padding: 14px 16px;
+  padding: 14px 12px;
   margin-bottom: 10px;
   background-color: #FFFFFF;
   border-radius: 8px;
@@ -453,4 +456,213 @@ page {
   color: #4A6FE8;
   font-weight: 700;
   line-height: 1;
+}
+
+/* ========== 侧边栏抽屉 - 知识库管理 ========== */
+
+/* 遮罩层 */
+.drawer-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.25s ease;
+}
+
+.drawer-mask.show {
+  background-color: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* 抽屉容器 */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 75%;
+  height: 100vh;
+  background-color: #F8F9FA;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.25s;
+  pointer-events: none;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.drawer.show {
+  left: 0;
+  pointer-events: auto;
+  visibility: visible;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 抽屉头部 */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  padding-top: calc(env(safe-area-inset-top) + 14px);
+  background-color: #FFFFFF;
+  border-bottom: 0.5px solid #E5E5E5;
+  flex-shrink: 0;
+}
+
+.drawer-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  letter-spacing: -0.3px;
+}
+
+.drawer-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.drawer-icon {
+  font-size: 18px;
+  color: #000000;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+  line-height: 1;
+}
+
+.drawer-icon:active {
+  opacity: 0.5;
+}
+
+/* 抽屉内容 */
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #F8F9FA;
+  padding: 12px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
+
+/* 通用列表项 - 卡片样式 */
+.drawer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s;
+}
+
+.drawer-item:active {
+  background-color: #F5F5F5;
+  transform: scale(0.98);
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.item-name {
+  font-size: 15px;
+  color: #000000;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-count {
+  font-size: 15px;
+  color: #8E8E93;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* 全部文件（录音文件）- 独立卡片 */
+.drawer-item.all-files {
+  margin-bottom: 16px;
+}
+
+.drawer-item.all-files .item-name {
+  font-weight: 400;
+}
+
+/* 分组区域 */
+.drawer-section {
+  margin-top: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 10px 4px;
+  background-color: transparent;
+}
+
+.section-title {
+  font-size: 13px;
+  color: #8E8E93;
+  font-weight: 400;
+  letter-spacing: -0.1px;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.action-icon {
+  font-size: 18px;
+  color: #8E8E93;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+
+.action-icon:active {
+  opacity: 0.4;
+}
+
+/* 文件夹列表项 - 独立卡片 */
+.folder-item {
+  /* 继承通用卡片样式 */
+}
+
+.folder-item:last-child {
+  margin-bottom: 0;
+}
+
+.more-icon {
+  font-size: 18px;
+  color: #C7C7CC;
+  line-height: 1;
+  padding: 4px;
+  opacity: 0.8;
+  flex-shrink: 0;
 }

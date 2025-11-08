@@ -20,7 +20,7 @@
   <!-- 二级导航栏 -->
   <view class="header">
     <view class="header-left">
-      <text class="icon">☰</text>
+      <text class="icon" bindtap="toggleDrawer">☰</text>
       <text class="title">录音文件</text>
     </view>
     <view class="header-right">
@@ -140,5 +140,57 @@
         <text class="action-check" wx:if="{{currentSort === item.value}}">✓</text>
       </view>
     </view>
+  </view>
+
+  <!-- 侧边栏抽屉 - 知识库管理 -->
+  <view class="drawer-mask {{showDrawer ? 'show' : ''}}" bindtap="closeDrawer" catchtouchmove="preventDefault"></view>
+  <view class="drawer {{showDrawer ? 'show' : ''}}">
+    <!-- 抽屉头部 -->
+    <view class="drawer-header">
+      <text class="drawer-title">知识库管理</text>
+      <view class="drawer-icons">
+        <text class="drawer-icon">🔍</text>
+        <text class="drawer-icon">+</text>
+      </view>
+    </view>
+
+    <!-- 抽屉内容 -->
+    <scroll-view class="drawer-content" scroll-y>
+      <!-- 录音文件（全部） -->
+      <view class="drawer-item all-files">
+        <view class="item-left">
+          <text class="folder-icon">📁</text>
+          <text class="item-name">录音文件</text>
+          <text class="item-count">({{totalCount}})</text>
+        </view>
+      </view>
+
+      <!-- 我创建的分组 -->
+      <view class="drawer-section">
+        <view class="section-header">
+          <text class="section-title">我创建的</text>
+          <view class="section-actions">
+            <text class="action-icon">📋</text>
+            <text class="action-icon">↕</text>
+          </view>
+        </view>
+
+        <!-- 文件夹列表 -->
+        <view 
+          class="drawer-item folder-item"
+          wx:for="{{folders}}"
+          wx:key="id"
+          bindtap="selectFolder"
+          data-id="{{item.id}}"
+        >
+          <view class="item-left">
+            <text class="folder-icon">📁</text>
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-count">({{item.count}})</text>
+          </view>
+          <text class="more-icon">⋯</text>
+        </view>
+      </view>
+    </scroll-view>
   </view>
 </view>

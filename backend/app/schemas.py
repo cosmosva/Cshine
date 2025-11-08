@@ -146,6 +146,8 @@ class MeetingResponse(BaseModel):
     mind_map: Optional[str] = None  # 思维导图 ✨新增
     key_points: Optional[List[dict]]
     action_items: Optional[List[dict]]
+    is_favorite: Optional[bool] = False  # 收藏状态 ✨新增
+    tags: Optional[List[str]] = None  # AI生成的标签 ✨新增
     status: str
     created_at: datetime
     
@@ -169,6 +171,8 @@ class MeetingResponse(BaseModel):
             "mind_map": obj.mind_map if hasattr(obj, 'mind_map') else None,
             "key_points": json.loads(obj.key_points) if obj.key_points else None,
             "action_items": json.loads(obj.action_items) if obj.action_items else None,
+            "is_favorite": obj.is_favorite if hasattr(obj, 'is_favorite') else False,
+            "tags": json.loads(obj.tags) if (hasattr(obj, 'tags') and obj.tags) else None,
             "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,
             "created_at": obj.created_at
         }

@@ -5,6 +5,146 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-11-08
+
+### ✨ 新增功能 - 知识库管理侧边栏抽屉
+
+这是一个专注于知识库管理功能的版本，新增了从左侧滑出的抽屉组件，用户可以通过抽屉查看和管理所有文件夹分类。
+
+### Added - 新增
+
+#### 侧边栏抽屉组件 🗂️
+
+- 📱 **抽屉交互**
+  - 点击二级导航栏的"☰"图标打开侧边栏
+  - 从屏幕左侧平滑滑入，宽度为屏幕的 75%
+  - 点击遮罩层或选择文件夹后自动关闭
+  - 支持流畅的动画过渡效果（0.25s cubic-bezier）
+
+- 🎨 **视觉设计**
+  - 完全复刻滴答清单风格的抽屉 UI
+  - 白色头部 + 浅灰色内容区背景（#F8F9FA）
+  - 卡片式文件夹列表，每个文件夹为独立白色圆角卡片
+  - 半透明黑色遮罩层（rgba(0, 0, 0, 0.4)）
+  - 轻量级卡片阴影效果
+
+- 📂 **内容结构**
+  - 头部："知识库管理"标题（20px 加粗）+ 搜索/添加图标
+  - "录音文件 (总数)"：显示所有录音文件总数的入口
+  - "我创建的"分组：显示用户创建的所有文件夹
+  - 每个文件夹卡片显示：📁 图标 + 名称 + 数量 + ⋯ 更多操作
+
+- 🔧 **技术实现**
+  - 使用 `pointer-events` 防止关闭状态影响主页面
+  - 使用 `visibility` + `left: -100%` 确保完全隐藏
+  - 自动适配状态栏和底部安全区
+  - 模拟数据：8个文件夹分类，共55个文件
+
+### Changed - 变更
+
+#### UI 细节优化
+
+- 🎯 **卡片样式精调**
+  - 卡片圆角：8px（更柔和的视觉效果）
+  - 卡片阴影：`0 1px 2px rgba(0, 0, 0, 0.05)`（更轻盈）
+  - 卡片内边距：13px 16px
+  - 卡片间距：8px（录音文件卡片底部间距 16px）
+
+- 📏 **文字与间距**
+  - 文件夹名称：15px，正常字重（不加粗）
+  - 文件数量：15px，灰色（#8E8E93），紧跟在名称后
+  - 图标与文字间距：10px
+  - 文件夹图标：18px，透明度 0.7
+
+- 🔤 **标题优化**
+  - "知识库管理"标题从 17px 增大到 20px
+  - 字重保持 600，字间距 -0.3px
+  - 头部内边距：14px
+
+### Technical Details - 技术细节
+
+**WXML 结构**
+```xml
+<!-- 侧边栏抽屉 -->
+<view class="drawer-mask {{showDrawer ? 'show' : ''}}" bindtap="closeDrawer"></view>
+<view class="drawer {{showDrawer ? 'show' : ''}}">
+  <view class="drawer-header">知识库管理 + 图标</view>
+  <scroll-view class="drawer-content">
+    <view class="drawer-item all-files">📁 录音文件 (55)</view>
+    <view class="drawer-section">
+      <view class="section-header">我创建的 + 操作图标</view>
+      <view class="drawer-item folder-item">📁 文件夹名 (数量) ⋯</view>
+    </view>
+  </scroll-view>
+</view>
+```
+
+**CSS 关键技术**
+```css
+/* 抽屉容器 */
+.drawer {
+  position: fixed;
+  left: -100%;  /* 完全隐藏 */
+  width: 75%;
+  visibility: hidden;
+  pointer-events: none;  /* 不阻挡主页面 */
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.25s;
+}
+
+.drawer.show {
+  left: 0;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* 卡片式布局 */
+.drawer-content {
+  background-color: #F8F9FA;
+  padding: 12px;
+}
+
+.drawer-item {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+```
+
+**JavaScript 逻辑**
+```javascript
+// 抽屉状态管理
+data: {
+  showDrawer: false,
+  totalCount: 55,
+  folders: [
+    { id: 1, name: '短视频', count: 6 },
+    // ... 更多文件夹
+  ]
+},
+
+// 打开/关闭抽屉
+toggleDrawer() {
+  this.setData({ showDrawer: !this.data.showDrawer })
+},
+
+// 选择文件夹（业务逻辑待实现）
+selectFolder(e) {
+  const folderId = e.currentTarget.dataset.id
+  // TODO: 根据文件夹ID筛选会议列表
+  this.closeDrawer()
+}
+```
+
+### 待实现功能
+
+- [ ] 文件夹筛选功能（点击文件夹后筛选对应的会议列表）
+- [ ] 文件夹管理功能（创建、重命名、删除文件夹）
+- [ ] 搜索功能（头部搜索图标）
+- [ ] 更多操作菜单（点击"⋯"图标）
+
+---
+
 ## [0.3.0] - 2025-11-08
 
 ### 🎨 UI/UX 优化 - 知识库页面视觉升级

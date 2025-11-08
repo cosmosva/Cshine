@@ -3,8 +3,8 @@
  */
 
 // API 基础地址
-// const API_BASE_URL = 'http://172.20.10.52:8000'  // 开发环境（真机测试用）
-const API_BASE_URL = 'http://localhost:8000'  // 模拟器用
+const API_BASE_URL = 'http://192.168.80.50:8000'  // 开发环境（真机测试用）
+// const API_BASE_URL = 'http://localhost:8000'  // 模拟器用
 // const API_BASE_URL = 'https://api.yourdomain.com'  // 生产环境
 
 // 存储键名

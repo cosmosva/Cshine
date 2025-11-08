@@ -38,6 +38,20 @@ Page({
     showFilterSheet: false,
     showSortSheet: false,
     
+    // 侧边栏抽屉
+    showDrawer: false,
+    totalCount: 55,  // 模拟数据：总文件数
+    folders: [
+      { id: 1, name: '短视频', count: 6 },
+      { id: 2, name: '大海', count: 1 },
+      { id: 3, name: '日常工作', count: 3 },
+      { id: 4, name: 'AI 共创', count: 2 },
+      { id: 5, name: 'AKS', count: 4 },
+      { id: 6, name: 'MFY', count: 1 },
+      { id: 7, name: '注会', count: 1 },
+      { id: 8, name: '期货', count: 7 }
+    ],
+    
     // 状态文案映射
     statusTextMap: {
       'pending': '等待',
@@ -292,6 +306,37 @@ Page({
       return `${hours}h ${secs}s`
     }
     return `${minutes}m ${secs}s`
+  },
+
+  /**
+   * ========== 侧边栏抽屉 ==========
+   */
+  // 切换抽屉显示/隐藏
+  toggleDrawer() {
+    this.setData({
+      showDrawer: !this.data.showDrawer
+    })
+  },
+
+  // 关闭抽屉
+  closeDrawer() {
+    this.setData({
+      showDrawer: false
+    })
+  },
+
+  // 选择文件夹
+  selectFolder(e) {
+    const folderId = e.currentTarget.dataset.id
+    console.log('选中文件夹ID:', folderId)
+    
+    // TODO: 后续实现业务逻辑
+    // 1. 根据文件夹ID筛选会议列表
+    // 2. 更新导航栏标题为文件夹名称
+    // 3. 关闭抽屉
+    
+    showToast('选中文件夹: ' + folderId, 'success')
+    this.closeDrawer()
   },
 
   /**

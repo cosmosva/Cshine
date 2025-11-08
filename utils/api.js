@@ -165,6 +165,14 @@ function getMeetingStatus(meetingId) {
 }
 
 /**
+ * 切换会议收藏状态
+ * @param {string} meetingId 会议ID
+ */
+function toggleMeetingFavorite(meetingId) {
+  return put(API_ENDPOINTS.MEETING_UPDATE + meetingId + '/favorite')
+}
+
+/**
  * ==================== 导出 ====================
  */
 
@@ -189,6 +197,7 @@ module.exports = {
   updateMeeting,
   deleteMeeting,
   getMeetingStatus,
+  toggleMeetingFavorite,
   
   // 文件上传
   uploadAudio

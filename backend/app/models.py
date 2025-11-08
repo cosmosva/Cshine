@@ -100,6 +100,8 @@ class Meeting(Base):
     mind_map = Column(Text, nullable=True)  # 思维导图 ✨新增
     key_points = Column(Text, nullable=True)  # 存储为 JSON 字符串
     action_items = Column(Text, nullable=True)  # 存储为 JSON 字符串
+    is_favorite = Column(Boolean, default=False, nullable=False)  # 收藏状态 ✨新增
+    tags = Column(Text, nullable=True)  # AI生成的标签，存储为JSON字符串 ✨新增
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     status = Column(SQLEnum(MeetingStatus), default=MeetingStatus.PENDING, nullable=False)
     

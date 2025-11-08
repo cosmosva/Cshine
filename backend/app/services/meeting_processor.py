@@ -112,13 +112,18 @@ def _process_meeting_ai(meeting_id: str, audio_url: str):
         conversational_summary = parsed_result.get('conversational_summary', '')
         mind_map = parsed_result.get('mind_map', '')
         
-        # 9. 更新数据库
+        # 9. 生成AI标签（从关键词和要点中提取）
+        tags = _generate_tags(parsed_result.get('keywords', []), key_points, transcription)
+        logger.info(f"为会议生成标签: {tags}")
+        
+        # 10. 更新数据库
         meeting.transcript = transcription
         meeting.summary = summary
         meeting.conversational_summary = conversational_summary  # ✨新增
         meeting.mind_map = mind_map  # ✨新增
         meeting.key_points = json.dumps(key_points, ensure_ascii=False)
         meeting.action_items = json.dumps(action_items, ensure_ascii=False)
+        meeting.tags = json.dumps(tags, ensure_ascii=False) if tags else None  # ✨新增
         meeting.status = MeetingStatus.COMPLETED
         
         db.commit()
@@ -470,4 +475,41 @@ def check_meeting_ai_status(meeting_id: str) -> Dict:
         
     finally:
         db.close()
+
+
+def _generate_tags(keywords: List[str], key_points: List[Dict], transcription: str) -> List[str]:
+    """
+    从关键词和要点中生成标签
+    
+    优先使用关键词，如果没有则从要点的topic中提取
+    """
+    tags = []
+    
+    # 1. 优先使用通义听悟的关键词（取前5个）
+    if keywords:
+        tags.extend(keywords[:5])
+    
+    # 2. 如果标签不足3个，从要点的topic补充
+    if len(tags) < 3 and key_points:
+        for point in key_points:
+            topic = point.get('topic', '')
+            if topic and topic not in tags:
+                # 清理topic（去掉时间戳等）
+                cleaned_topic = re.sub(r'\d+[:：]\d+', '', topic).strip()
+                if cleaned_topic and len(cleaned_topic) <= 10:  # 只保留短标签
+                    tags.append(cleaned_topic)
+                    if len(tags) >= 5:
+                        break
+    
+    # 3. 如果还是没有标签，尝试从转写文本中提取常见主题词
+    if not tags and transcription:
+        # 简单的主题词提取（可以后续优化为更智能的算法）
+        common_topics = ['产品', '设计', '技术', '市场', '运营', '财务', '人事', '策略', '方案', '讨论']
+        for topic in common_topics:
+            if topic in transcription:
+                tags.append(topic)
+                if len(tags) >= 3:
+                    break
+    
+    return tags[:5]  # 最多返回5个标签
 

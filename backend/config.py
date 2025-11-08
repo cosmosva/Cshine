@@ -84,11 +84,13 @@ class Settings(BaseSettings):
     LOG_FILE: str = "./logs/cshine.log"
     
     # CORS 配置
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "*"  # 允许所有来源（开发环境）
     
     @property
     def cors_origins_list(self) -> List[str]:
         """解析 CORS 域名列表"""
+        if self.CORS_ORIGINS == "*":
+            return ["*"]
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
     
     class Config:

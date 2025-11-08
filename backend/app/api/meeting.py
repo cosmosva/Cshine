@@ -79,13 +79,15 @@ async def get_meeting_list(
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     status: Optional[str] = Query(None, description="状态筛选"),
+    is_favorite: Optional[bool] = Query(None, description="收藏筛选"),
+    sort_by: Optional[str] = Query("time", description="排序方式: time/favorite"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取会议纪要列表
     
-    支持分页、状态筛选
+    支持分页、状态筛选、收藏筛选、排序
     """
     try:
         # 构建查询
@@ -99,12 +101,23 @@ async def get_meeting_list(
             except ValueError:
                 pass  # 忽略无效状态
         
+        # 收藏筛选
+        if is_favorite is not None:
+            query = query.filter(Meeting.is_favorite == is_favorite)
+        
         # 总数
         total = query.count()
         
+        # 排序
+        if sort_by == "favorite":
+            # 收藏优先，然后按时间倒序
+            query = query.order_by(desc(Meeting.is_favorite), desc(Meeting.created_at))
+        else:
+            # 默认按时间倒序
+            query = query.order_by(desc(Meeting.created_at))
+        
         # 分页
-        meetings = query.order_by(desc(Meeting.created_at))\
-            .offset((page - 1) * page_size)\
+        meetings = query.offset((page - 1) * page_size)\
             .limit(page_size)\
             .all()
         
@@ -224,6 +237,43 @@ async def delete_meeting(
     except Exception as e:
         db.rollback()
         logger.error(f"Delete meeting error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{meeting_id}/favorite", response_model=ResponseModel)
+async def toggle_meeting_favorite(
+    meeting_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    切换会议收藏状态
+    """
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    try:
+        # 切换收藏状态
+        meeting.is_favorite = not meeting.is_favorite
+        db.commit()
+        db.refresh(meeting)
+        
+        logger.info(f"Meeting favorite toggled: {meeting_id}, is_favorite={meeting.is_favorite}")
+        
+        return ResponseModel(
+            code=200,
+            message="收藏状态已更新",
+            data=MeetingResponse.from_orm(meeting)
+        )
+    
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Toggle meeting favorite error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
