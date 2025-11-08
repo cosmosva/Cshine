@@ -2,10 +2,18 @@
  * API 配置
  */
 
-// API 基础地址
-const API_BASE_URL = 'http://192.168.80.50:8000'  // 开发环境（真机测试用）
-// const API_BASE_URL = 'http://localhost:8000'  // 模拟器用
-// const API_BASE_URL = 'https://api.yourdomain.com'  // 生产环境
+// 环境配置
+const ENV = 'production'  // 'development' | 'production'
+
+// API 基础地址配置
+const API_CONFIG = {
+  development: 'http://192.168.80.50:8000',  // 开发环境（真机测试用）
+  // development: 'http://localhost:8000',     // 模拟器用
+  production: 'https://cshine.xuyucloud.com'  // 生产环境
+}
+
+// 根据环境选择 API 地址
+const API_BASE_URL = API_CONFIG[ENV]
 
 // 存储键名
 const STORAGE_KEYS = {
