@@ -29,69 +29,50 @@ backend/
 └── logs/                   # 日志目录
 ```
 
-## 🚀 快速开始
+## 🚀 快速开始（5分钟）
 
-### 1. 环境准备
+### 1. 安装依赖
 
 ```bash
-# Python 3.11+
-python --version
-
 # 创建虚拟环境
-python -m venv venv
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+# venv\Scripts\activate   # Windows
 
-# 激活虚拟环境
-# macOS/Linux:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-```
-
-### 2. 安装依赖
-
-```bash
+# 安装依赖
 pip install -r requirements.txt
 ```
 
-### 3. 配置环境变量
+### 2. 配置环境变量
 
 ```bash
-# 复制环境变量示例文件
-cp .env.example .env
-
-# 编辑 .env 文件，填入配置
-vim .env
+# 创建 .env 文件
+cat > .env << EOF
+APP_NAME=Cshine API
+DEBUG=True
+SECRET_KEY=your-secret-key-for-development
+DATABASE_URL=sqlite:///./cshine.db
+WECHAT_APPID=your_appid
+WECHAT_SECRET=your_secret
+CORS_ORIGINS=*
+EOF
 ```
 
-### 4. 初始化数据库
+### 3. 运行应用
 
 ```bash
-# 使用 SQLite（开发环境）
-# 数据库会自动创建在 cshine.db
-
-# 使用 PostgreSQL（生产环境）
-# 需要先创建数据库
-# CREATE DATABASE cshine;
-
-# 运行应用时会自动创建表
-```
-
-### 5. 运行应用
-
-```bash
-# 开发模式（自动重载）
 python main.py
-
-# 或使用 uvicorn
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# 应用会在 http://localhost:8000 启动
 ```
 
-### 6. 访问 API 文档
+### 4. 访问 API 文档
 
 ```
 http://localhost:8000/docs       # Swagger UI
 http://localhost:8000/redoc      # ReDoc
 ```
+
+**详细配置说明**：见 [部署文档](../DEPLOYMENT_GUIDE.md)
 
 ## 📡 API 接口
 

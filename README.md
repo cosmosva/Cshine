@@ -159,7 +159,7 @@ python main.py             # 启动服务
 - 真机测试：`http://<你的IP>:8000`
 
 **登录配置：**
-- 查看 [LOGIN_GUIDE.md](LOGIN_GUIDE.md) 了解完整登录流程
+- 查看 [LOGIN.md](LOGIN.md) 了解完整登录流程
 - 配置微信小程序 AppID 和 AppSecret
 - 小程序启动时自动完成静默登录
 
