@@ -38,10 +38,26 @@ Page({
     showFilterSheet: false,
     showSortSheet: false,
     showUploadSheet: false,  // 上传操作 ActionSheet
+    showFolderActions: false, // 知识库操作菜单 ✨新增
     
     // Modal 显示状态
     showFolderSelector: false,  // 知识库选择 Modal
     showCreateFolder: false,    // 新建知识库 Modal
+    showRenameModal: false,     // 重命名 Modal ✨新增
+    showDeleteConfirm: false,   // 删除确认 Modal ✨新增
+    
+    // 知识库管理状态 ✨新增
+    selectedFolderId: null,     // 当前操作的知识库ID
+    selectedFolderName: '',     // 当前操作的知识库名称
+    renameFolderValue: '',      // 重命名输入值
+    
+    // 会议移动状态 ✨新增
+    showMeetingActions: false,      // 会议操作菜单
+    showMoveFolderSelector: false,  // 会议移动选择器
+    movingMeetingId: null,          // 要移动的会议ID
+    meetingCurrentFolderId: null,   // 会议当前所在知识库
+    meetingCurrentFolderName: '',   // 会议当前知识库名称
+    meetingTargetFolderId: null,    // 会议目标知识库ID
     
     // 侧边栏抽屉
     showDrawer: false,
@@ -512,6 +528,242 @@ Page({
       console.error('创建知识库失败:', error)
       hideLoading()
       showToast('创建失败，请重试', 'error')
+    }
+  },
+
+  // ========== 知识库管理功能 ✨新增 ==========
+  
+  // 显示知识库操作菜单
+  showFolderMenu(e) {
+    const { id, name } = e.currentTarget.dataset
+    console.log('显示知识库操作菜单:', id, name)
+    this.setData({
+      selectedFolderId: id,
+      selectedFolderName: name,
+      showFolderActions: true
+    })
+  },
+
+  // 隐藏知识库操作菜单
+  hideFolderActions() {
+    this.setData({ showFolderActions: false })
+  },
+
+  // ========== 重命名知识库 ==========
+  
+  // 打开重命名 Modal
+  handleRenameFolder() {
+    this.setData({
+      showFolderActions: false,
+      showRenameModal: true,
+      renameFolderValue: this.data.selectedFolderName
+    })
+  },
+
+  // 隐藏重命名 Modal
+  hideRenameModal() {
+    this.setData({ showRenameModal: false })
+  },
+
+  // 重命名输入
+  onRenameInput(e) {
+    this.setData({ renameFolderValue: e.detail.value })
+  },
+
+  // 确认重命名
+  async confirmRename() {
+    const name = this.data.renameFolderValue.trim()
+    const folderId = this.data.selectedFolderId
+
+    if (!name) {
+      showToast('请输入知识库名称', 'error')
+      return
+    }
+
+    if (name === this.data.selectedFolderName) {
+      // 名称未改变，直接关闭
+      this.setData({ showRenameModal: false })
+      return
+    }
+
+    try {
+      showLoading('重命名中...')
+      await API.updateFolder(folderId, { name })
+
+      // 更新本地列表
+      const folders = this.data.folders.map(f =>
+        f.id === folderId ? { ...f, name } : f
+      )
+      this.setData({ folders })
+
+      // 如果是当前选中的知识库，同步更新
+      if (this.data.currentFolderId === folderId) {
+        this.setData({ currentFolderName: name })
+      }
+
+      hideLoading()
+      showToast('重命名成功', 'success')
+      this.setData({ showRenameModal: false })
+    } catch (error) {
+      console.error('重命名失败:', error)
+      hideLoading()
+      showToast(error.message || '重命名失败', 'error')
+    }
+  },
+
+  // ========== 删除知识库 ==========
+  
+  // 打开删除确认 Modal
+  handleDeleteFolder() {
+    this.setData({
+      showFolderActions: false,
+      showDeleteConfirm: true
+    })
+  },
+
+  // 隐藏删除确认 Modal
+  hideDeleteConfirm() {
+    this.setData({ showDeleteConfirm: false })
+  },
+
+  // 确认删除
+  async confirmDelete() {
+    const folderId = this.data.selectedFolderId
+
+    try {
+      showLoading('删除中...')
+      await API.deleteFolder(folderId)
+
+      // 更新本地列表
+      const folders = this.data.folders.filter(f => f.id !== folderId)
+      this.setData({ folders })
+
+      // 如果删除的是当前选中的知识库，切换到"录音文件"
+      if (this.data.currentFolderId === folderId) {
+        this.setData({
+          currentFolderId: null,
+          currentFolderName: '录音文件'
+        })
+        // 重新加载会议列表
+        await this.loadMeetingList(true)
+      }
+
+      hideLoading()
+      showToast('知识库已删除', 'success')
+      this.setData({ showDeleteConfirm: false })
+    } catch (error) {
+      console.error('删除失败:', error)
+      hideLoading()
+      showToast(error.message || '删除失败', 'error')
+    }
+  },
+
+  // ========== 会议移动功能 ✨新增 ==========
+  
+  // 会议长按事件
+  onMeetingLongPress(e) {
+    const { id, folderId, folderName } = e.currentTarget.dataset
+    wx.vibrateShort() // 震动反馈
+    
+    this.setData({
+      movingMeetingId: id,
+      meetingCurrentFolderId: folderId || null,
+      meetingCurrentFolderName: folderName || '录音文件',
+      showMeetingActions: true
+    })
+  },
+
+  // 隐藏会议操作菜单
+  hideMeetingActions() {
+    this.setData({ showMeetingActions: false })
+  },
+
+  // 打开移动到知识库选择器
+  handleMoveToFolder() {
+    this.setData({
+      showMeetingActions: false,
+      showMoveFolderSelector: true,
+      meetingTargetFolderId: this.data.meetingCurrentFolderId
+    })
+  },
+
+  // 隐藏移动选择器
+  hideMoveFolderSelector() {
+    this.setData({ showMoveFolderSelector: false })
+  },
+
+  // 选择目标知识库
+  selectMoveTargetFolder(e) {
+    const folderId = e.currentTarget.dataset.id
+    this.setData({ meetingTargetFolderId: folderId })
+  },
+
+  // 确认移动会议
+  async confirmMoveToFolder() {
+    const meetingId = this.data.movingMeetingId
+    const targetFolderId = this.data.meetingTargetFolderId
+    const currentFolderId = this.data.meetingCurrentFolderId
+
+    // 如果目标知识库和当前一样，直接关闭
+    if (targetFolderId === currentFolderId) {
+      this.setData({ showMoveFolderSelector: false })
+      return
+    }
+
+    try {
+      showLoading('移动中...')
+      await API.updateMeeting(meetingId, { folder_id: targetFolderId })
+
+      // 获取目标知识库名称
+      const targetFolderName = targetFolderId === null
+        ? '录音文件'
+        : this.data.folders.find(f => f.id === targetFolderId)?.name || '知识库'
+
+      hideLoading()
+      showToast(`已移动到「${targetFolderName}」`, 'success')
+      this.setData({ showMoveFolderSelector: false })
+
+      // 刷新列表
+      await this.loadMeetingList(true)
+    } catch (error) {
+      console.error('移动失败:', error)
+      hideLoading()
+      showToast(error.message || '移动失败', 'error')
+    }
+  },
+
+  // 从列表删除会议
+  async handleDeleteMeetingFromList() {
+    const meetingId = this.data.movingMeetingId
+    
+    // 先弹出确认对话框
+    const res = await wx.showModal({
+      title: '删除会议',
+      content: '确定要删除这条会议纪要吗？',
+      confirmText: '删除',
+      confirmColor: '#FF3B30',
+      cancelText: '取消'
+    })
+
+    if (!res.confirm) {
+      this.setData({ showMeetingActions: false })
+      return
+    }
+
+    try {
+      showLoading('删除中...')
+      await API.deleteMeeting(meetingId)
+      
+      hideLoading()
+      showToast('删除成功', 'success')
+      this.setData({ showMeetingActions: false })
+
+      // 刷新列表
+      await this.loadMeetingList(true)
+    } catch (error) {
+      console.error('删除会议失败:', error)
+      hideLoading()
+      showToast(error.message || '删除失败', 'error')
     }
   },
 

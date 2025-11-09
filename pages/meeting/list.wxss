@@ -872,3 +872,67 @@ page {
   gap: 12px;
 }
 
+/* ========== 知识库管理新增样式 ========== */
+
+/* 危险操作样式 */
+.action-item.danger {
+  color: #FF3B30;
+}
+
+.action-item.danger .action-icon {
+  opacity: 1;
+}
+
+/* 危险按钮 */
+.btn-danger {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #FF3B30;
+  color: #FFFFFF;
+  transition: opacity 0.15s;
+}
+
+.btn-danger:active {
+  opacity: 0.7;
+}
+
+/* 删除警告文案 */
+.delete-warning {
+  display: block;
+  font-size: 16px;
+  color: #1A1A1A;
+  margin-bottom: 12px;
+  line-height: 22px;
+}
+
+.delete-note {
+  display: block;
+  font-size: 14px;
+  color: #8E8E93;
+  line-height: 20px;
+}
+
+/* 知识库更多操作按钮优化 */
+.more-icon {
+  padding: 6px;
+  font-size: 18px;
+  color: #8E8E93;
+  transition: opacity 0.15s;
+}
+
+.more-icon:active {
+  opacity: 0.5;
+}
+
+/* 当前位置标签 */
+.current-folder-label {
+  display: block;
+  font-size: 14px;
+  color: #8E8E93;
+  margin-bottom: 12px;
+}
+

@@ -5,6 +5,165 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-11-09
+
+### ✨ 功能增强 - 知识库管理完善
+
+这是一个重要的用户体验提升版本，完善了知识库（文件夹）管理功能，让用户可以更灵活地组织和管理会议内容。
+
+### Added - 新增功能
+
+#### 知识库管理 ✨
+- 📝 **重命名知识库**
+  - 点击知识库⋯按钮打开操作菜单
+  - 选择"重命名"弹出输入框
+  - 当前名称自动预填充
+  - 重命名后自动更新所有相关显示
+  - 支持同步更新当前选中知识库的标题
+
+- 🗑️ **删除知识库**
+  - 点击操作菜单中的"删除"
+  - 弹出确认对话框（带警告说明）
+  - 删除后，其中的会议移至"录音文件"
+  - 自动切换到"录音文件"并刷新列表
+  - 危险操作使用红色高亮提示
+
+- 📁 **会议移动功能**
+  - 长按会议卡片触发操作菜单
+  - 选择"移动到知识库"
+  - 显示当前位置和所有可选知识库
+  - 支持移动到"录音文件"或任意知识库
+  - 移动后自动刷新列表并提示成功
+
+- 🗑️ **列表快捷删除**
+  - 长按会议卡片可直接删除
+  - 系统原生确认对话框
+  - 危险操作红色按钮
+
+### Changed - 优化
+
+#### UI/UX 提升
+- 🎨 **知识库操作菜单**
+  - ActionSheet 设计，从底部滑出
+  - 清晰的图标和文字标签
+  - 危险操作（删除）使用红色高亮
+
+- 💬 **Modal 设计优化**
+  - 重命名 Modal：自动聚焦输入框
+  - 删除确认 Modal：清晰的警告文案和说明
+  - 移动选择 Modal：显示当前位置和目标列表
+  - 所有 Modal 支持点击遮罩关闭
+
+- ⚡ **交互体验增强**
+  - 长按会议卡片有震动反馈
+  - 所有操作有 Loading 状态
+  - 成功后有 Toast 提示
+  - 列表自动刷新，状态实时同步
+
+#### 样式规范
+- 🎨 **危险操作样式**
+  - 删除按钮/文字使用 #FF3B30 红色
+  - 按下时有透明度变化反馈
+  - 与其他操作形成视觉区分
+
+- 📐 **更多操作按钮**
+  - ⋯ 图标优化点击区域
+  - 添加点击态反馈
+  - 使用 catchtap 防止冒泡
+
+### Technical Details - 技术实现
+
+**前端实现**
+- 新增状态管理：`showFolderActions`、`showRenameModal`、`showDeleteConfirm`、`showMoveFolderSelector`、`showMeetingActions`
+- 新增事件处理：`showFolderMenu`、`handleRenameFolder`、`handleDeleteFolder`、`onMeetingLongPress`、`handleMoveToFolder`
+- 数据流：本地状态 → API 调用 → 更新本地列表 → 刷新 UI
+
+**API 集成**
+- 重命名：`API.updateFolder(folderId, { name })`
+- 删除：`API.deleteFolder(folderId)`
+- 移动会议：`API.updateMeeting(meetingId, { folder_id })`
+
+**错误处理**
+- 空名称校验
+- 网络异常提示
+- API 错误统一处理
+- 用户友好的错误信息
+
+### Documentation - 文档
+
+- 📚 **功能设计文档** (`docs/features/FOLDER_MANAGEMENT_ENHANCEMENT.md`)
+  - 完整的交互流程设计
+  - UI 组件详细规范
+  - 技术实现说明
+  - 测试计划
+
+- 📝 **部署文档** (`docs/features/DEPLOY_FOLDER_MGMT_20251109.md`)
+  - 更新类型：功能增强
+  - 更新优先级：建议🟡
+  - 详细部署步骤
+  - 测试清单
+  - 回滚方案
+
+### Testing - 测试
+
+**功能测试**
+- ✅ 知识库重命名
+- ✅ 知识库删除（带确认）
+- ✅ 会议长按菜单
+- ✅ 会议移动到知识库
+- ✅ 列表刷新和状态同步
+
+**边界测试**
+- ✅ 空名称校验
+- ✅ 重复名称校验（后端）
+- ✅ 删除当前选中知识库
+- ✅ 移动到相同知识库
+- ✅ 网络异常处理
+
+**UI/UX 测试**
+- ✅ Modal 动画流畅
+- ✅ ActionSheet 显示/隐藏
+- ✅ 危险操作红色高亮
+- ✅ 长按震动反馈
+- ✅ Toast 提示清晰
+
+### Known Issues - 已知问题
+
+无已知问题。
+
+### Breaking Changes - 破坏性变更
+
+⚠️ **无破坏性变更**
+
+所有功能向后兼容，可随时回滚到 v0.4.5。
+
+### Migration Guide - 迁移指南
+
+从 v0.4.5 升级到 v0.5.0：
+
+**前端迁移**
+- 无需特殊操作
+- 小程序重新上传即可
+- 建议版本号：v0.5.0
+- 建议清除小程序缓存后测试
+
+**后端迁移**
+- 无需后端部署（API 已在 v0.4.5 实现）
+
+### Performance - 性能
+
+- 操作后智能刷新列表，只更新必要数据
+- 本地状态同步，减少网络请求
+- Modal 动画使用 CSS transition，流畅度高
+
+### Security - 安全性
+
+- 删除知识库不删除会议，数据安全
+- 所有危险操作有二次确认
+- 后端 API 权限校验（已有）
+
+---
+
 ## [0.4.8] - 2025-11-09
 
 ### 📖 开发规范文档 - 必读

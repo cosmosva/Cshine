@@ -50,8 +50,11 @@
           wx:for="{{meetingList}}"
           wx:key="id"
           bindtap="viewMeeting"
+          bindlongpress="onMeetingLongPress"
           data-id="{{item.id}}"
           data-status="{{item.status}}"
+          data-folder-id="{{item.folder_id}}"
+          data-folder-name="{{item.folder_name}}"
         >
           <!-- 第一行：标题 + 收藏 -->
           <view class="card-row-1">
@@ -181,7 +184,7 @@
             <text class="item-name">{{item.name}}</text>
             <text class="item-count">({{item.count}})</text>
           </view>
-          <text class="more-icon">⋯</text>
+          <text class="more-icon" catchtap="showFolderMenu" data-id="{{item.id}}" data-name="{{item.name}}">⋯</text>
         </view>
       </view>
     </scroll-view>
@@ -239,6 +242,61 @@
     </view>
   </view>
 
+  <!-- 知识库操作菜单 ActionSheet -->
+  <view class="action-sheet-mask" wx:if="{{showFolderActions}}" bindtap="hideFolderActions" catchtouchmove="preventDefault"></view>
+  <view class="action-sheet {{showFolderActions ? 'show' : ''}}">
+    <view class="action-sheet-header">
+      <text class="action-sheet-title">{{selectedFolderName}}</text>
+      <view class="action-sheet-close" bindtap="hideFolderActions">✕</view>
+    </view>
+    <view class="action-sheet-body">
+      <view class="action-item" bindtap="handleRenameFolder">
+        <text class="action-icon">✏️</text>
+        <text class="action-label">重命名</text>
+      </view>
+      <view class="action-item danger" bindtap="handleDeleteFolder">
+        <text class="action-icon">🗑️</text>
+        <text class="action-label">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 重命名知识库 Modal -->
+  <view class="modal-mask" wx:if="{{showRenameModal}}" catchtap="hideRenameModal" catchtouchmove="preventDefault"></view>
+  <view class="modal small {{showRenameModal ? 'show' : ''}}" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">重命名知识库</text>
+    </view>
+    <view class="modal-body">
+      <input class="folder-name-input"
+             placeholder="请输入新名称"
+             value="{{renameFolderValue}}"
+             bindinput="onRenameInput"
+             maxlength="20"
+             focus="{{showRenameModal}}" />
+    </view>
+    <view class="modal-footer">
+      <view class="btn-secondary" bindtap="hideRenameModal">取消</view>
+      <view class="btn-primary" bindtap="confirmRename">确认</view>
+    </view>
+  </view>
+
+  <!-- 删除确认 Modal -->
+  <view class="modal-mask" wx:if="{{showDeleteConfirm}}" catchtap="hideDeleteConfirm" catchtouchmove="preventDefault"></view>
+  <view class="modal small {{showDeleteConfirm ? 'show' : ''}}" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">删除知识库</text>
+    </view>
+    <view class="modal-body">
+      <text class="delete-warning">确定要删除「{{selectedFolderName}}」吗？</text>
+      <text class="delete-note">删除后，其中的会议将移至「录音文件」</text>
+    </view>
+    <view class="modal-footer">
+      <view class="btn-secondary" bindtap="hideDeleteConfirm">取消</view>
+      <view class="btn-danger" bindtap="confirmDelete">删除</view>
+    </view>
+  </view>
+
   <!-- 新建知识库 Modal -->
   <view class="modal-mask" wx:if="{{showCreateFolder}}" catchtap="hideCreateFolder" catchtouchmove="preventDefault"></view>
   <view class="modal small {{showCreateFolder ? 'show' : ''}}" catchtap="preventClose">
@@ -256,6 +314,58 @@
     <view class="modal-footer">
       <view class="btn-secondary" bindtap="hideCreateFolder">取消</view>
       <view class="btn-primary" bindtap="confirmCreateFolder">确认</view>
+    </view>
+  </view>
+
+  <!-- 会议操作菜单 ActionSheet ✨新增 -->
+  <view class="action-sheet-mask" wx:if="{{showMeetingActions}}" bindtap="hideMeetingActions" catchtouchmove="preventDefault"></view>
+  <view class="action-sheet {{showMeetingActions ? 'show' : ''}}">
+    <view class="action-sheet-header">
+      <text class="action-sheet-title">操作</text>
+      <view class="action-sheet-close" bindtap="hideMeetingActions">✕</view>
+    </view>
+    <view class="action-sheet-body">
+      <view class="action-item" bindtap="handleMoveToFolder">
+        <text class="action-icon">📁</text>
+        <text class="action-label">移动到知识库</text>
+      </view>
+      <view class="action-item danger" bindtap="handleDeleteMeetingFromList">
+        <text class="action-icon">🗑️</text>
+        <text class="action-label">删除会议</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 会议移动：知识库选择器 ✨新增 -->
+  <view class="modal-mask" wx:if="{{showMoveFolderSelector}}" bindtap="hideMoveFolderSelector" catchtouchmove="preventDefault"></view>
+  <view class="modal {{showMoveFolderSelector ? 'show' : ''}}" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">移动到知识库</text>
+    </view>
+    <view class="modal-body">
+      <text class="current-folder-label">当前位置：{{meetingCurrentFolderName}}</text>
+
+      <scroll-view class="folder-list" scroll-y>
+        <!-- 录音文件（全部） -->
+        <view class="folder-option {{meetingTargetFolderId === null ? 'selected' : ''}}"
+              bindtap="selectMoveTargetFolder" data-id="{{null}}" data-name="录音文件">
+          <text class="folder-name">📁 录音文件</text>
+          <text class="check-icon" wx:if="{{meetingTargetFolderId === null}}">✓</text>
+        </view>
+
+        <!-- 用户创建的知识库 -->
+        <view class="folder-option {{meetingTargetFolderId === item.id ? 'selected' : ''}}"
+              wx:for="{{folders}}" wx:key="id"
+              bindtap="selectMoveTargetFolder" data-id="{{item.id}}" data-name="{{item.name}}">
+          <text class="folder-name">📁 {{item.name}}</text>
+          <text class="check-icon" wx:if="{{meetingTargetFolderId === item.id}}">✓</text>
+        </view>
+      </scroll-view>
+
+      <view class="modal-actions">
+        <view class="btn-secondary" bindtap="hideMoveFolderSelector">取消</view>
+        <view class="btn-primary" bindtap="confirmMoveToFolder">确认</view>
+      </view>
     </view>
   </view>
 </view>
