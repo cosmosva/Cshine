@@ -10,7 +10,7 @@ from loguru import logger
 from app.models import User
 from app.dependencies import get_current_user
 from app.schemas import UploadResponse, ResponseModel
-from app.utils.oss import upload_audio_to_oss
+from app.utils.oss import upload_audio_to_oss, generate_oss_upload_signature
 from config import settings
 
 router = APIRouter()
@@ -93,7 +93,7 @@ async def upload_audio(
         
         # 5. 上传到 OSS
         try:
-            oss_url = upload_audio_to_oss(temp_file_path, file_ext)
+            oss_url = upload_audio_to_oss(temp_file_path, current_user.id, file_ext)
             logger.info(f"用户 {current_user.id} 上传音频到 OSS: {oss_url}")
         except Exception as e:
             logger.error(f"OSS 上传失败: {e}")
@@ -120,4 +120,28 @@ async def upload_audio(
         # 6. 延迟删除临时文件（保留一段时间，避免并发访问问题）
         # 注意：生产环境建议使用定时任务清理临时文件
         pass  # 暂时不删除，让系统或定时任务处理
+
+
+@router.get("/oss-signature", response_model=ResponseModel)
+async def get_oss_signature(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    获取 OSS 上传签名（用于前端直传）
+    
+    返回阿里云 OSS 的上传签名，前端可以直接使用签名上传文件到 OSS
+    """
+    try:
+        signature_data = generate_oss_upload_signature(current_user.id)
+        
+        return ResponseModel(
+            code=200,
+            message="success",
+            data=signature_data
+        )
+    
+    except Exception as e:
+        logger.error(f"生成 OSS 签名失败: {e}")
+        raise HTTPException(status_code=500, detail=f"生成签名失败: {str(e)}")
+
 

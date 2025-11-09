@@ -50,6 +50,7 @@ class User(Base):
     flashes = relationship("Flash", back_populates="user", cascade="all, delete-orphan")
     meetings = relationship("Meeting", back_populates="user", cascade="all, delete-orphan")
     tags = relationship("Tag", back_populates="user", cascade="all, delete-orphan")
+    folders = relationship("Folder", back_populates="user", cascade="all, delete-orphan")
 
 
 class Flash(Base):
@@ -89,6 +90,7 @@ class Meeting(Base):
     
     id = Column(String(36), primary_key=True, default=generate_uuid)
     user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    folder_id = Column(Integer, ForeignKey("folders.id", ondelete="SET NULL"), nullable=True)  # 知识库ID ✨新增
     title = Column(String(200), nullable=False)
     participants = Column(Text, nullable=True)  # 存储为 JSON 字符串
     meeting_date = Column(DateTime, nullable=True)
@@ -107,6 +109,7 @@ class Meeting(Base):
     
     # 关系
     user = relationship("User", back_populates="meetings")
+    folder = relationship("Folder", back_populates="meetings")
 
 
 class Tag(Base):
@@ -136,4 +139,20 @@ class FlashTag(Base):
     # 关系
     flash = relationship("Flash", back_populates="flash_tags")
     tag = relationship("Tag", back_populates="flash_tags")
+
+
+class Folder(Base):
+    """知识库（文件夹）表 ✨新增"""
+    __tablename__ = "folders"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(50), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关系
+    user = relationship("User", back_populates="folders")
+    meetings = relationship("Meeting", back_populates="folder", cascade="all, delete-orphan")
+
 

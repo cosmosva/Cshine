@@ -84,13 +84,14 @@
         <view class="status-info">
           <view class="status-title">{{title}}</view>
           <view class="status-text">
-            <text wx:if="{{status === 'uploading'}}">正在上传文件...</text>
+            <text wx:if="{{status === 'uploading'}}">上传中</text>
             <text wx:if="{{status === 'processing'}}">正在处理中...</text>
           </view>
           <view class="status-desc">
-            AI 正在分析会议内容，包括：
+            <text wx:if="{{status === 'uploading'}}">正在上传文件到云端</text>
+            <text wx:if="{{status === 'processing'}}">AI 正在分析会议内容，包括：</text>
           </view>
-          <view class="process-steps">
+          <view class="process-steps" wx:if="{{status === 'processing'}}">
             <view class="step-item">✓ 语音转文字</view>
             <view class="step-item {{progress >= 60 ? 'active' : ''}}">
               {{progress >= 60 ? '✓' : '○'}} 提取会议要点

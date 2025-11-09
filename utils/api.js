@@ -108,6 +108,50 @@ function uploadAudio(filePath) {
 }
 
 /**
+ * 获取 OSS 上传签名
+ */
+function getOssSignature() {
+  return get(API_ENDPOINTS.UPLOAD_OSS_SIGNATURE || '/api/v1/upload/oss-signature')
+}
+
+/**
+ * ==================== 知识库（文件夹）相关 ====================
+ */
+
+/**
+ * 创建知识库
+ * @param {object} data 知识库数据 { name: '知识库名称' }
+ */
+function createFolder(data) {
+  return post(API_ENDPOINTS.FOLDER_CREATE || '/api/v1/folders', data)
+}
+
+/**
+ * 获取知识库列表
+ */
+function getFolders() {
+  return get(API_ENDPOINTS.FOLDER_LIST || '/api/v1/folders')
+}
+
+/**
+ * 更新知识库
+ * @param {number} folderId 知识库ID
+ * @param {object} data 更新的数据
+ */
+function updateFolder(folderId, data) {
+  return put((API_ENDPOINTS.FOLDER_UPDATE || '/api/v1/folders/') + folderId, data)
+}
+
+/**
+ * 删除知识库
+ * @param {number} folderId 知识库ID
+ */
+function deleteFolder(folderId) {
+  return del((API_ENDPOINTS.FOLDER_DELETE || '/api/v1/folders/') + folderId)
+}
+
+
+/**
  * ==================== 会议纪要相关 ====================
  */
 
@@ -200,6 +244,13 @@ module.exports = {
   toggleMeetingFavorite,
   
   // 文件上传
-  uploadAudio
+  uploadAudio,
+  getOssSignature,
+  
+  // 知识库
+  createFolder,
+  getFolders,
+  updateFolder,
+  deleteFolder
 }
 

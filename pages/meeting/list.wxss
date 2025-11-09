@@ -689,3 +689,186 @@ page {
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+/* ========== Modal 样式（上传功能） ========== */
+
+/* Modal 遮罩层 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.modal-mask.show {
+  opacity: 1;
+}
+
+/* Modal 容器 */
+.modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 80%;
+  max-width: 400px;
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  z-index: 1002;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.modal.small {
+  max-width: 300px;
+  width: 75%;
+}
+
+/* Modal 头部 */
+.modal-header {
+  padding: 20px 16px 16px;
+  border-bottom: 0.5px solid #EBEBEB;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+/* Modal 内容 */
+.modal-body {
+  padding: 20px 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 当前知识库标签 */
+.current-folder-label {
+  display: block;
+  font-size: 14px;
+  color: #8E8E93;
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+
+/* 知识库列表 */
+.folder-list {
+  max-height: 300px;
+  margin-bottom: 16px;
+}
+
+/* 知识库选项 */
+.folder-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.15s;
+}
+
+.folder-option:active {
+  background-color: #F5F5F5;
+}
+
+.folder-option.selected {
+  background-color: rgba(74, 111, 232, 0.08);
+}
+
+.folder-name {
+  font-size: 16px;
+  color: #1A1A1A;
+  font-weight: 400;
+}
+
+.folder-option.selected .folder-name {
+  color: #4A6FE8;
+  font-weight: 500;
+}
+
+.check-icon {
+  color: #4A6FE8;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Modal 操作按钮 */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-top: 0.5px solid #EBEBEB;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.btn-primary {
+  background-color: #4A6FE8;
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background-color: #F2F2F7;
+  color: #1A1A1A;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  opacity: 0.7;
+}
+
+/* 知识库名称输入框 */
+.folder-name-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* 上传 ActionSheet 特殊样式 */
+.upload-sheet.show {
+  transform: translateY(calc(-1 * var(--tabbar-height)));
+}
+
+.action-item .action-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.upload-action,
+.create-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+

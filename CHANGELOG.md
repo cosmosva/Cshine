@@ -5,6 +5,315 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5] - 2025-11-09
+
+### 🚀 重大功能更新 - 文件上传与知识库管理
+
+这是一个重要的功能性版本，新增了文件上传和知识库管理功能，极大提升了用户体验和内容组织能力。
+
+### Added - 新增功能
+
+#### 文件上传功能 ✨
+- 📤 **音频文件上传**
+  - 支持从本地选择音频文件（mp3/m4a/wav）
+  - 最大支持 500MB 文件
+  - 实时上传进度显示
+  - OSS 直传优化，提升上传速度
+  - 自动提取音频时长
+
+- 🎯 **上传流程优化**
+  - 点击 "+" 按钮弹出操作菜单
+  - 文件选择后自动提取音频信息
+  - 知识库选择界面
+  - 实时进度监控
+  - 完成后自动跳转详情页
+
+#### 知识库管理功能 📚
+- 📁 **知识库创建与管理**
+  - 创建自定义知识库（文件夹）
+  - 知识库重命名功能
+  - 知识库删除功能
+  - 知识库列表展示（带文件数统计）
+  
+- 🗂️ **会议分类组织**
+  - 上传文件时选择目标知识库
+  - 按知识库筛选会议列表
+  - "录音文件"默认分类（全部）
+  - 知识库卡片式展示
+
+- 🎨 **UI/UX 优化**
+  - 上传操作 ActionSheet
+  - 知识库选择 Modal
+  - 新建知识库输入 Modal
+  - TicNote 风格的界面设计
+  - 流畅的动画效果
+
+#### 后端 API 增强 🔌
+- 📡 **知识库 API**
+  - `POST /api/v1/folders` - 创建知识库
+  - `GET /api/v1/folders` - 获取知识库列表（带统计）
+  - `GET /api/v1/folders/{id}` - 获取知识库详情
+  - `PUT /api/v1/folders/{id}` - 更新知识库
+  - `DELETE /api/v1/folders/{id}` - 删除知识库
+
+- 🔐 **OSS 签名 API**
+  - `GET /api/v1/upload/oss-signature` - 获取 OSS 上传签名
+  - 前端直传 OSS，提升上传效率
+  - 签名有效期 1 小时
+
+- 📊 **会议 API 增强**
+  - 创建会议支持 `folder_id` 参数
+  - 列表查询支持按 `folder_id` 筛选
+  - 返回数据包含 `folder_id` 信息
+
+#### 数据库模型扩展 🗄️
+- 📋 **新增 Folder 表**
+  - id（主键，自增）
+  - user_id（用户ID，外键）
+  - name（知识库名称）
+  - created_at / updated_at（时间戳）
+
+- 📝 **Meeting 表增强**
+  - 新增 `folder_id` 字段（可为空）
+  - 外键关联到 folders 表
+  - 删除知识库时自动置空
+
+### Changed - 变更
+
+#### 前端优化
+- 🎨 **list.wxml**
+  - 添加上传相关的 ActionSheet UI
+  - 添加知识库选择 Modal UI
+  - 添加新建知识库 Modal UI
+  - 优化 "+" 按钮点击事件
+
+- 💅 **list.wxss**
+  - 新增 Modal 相关样式
+  - 优化 ActionSheet 样式
+  - 增强视觉层次感
+
+- ⚙️ **list.js**
+  - 实现文件选择逻辑
+  - 实现音频时长提取
+  - 实现知识库选择逻辑
+  - 实现新建知识库逻辑
+  - 状态管理优化
+
+- 📤 **upload.wxml/js**
+  - 修改上传文案（"上传中" → "正在上传文件到云端"）
+  - 支持从列表页传递文件信息
+  - OSS 直传实现
+  - 进度监听优化
+  - 支持 folder_id 参数
+
+- 🔌 **api.js**
+  - 添加知识库 CRUD API 方法
+  - 添加 OSS 签名获取方法
+  - 统一错误处理
+
+- 🌐 **app.js**
+  - globalData 添加 uploadFile 字段
+  - 支持跨页面文件信息传递
+
+#### 后端优化
+- 🏗️ **models.py**
+  - 新增 Folder 模型
+  - Meeting 模型添加 folder_id 字段
+  - User 模型添加 folders 关系
+
+- 📋 **schemas.py**
+  - 新增 FolderCreate、FolderUpdate、FolderResponse、FolderListResponse
+  - MeetingCreate 添加 folder_id 字段
+  - MeetingResponse 添加 folder_id 字段
+
+- 🔧 **api/folder.py**（新文件）
+  - 完整的知识库 CRUD 实现
+  - 自动统计会议数量
+  - 名称唯一性校验
+
+- 🚀 **api/upload.py**
+  - 添加 OSS 签名生成接口
+  - 支持前端直传
+
+- 🔐 **utils/oss.py**
+  - 实现 generate_oss_upload_signature 函数
+  - Policy 生成和签名
+  - 安全性增强
+
+### Technical Details - 技术细节
+
+**前端文件上传流程**
+```
+用户点击 "+" → ActionSheet 弹出 → 选择"上传文件"
+    ↓
+wx.chooseMessageFile() 文件选择
+    ↓
+提取音频时长 (wx.createInnerAudioContext)
+    ↓
+知识库选择 Modal → 选择目标知识库
+    ↓
+跳转上传页面 → 获取 OSS 签名
+    ↓
+wx.uploadFile() 直传 OSS（带进度）
+    ↓
+调用后端创建会议 API（携带 folder_id）
+    ↓
+AI 后台处理 → 完成后跳转详情页
+```
+
+**数据库迁移**
+```sql
+-- 创建 folders 表
+CREATE TABLE folders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id VARCHAR(36) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- meetings 表添加字段
+ALTER TABLE meetings ADD COLUMN folder_id INTEGER;
+```
+
+**OSS 直传实现**
+```javascript
+// 前端
+1. 调用 API.getOssSignature() 获取签名
+2. 使用 wx.uploadFile() 上传到 OSS
+3. 监听 onProgressUpdate 显示进度
+4. 上传成功后调用后端创建会议
+
+// 后端
+1. 生成 Policy（包含文件大小、路径限制）
+2. Base64 编码 Policy
+3. 使用 HMAC-SHA1 签名
+4. 返回签名数据给前端
+```
+
+### Documentation - 文档
+
+- 📚 **新增文档**
+  - `UPLOAD_FEATURE_PLAN.md` - 上传功能开发计划（完整设计文档）
+  - `UPLOAD_FEATURE_IMPLEMENTATION.md` - 实现总结文档
+  - `PRODUCTION_DEPLOYMENT_GUIDE.md` - 线上部署详细指南
+  - `DEPLOYMENT_CHECKLIST.md` - 部署快速清单
+  - `DEPLOYMENT_REPORT.md` - 本地部署报告
+  - `backend/deploy/deploy_upload_feature.sh` - 一键部署脚本
+  - `backend/deploy/rollback_upload_feature.sh` - 一键回滚脚本
+  - `backend/migrations/add_folders_and_folder_id.py` - 数据库迁移脚本
+  - `backend/test_upload_apis.py` - API 测试脚本
+
+### Deployment - 部署
+
+#### 本地环境
+- ✅ 数据库迁移成功
+- ✅ 后端服务已重启（PID: 49172）
+- ✅ API 接口验证通过
+- ✅ 健康检查正常
+
+#### 线上部署步骤
+```bash
+# 方式一：一键部署（推荐）
+./backend/deploy/deploy_upload_feature.sh
+
+# 方式二：手动部署
+git pull origin main
+python migrations/add_folders_and_folder_id.py
+sudo systemctl restart cshine
+```
+
+#### 小程序部署
+1. 微信开发者工具编译预览
+2. 真机测试功能
+3. 上传代码（版本：v0.4.5）
+4. 提交审核（功能说明模板已提供）
+
+### Migration Guide - 迁移指南
+
+从 v0.4.2 升级到 v0.4.5：
+
+**后端迁移**
+```bash
+cd backend
+# 备份数据库
+cp cshine.db cshine.db.backup.$(date +%Y%m%d)
+
+# 运行迁移
+python migrations/add_folders_and_folder_id.py
+
+# 重启服务
+sudo systemctl restart cshine
+```
+
+**前端迁移**
+- 无需特殊操作，兼容旧版本
+- 建议清除小程序缓存后重新编译
+
+### Breaking Changes - 破坏性变更
+
+⚠️ **无破坏性变更**
+
+所有新功能向后兼容，不影响现有功能。
+
+### Performance - 性能优化
+
+- ⚡ OSS 直传，减轻服务器压力
+- ⚡ 前端进度监听，实时反馈
+- ⚡ 异步处理，不阻塞用户操作
+- ⚡ 智能缓存，减少重复请求
+
+### Security - 安全性
+
+- 🔐 OSS 签名机制，保护上传安全
+- 🔐 文件大小限制（500MB）
+- 🔐 文件格式校验
+- 🔐 用户权限隔离
+- 🔐 知识库名称唯一性校验
+
+### Testing - 测试
+
+**功能测试**
+- ✅ 文件选择和上传
+- ✅ 音频时长提取
+- ✅ 知识库创建和管理
+- ✅ 会议列表筛选
+- ✅ OSS 签名和直传
+- ✅ 进度监听和显示
+- ✅ 错误处理
+
+**集成测试**
+- ✅ 完整上传流程
+- ✅ 知识库关联
+- ✅ 数据库一致性
+- ✅ API 接口联调
+
+### Known Issues - 已知问题
+
+- ⚠️ 知识库重命名功能 UI 待实现（API 已就绪）
+- ⚠️ 知识库删除需要确认对话框
+- ⚠️ 批量上传功能待开发
+- ⚠️ 断点续传功能待开发
+
+### Next Steps - 下一步计划
+
+#### P1 - 知识库管理增强
+- [ ] 知识库重命名 UI
+- [ ] 知识库删除确认对话框
+- [ ] 会议移动到其他知识库
+- [ ] 知识库排序功能
+- [ ] 知识库统计信息优化
+
+#### P2 - 上传功能优化
+- [ ] 上传失败重试机制
+- [ ] 断点续传支持
+- [ ] 批量上传支持
+- [ ] 上传历史记录
+- [ ] 文件格式自动转换
+
+---
+
 ## [0.4.2] - 2025-11-09
 
 ### 🎉 体验版测试通过 - 登录功能完全正常

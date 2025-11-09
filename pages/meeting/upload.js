@@ -46,8 +46,31 @@ Page({
         meetingId: options.meetingId
       })
       this.loadMeetingStatus()
+    } else if (options.fileName) {
+      // 从列表页跳转过来的上传模式
+      this.setData({ 
+        mode: 'upload',
+        audioDuration: parseInt(options.duration) || 0
+      })
+      
+      // 从全局变量获取文件信息
+      const uploadFile = getApp().globalData.uploadFile
+      if (uploadFile) {
+        this.setData({
+          audioPath: uploadFile.path,
+          title: decodeURIComponent(options.fileName),
+          audioDuration: uploadFile.duration || 0
+        })
+        
+        // 获取 folderId
+        const folderId = options.folderId ? parseInt(options.folderId) : null
+        this._folderId = folderId
+        
+        // 自动开始上传
+        this.startUpload()
+      }
     } else {
-      // 上传模式
+      // 普通上传模式
       this.setData({ mode: 'upload' })
     }
   },
@@ -126,12 +149,19 @@ Page({
       return
     }
     
+    await this.startUpload()
+  },
+
+  /**
+   * 开始上传流程
+   */
+  async startUpload() {
     this.setData({ status: 'uploading', progress: 10 })
     
     try {
-      // 1. 上传音频文件
+      // 1. 上传音频文件到 OSS (带进度)
       console.log('开始上传音频文件:', this.data.audioPath)
-      const uploadData = await API.uploadAudio(this.data.audioPath)
+      const uploadData = await this.uploadAudioWithProgress(this.data.audioPath)
       console.log('上传响应（已解包）:', uploadData)
       
       if (!uploadData || !uploadData.file_url) {
@@ -140,7 +170,7 @@ Page({
       
       this.setData({ 
         audioUrl: uploadData.file_url,
-        audioDuration: uploadData.duration || 0,
+        audioDuration: uploadData.duration || this.data.audioDuration,
         progress: 30
       })
       
@@ -157,6 +187,11 @@ Page({
         meeting_date: this.data.meetingDate || null,
         audio_url: this.data.audioUrl,
         audio_duration: this.data.audioDuration
+      }
+      
+      // 如果有 folderId，添加到数据中
+      if (this._folderId) {
+        meetingData.folder_id = this._folderId
       }
       
       console.log('创建会议纪要，数据:', meetingData)
@@ -187,6 +222,58 @@ Page({
       })
       showToast(this.data.errorMessage, 'error')
     }
+  },
+
+  /**
+   * 上传音频文件到 OSS（带进度监听）
+   */
+  uploadAudioWithProgress(filePath) {
+    return new Promise((resolve, reject) => {
+      // 先获取 OSS 签名
+      API.getOssSignature()
+        .then(ossData => {
+          console.log('OSS 签名数据:', ossData)
+          
+          // 构建 OSS 上传参数
+          const uploadTask = wx.uploadFile({
+            url: ossData.host,
+            filePath: filePath,
+            name: 'file',
+            formData: {
+              key: ossData.key,
+              policy: ossData.policy,
+              OSSAccessKeyId: ossData.accessid,
+              signature: ossData.signature,
+              success_action_status: '200'
+            },
+            success: (res) => {
+              if (res.statusCode === 200) {
+                const fileUrl = `${ossData.host}/${ossData.key}`
+                resolve({
+                  file_url: fileUrl,
+                  duration: this.data.audioDuration
+                })
+              } else {
+                reject(new Error(`上传失败: ${res.statusCode}`))
+              }
+            },
+            fail: (err) => {
+              console.error('OSS 上传失败:', err)
+              reject(new Error('上传失败，请重试'))
+            }
+          })
+
+          // 监听上传进度
+          uploadTask.onProgressUpdate((res) => {
+            const progress = Math.min(res.progress, 30) // 上传进度占 0-30%
+            this.setData({ progress })
+          })
+        })
+        .catch(err => {
+          console.error('获取 OSS 签名失败:', err)
+          reject(new Error('获取上传凭证失败'))
+        })
+    })
   },
 
   /**

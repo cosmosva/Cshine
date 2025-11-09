@@ -4,7 +4,7 @@
 
 // API 基础地址配置
 const API_CONFIG = {
-  development: 'http://192.168.80.50:8000',  // 开发环境（真机测试用）
+  development: 'http://192.168.1.60:8000',  // 开发环境（真机测试用）
   // development: 'http://localhost:8000',     // 模拟器用
   production: 'https://cshine.xuyucloud.com'  // 生产环境
 }

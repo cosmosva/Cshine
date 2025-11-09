@@ -37,6 +37,11 @@ Page({
     // ActionSheet 显示状态
     showFilterSheet: false,
     showSortSheet: false,
+    showUploadSheet: false,  // 上传操作 ActionSheet
+    
+    // Modal 显示状态
+    showFolderSelector: false,  // 知识库选择 Modal
+    showCreateFolder: false,    // 新建知识库 Modal
     
     // 侧边栏抽屉
     showDrawer: false,
@@ -51,6 +56,14 @@ Page({
       { id: 7, name: '注会', count: 1 },
       { id: 8, name: '期货', count: 7 }
     ],
+    
+    // 知识库状态
+    currentFolderId: null,        // 当前选中的知识库ID (null = 全部)
+    currentFolderName: '录音文件', // 当前知识库名称
+    
+    // 临时数据
+    tempSelectedFile: null,  // 临时存储选中的文件信息
+    newFolderName: '',       // 新建知识库名称输入
     
     // 状态文案映射
     statusTextMap: {
@@ -328,15 +341,183 @@ Page({
   // 选择文件夹
   selectFolder(e) {
     const folderId = e.currentTarget.dataset.id
-    console.log('选中文件夹ID:', folderId)
+    const folder = this.data.folders.find(f => f.id === folderId)
     
-    // TODO: 后续实现业务逻辑
-    // 1. 根据文件夹ID筛选会议列表
-    // 2. 更新导航栏标题为文件夹名称
-    // 3. 关闭抽屉
+    this.setData({
+      currentFolderId: folderId,
+      currentFolderName: folder ? folder.name : '录音文件',
+      showDrawer: false
+    })
     
-    showToast('选中文件夹: ' + folderId, 'success')
-    this.closeDrawer()
+    // 重新加载列表 (按文件夹筛选)
+    this.loadMeetingList(true)
+  },
+
+  /**
+   * ========== 上传功能 ==========
+   */
+  
+  // 显示上传菜单
+  showUploadMenu() {
+    this.setData({ showUploadSheet: true })
+  },
+
+  // 隐藏上传菜单
+  hideUploadSheet() {
+    this.setData({ showUploadSheet: false })
+  },
+
+  // 处理上传文件
+  handleUploadFile() {
+    this.setData({ showUploadSheet: false })
+
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'file',
+      extension: ['mp3', 'm4a', 'wav'],
+      success: (res) => {
+        const file = res.tempFiles[0]
+
+        // 检查文件大小（500MB）
+        if (file.size > 500 * 1024 * 1024) {
+          showToast('文件大小不能超过 500MB', 'error')
+          return
+        }
+
+        // 提取音频时长
+        this.extractAudioDuration(file.path, (duration) => {
+          // 保存临时文件信息
+          this.setData({
+            tempSelectedFile: {
+              path: file.path,
+              name: file.name,
+              size: file.size,
+              duration: duration
+            },
+            showFolderSelector: true
+          })
+        })
+      },
+      fail: (err) => {
+        console.error('选择文件失败:', err)
+        showToast('文件选择失败', 'error')
+      }
+    })
+  },
+
+  // 提取音频时长
+  extractAudioDuration(filePath, callback) {
+    const audio = wx.createInnerAudioContext()
+    audio.src = filePath
+
+    audio.onCanplay(() => {
+      const duration = Math.floor(audio.duration)
+      audio.destroy()
+      callback(duration)
+    })
+
+    audio.onError((err) => {
+      console.error('音频加载失败:', err)
+      audio.destroy()
+      callback(0)
+    })
+  },
+
+  // 隐藏知识库选择器
+  hideFolderSelector() {
+    this.setData({ showFolderSelector: false })
+  },
+
+  // 选择知识库用于上传
+  selectFolderForUpload(e) {
+    const folderId = e.currentTarget.dataset.id
+    const folderName = e.currentTarget.dataset.name
+
+    this.setData({
+      currentFolderId: folderId,
+      currentFolderName: folderName
+    })
+  },
+
+  // 确认知识库选择
+  confirmFolderSelection() {
+    this.setData({ showFolderSelector: false })
+
+    // 跳转到上传页面
+    const file = this.data.tempSelectedFile
+    const fileName = encodeURIComponent(file.name)
+    const folderId = this.data.currentFolderId || ''
+    
+    wx.navigateTo({
+      url: `/pages/meeting/upload?fileName=${fileName}&duration=${file.duration}&folderId=${folderId}`
+    })
+
+    // 传递文件路径（通过全局变量）
+    getApp().globalData.uploadFile = file
+  },
+
+  // 处理新建知识库（从上传 ActionSheet）
+  handleCreateFolder() {
+    this.setData({
+      showUploadSheet: false,
+      showFolderSelector: false,
+      showCreateFolder: true,
+      newFolderName: ''
+    })
+  },
+
+  // 处理新建知识库（从知识库选择器）
+  handleCreateFolderFromSelector() {
+    this.setData({
+      showFolderSelector: false,
+      showCreateFolder: true,
+      newFolderName: ''
+    })
+  },
+
+  // 隐藏新建知识库 Modal
+  hideCreateFolder() {
+    this.setData({ showCreateFolder: false })
+  },
+
+  // 知识库名称输入
+  onFolderNameInput(e) {
+    this.setData({ newFolderName: e.detail.value })
+  },
+
+  // 确认创建知识库
+  async confirmCreateFolder() {
+    const name = this.data.newFolderName.trim()
+
+    if (!name) {
+      showToast('请输入知识库名称', 'error')
+      return
+    }
+
+    try {
+      showLoading('创建中...')
+      const newFolder = await API.createFolder({ name })
+
+      // 更新本地列表
+      const folders = [...this.data.folders, newFolder]
+      this.setData({
+        folders,
+        showCreateFolder: false,
+        newFolderName: ''
+      })
+
+      hideLoading()
+      showToast('知识库创建成功', 'success')
+    } catch (error) {
+      console.error('创建知识库失败:', error)
+      hideLoading()
+      showToast('创建失败，请重试', 'error')
+    }
+  },
+
+  // 阻止关闭
+  preventClose() {
+    // 空函数，用于阻止点击 Modal 内部关闭
   },
 
   /**

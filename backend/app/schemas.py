@@ -122,6 +122,7 @@ class MeetingCreate(BaseModel):
     meeting_date: Optional[datetime] = None
     audio_url: str = Field(..., description="音频文件URL")
     audio_duration: Optional[int] = None
+    folder_id: Optional[int] = None  # 知识库ID ✨新增
 
 
 class MeetingUpdate(BaseModel):
@@ -148,6 +149,7 @@ class MeetingResponse(BaseModel):
     action_items: Optional[List[dict]]
     is_favorite: Optional[bool] = False  # 收藏状态 ✨新增
     tags: Optional[List[str]] = None  # AI生成的标签 ✨新增
+    folder_id: Optional[int] = None  # 知识库ID ✨新增
     status: str
     created_at: datetime
     
@@ -173,6 +175,7 @@ class MeetingResponse(BaseModel):
             "action_items": json.loads(obj.action_items) if obj.action_items else None,
             "is_favorite": obj.is_favorite if hasattr(obj, 'is_favorite') else False,
             "tags": json.loads(obj.tags) if (hasattr(obj, 'tags') and obj.tags) else None,
+            "folder_id": obj.folder_id if hasattr(obj, 'folder_id') else None,
             "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,
             "created_at": obj.created_at
         }
@@ -240,4 +243,33 @@ class StatsResponse(BaseModel):
     week: dict
     month: dict
     category_distribution: List[dict]
+
+
+# ============ 知识库（文件夹）相关 ✨新增 ============
+
+class FolderCreate(BaseModel):
+    """创建知识库请求"""
+    name: str = Field(..., min_length=1, max_length=50, description="知识库名称")
+
+
+class FolderUpdate(BaseModel):
+    """更新知识库请求"""
+    name: str = Field(..., min_length=1, max_length=50, description="知识库名称")
+
+
+class FolderResponse(BaseModel):
+    """知识库响应"""
+    id: int
+    name: str
+    count: int = 0  # 该知识库中的会议数量
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class FolderListResponse(BaseModel):
+    """知识库列表响应"""
+    items: List[FolderResponse]
+
 

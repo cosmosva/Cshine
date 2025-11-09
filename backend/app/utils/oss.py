@@ -5,8 +5,12 @@
 
 import os
 import uuid
-from datetime import datetime
 import oss2
+import json
+import base64
+import hmac
+import hashlib
+from datetime import datetime, timedelta
 from loguru import logger
 from config import settings
 
@@ -29,12 +33,13 @@ def get_oss_bucket():
     return bucket
 
 
-def upload_audio_to_oss(local_file_path: str, file_extension: str = ".wav") -> str:
+def upload_audio_to_oss(local_file_path: str, user_id: str, file_extension: str = ".wav") -> str:
     """
     上传音频文件到 OSS
     
     Args:
         local_file_path: 本地文件路径
+        user_id: 用户ID（用于组织文件目录）
         file_extension: 文件扩展名
         
     Returns:
@@ -46,10 +51,9 @@ def upload_audio_to_oss(local_file_path: str, file_extension: str = ".wav") -> s
     try:
         bucket = get_oss_bucket()
         
-        # 1. 生成唯一文件名（按日期组织目录）
-        today = datetime.now().strftime("%Y%m%d")
+        # 1. 生成唯一文件名（按用户ID组织目录）
         unique_id = str(uuid.uuid4())
-        object_name = f"audio/{today}/{unique_id}{file_extension}"
+        object_name = f"audio/{user_id}/{unique_id}{file_extension}"
         
         # 2. 上传到 OSS
         logger.info(f"开始上传文件到 OSS: {object_name}")
@@ -148,4 +152,63 @@ def get_signed_url(oss_url: str, expires: int = 3600) -> str:
     except Exception as e:
         logger.error(f"❌ 生成签名 URL 失败: {e}")
         return oss_url  # 降级：返回原始 URL
+
+
+def generate_oss_upload_signature(user_id: str, expires_in: int = 3600) -> dict:
+    """
+    生成 OSS 上传签名（用于前端直传）
+    
+    Args:
+        user_id: 用户ID
+        expires_in: 签名有效期（秒），默认 1 小时
+        
+    Returns:
+        包含签名信息的字典
+    """
+    try:
+        # 1. 生成文件路径
+        unique_id = str(uuid.uuid4())
+        object_key = f"audio/{user_id}/{unique_id}.m4a"
+        
+        # 2. 生成过期时间
+        expire_time = datetime.utcnow() + timedelta(seconds=expires_in)
+        expire_timestamp = int(expire_time.timestamp())
+        
+        # 3. 构建 Policy
+        policy_dict = {
+            "expiration": expire_time.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+            "conditions": [
+                ["content-length-range", 0, 500 * 1024 * 1024],  # 最大 500MB
+                ["starts-with", "$key", f"audio/{user_id}/"]
+            ]
+        }
+        
+        # 4. Base64 编码 Policy
+        policy_str = json.dumps(policy_dict)
+        policy_base64 = base64.b64encode(policy_str.encode('utf-8')).decode('utf-8')
+        
+        # 5. 生成签名
+        signature = base64.b64encode(
+            hmac.new(
+                settings.ALIBABA_CLOUD_ACCESS_KEY_SECRET.encode('utf-8'),
+                policy_base64.encode('utf-8'),
+                hashlib.sha1
+            ).digest()
+        ).decode('utf-8')
+        
+        # 6. 构建返回数据
+        return {
+            "accessid": settings.ALIBABA_CLOUD_ACCESS_KEY_ID,
+            "host": f"https://{settings.OSS_BUCKET_NAME}.{settings.OSS_ENDPOINT}",
+            "policy": policy_base64,
+            "signature": signature,
+            "expire": expire_timestamp,
+            "key": object_key,
+            "success_action_status": "200"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ 生成 OSS 签名失败: {e}")
+        raise
+
 

@@ -45,6 +45,7 @@ async def create_meeting(
             meeting_date=meeting_data.meeting_date,
             audio_url=meeting_data.audio_url,
             audio_duration=meeting_data.audio_duration,
+            folder_id=meeting_data.folder_id,  # ✨新增：支持知识库
             status=MeetingStatus.PENDING
         )
         
@@ -80,6 +81,7 @@ async def get_meeting_list(
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     status: Optional[str] = Query(None, description="状态筛选"),
     is_favorite: Optional[bool] = Query(None, description="收藏筛选"),
+    folder_id: Optional[int] = Query(None, description="知识库ID筛选"),  # ✨新增
     sort_by: Optional[str] = Query("time", description="排序方式: time/favorite"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -87,7 +89,7 @@ async def get_meeting_list(
     """
     获取会议纪要列表
     
-    支持分页、状态筛选、收藏筛选、排序
+    支持分页、状态筛选、收藏筛选、知识库筛选、排序
     """
     try:
         # 构建查询
@@ -104,6 +106,10 @@ async def get_meeting_list(
         # 收藏筛选
         if is_favorite is not None:
             query = query.filter(Meeting.is_favorite == is_favorite)
+        
+        # 知识库筛选 ✨新增
+        if folder_id is not None:
+            query = query.filter(Meeting.folder_id == folder_id)
         
         # 总数
         total = query.count()

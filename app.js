@@ -11,7 +11,8 @@ App({
     token: '',
     userInfo: null,
     userId: '',
-    aiPollingTimers: {}  // 存储所有的 AI 轮询定时器
+    aiPollingTimers: {},  // 存储所有的 AI 轮询定时器
+    uploadFile: null      // 临时存储待上传的文件信息
   },
 
   /**
