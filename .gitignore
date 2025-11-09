@@ -59,3 +59,7 @@ tmp/
 # 微信开发者工具
 .DS_Store
 node_modules/
+
+# 临时文档待清理区
+docs/features/DEPLOY_*.md
+

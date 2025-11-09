@@ -72,7 +72,7 @@ http://localhost:8000/docs       # Swagger UI
 http://localhost:8000/redoc      # ReDoc
 ```
 
-**详细配置说明**：见 [部署文档](../DEPLOYMENT_GUIDE.md)
+**详细配置说明**：见 [部署文档](../docs/deployment/DEPLOYMENT_GUIDE.md)
 
 ## 📡 API 接口
 
