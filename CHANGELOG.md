@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.6] - 2025-11-09
+
+### 📚 文档标准化 - 后端更新协议
+
+建立后端功能更新的标准化流程，确保每次开发完成后都有清晰的线上部署方案。
+
+### Added - 新增
+- 📋 **后端更新标准协议** (`BACKEND_UPDATE_PROTOCOL.md`)
+  - 定义标准化的更新流程
+  - 提供更新文档模板
+  - 包含部署步骤和验证方法
+  - 提供回滚方案
+  - 更新分类和优先级定义
+  - 安全准则和最佳实践
+
+- 📝 **快速上手指南** (`BACKEND_UPDATE_QUICKSTART.md`)
+  - 开发人员使用指南
+  - 部署人员使用指南
+  - 实际示例和通知模板
+
+### Changed - 优化
+- 🗂️ **文档结构大幅精简**
+  - 删除 15 个临时/重复文档
+  - 合并相关文档为单一来源
+  - 减少 ~4736 行冗余内容
+  
+- 📖 **核心文档合并**
+  - `LOGIN.md` - 合并登录指南和测试指南
+  - `DEPLOYMENT_GUIDE.md` - 唯一的部署文档
+  - `backend/README.md` - 整合快速开始内容
+
+### Removed - 删除
+- 历史/调试文档（8个）：CLAUDE.md, IMPLEMENTATION_SUMMARY.md, KNOWLEDGE_PAGE_UPDATE.md, MEETING_LIST_DEBUG.md, PROFILE_UPDATE_COMPLETE.md, REAL_DEVICE_TESTING.md, TABBAR_DESIGN.md, TABBAR_SETUP_GUIDE.md
+- 重复的部署文档（3个）：DEPLOYMENT_QUICKSTART.md, DEPLOYMENT_ENVIRONMENT_GUIDE.md, DEPLOY_LOGIN_UPDATE.md
+- 重复的登录文档（2个）：LOGIN_GUIDE.md, LOGIN_TEST_GUIDE.md
+- 重复的后端文档（2个）：backend/快速开始.md, backend/SETUP_DEV_OSS.md
+
+---
+
 ## [0.4.5] - 2025-11-09
 
 ### 🚀 重大功能更新 - 文件上传与知识库管理
