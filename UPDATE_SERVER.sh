@@ -1,51 +1,35 @@
 #!/bin/bash
-# Cshine 生产环境快速更新脚本
-# 域名: https://cshine.xuyucloud.com
-
-set -e
+# Cshine 服务器更新脚本
+# 服务器: 8.134.254.88
+# 用户: cshine
+# 项目路径: ~/Cshine
 
 echo "=========================================="
-echo "  🚀 Cshine 生产环境更新"
-echo "  域名: https://cshine.xuyucloud.com"
+echo "  🚀 Cshine 服务器更新"
+echo "  服务器: cshine@8.134.254.88"
 echo "=========================================="
 echo ""
 
-# 服务器配置（请根据实际情况修改）
-SERVER_USER="${1:-cshine}"
-SERVER_HOST="${2:-cshine.xuyucloud.com}"
-
-echo "📝 更新信息："
-echo "   服务器: $SERVER_USER@$SERVER_HOST"
-echo "   目标: ~/Cshine"
+echo "🔗 正在连接服务器..."
 echo ""
 
-read -p "确认更新？(y/N): " confirm
-if [ "$confirm" != "y" ]; then
-    echo "❌ 已取消"
-    exit 0
-fi
-
-echo ""
-echo "🔗 连接服务器并更新..."
-echo ""
-
-ssh "$SERVER_USER@$SERVER_HOST" << 'ENDSSH'
+ssh cshine@8.134.254.88 << 'ENDSSH'
     set -e
     
     echo "=========================================="
-    echo "📦 步骤 1/5: 检查当前状态"
+    echo "📦 步骤 1/6: 检查当前状态"
     echo "=========================================="
     cd ~/Cshine
     echo "✅ 当前分支: $(git branch --show-current)"
-    echo "✅ 最新提交: $(git log --oneline -1)"
+    echo "✅ 当前版本: $(git log --oneline -1)"
     echo ""
     
     echo "=========================================="
-    echo "📦 步骤 2/5: 备份数据库"
+    echo "📦 步骤 2/6: 备份数据库"
     echo "=========================================="
     cd backend
-    BACKUP_FILE="cshine.db.backup.$(date +%Y%m%d_%H%M%S)"
     if [ -f cshine.db ]; then
+        BACKUP_FILE="cshine.db.backup.$(date +%Y%m%d_%H%M%S)"
         cp cshine.db "$BACKUP_FILE"
         echo "✅ 已备份到: $BACKUP_FILE"
     else
@@ -54,68 +38,100 @@ ssh "$SERVER_USER@$SERVER_HOST" << 'ENDSSH'
     echo ""
     
     echo "=========================================="
-    echo "📦 步骤 3/5: 拉取最新代码"
+    echo "📦 步骤 3/6: 拉取最新代码"
     echo "=========================================="
     cd ~/Cshine
+    
+    # 显示更新前后的差异
+    OLD_COMMIT=$(git log --oneline -1)
     git pull origin main
+    NEW_COMMIT=$(git log --oneline -1)
+    
     echo "✅ 代码更新完成"
+    echo ""
+    echo "更新内容："
+    git log --oneline --graph -5
     echo ""
     
     echo "=========================================="
-    echo "📦 步骤 4/5: 更新依赖并重启"
+    echo "📦 步骤 4/6: 检查配置"
     echo "=========================================="
     cd backend
+    
+    # 检查 .env 配置
+    if [ ! -f .env ]; then
+        echo "⚠️  警告: 未找到 .env 文件！"
+        echo "请确保已配置以下环境变量："
+        echo "  - WECHAT_APPID"
+        echo "  - WECHAT_SECRET"
+        echo "  - OSS_BUCKET_NAME=cshine-audio (生产环境)"
+    else
+        echo "✅ .env 文件存在"
+        if grep -q "WECHAT_APPID=wx68cb1f3f6a2bcf17" .env; then
+            echo "✅ 微信 AppID 已配置"
+        else
+            echo "⚠️  请检查微信 AppID 配置"
+        fi
+    fi
+    echo ""
+    
+    echo "=========================================="
+    echo "📦 步骤 5/6: 更新依赖"
+    echo "=========================================="
     source venv/bin/activate
     
     # 检查依赖是否需要更新
-    if git diff HEAD@{1} HEAD -- requirements.txt | grep -q "^+"; then
+    if git diff HEAD@{1} HEAD -- requirements.txt | grep -q "^+" 2>/dev/null; then
         echo "📦 检测到依赖变化，正在更新..."
         pip install -r requirements.txt --quiet
         echo "✅ 依赖更新完成"
     else
-        echo "✅ 依赖无变化"
+        echo "✅ 依赖无变化，跳过更新"
     fi
-    
     echo ""
-    echo "🔄 重启服务..."
+    
+    echo "=========================================="
+    echo "📦 步骤 6/6: 重启服务"
+    echo "=========================================="
     sudo systemctl restart cshine-api
     
-    # 等待服务启动
+    echo "⏳ 等待服务启动..."
     sleep 3
     echo ""
-    
-    echo "=========================================="
-    echo "📦 步骤 5/5: 健康检查"
-    echo "=========================================="
     
     # 检查服务状态
     if systemctl is-active --quiet cshine-api; then
         echo "✅ 服务状态: active (running)"
     else
-        echo "❌ 服务状态: inactive"
-        sudo systemctl status cshine-api --no-pager | head -10
+        echo "❌ 服务状态: inactive/failed"
+        echo ""
+        echo "错误日志："
+        sudo journalctl -u cshine-api -n 30 --no-pager
         exit 1
     fi
     
     # 健康检查
+    echo ""
+    echo "🔍 健康检查..."
     sleep 2
     HEALTH_STATUS=$(curl -s http://127.0.0.1:8000/health || echo "")
     if echo "$HEALTH_STATUS" | grep -q "healthy\|ok"; then
         echo "✅ 健康检查: 通过"
+        echo "响应: $HEALTH_STATUS"
     else
         echo "❌ 健康检查: 失败"
         echo "响应: $HEALTH_STATUS"
     fi
     
-    # 检查配置
+    # 配置检查
     echo ""
-    echo "🔍 配置检查:"
+    echo "🔍 配置检查..."
     python -c "
 from config import settings
 print(f'   AppID: {settings.WECHAT_APPID}')
 print(f'   Secret: {\"✅ 已配置\" if settings.WECHAT_SECRET else \"❌ 未配置\"}')
 print(f'   OSS Bucket: {settings.OSS_BUCKET_NAME}')
-print(f'   Storage: {settings.STORAGE_TYPE}')
+print(f'   Storage Type: {settings.STORAGE_TYPE}')
 "
     
     echo ""
@@ -123,45 +139,41 @@ print(f'   Storage: {settings.STORAGE_TYPE}')
     echo "  🎉 更新完成！"
     echo "=========================================="
     echo ""
-    echo "📋 最近更新："
-    cd ~/Cshine
-    git log --oneline -3
+    echo "📋 服务信息："
+    sudo systemctl status cshine-api --no-pager | head -10
     
 ENDSSH
 
-if [ $? -eq 0 ]; then
-    echo ""
+UPDATE_STATUS=$?
+
+echo ""
+if [ $UPDATE_STATUS -eq 0 ]; then
     echo "=========================================="
-    echo "  ✅ 生产环境更新成功！"
+    echo "  ✅ 服务器更新成功！"
     echo "=========================================="
     echo ""
     echo "🧪 在线验证："
     echo ""
-    
-    # 在线健康检查
-    echo "🔍 健康检查..."
     curl -s https://cshine.xuyucloud.com/health | python3 -m json.tool 2>/dev/null || \
     curl -s https://cshine.xuyucloud.com/health
-    
     echo ""
     echo ""
-    echo "📱 现在可以测试小程序："
+    echo "📱 测试步骤："
     echo "   1. 清除小程序缓存"
     echo "   2. 重启小程序"
     echo "   3. 应该能自动登录成功"
-    echo "   4. 进入'我的'页面查看用户信息"
+    echo "   4. 进入'我的'页面，查看用户信息"
+    echo "   5. 点击'完善资料'按钮测试授权"
     echo ""
 else
-    echo ""
     echo "=========================================="
     echo "  ❌ 更新失败"
     echo "=========================================="
     echo ""
-    echo "💡 请检查上面的错误信息"
-    echo ""
     echo "🔧 故障排查："
-    echo "   ssh $SERVER_USER@$SERVER_HOST"
-    echo "   sudo journalctl -u cshine-api -n 50"
-    exit 1
+    echo "   1. SSH 手动登录: ssh cshine@8.134.254.88"
+    echo "   2. 查看日志: sudo journalctl -u cshine-api -n 50"
+    echo "   3. 检查配置: cat ~/Cshine/backend/.env"
+    echo ""
 fi
 
