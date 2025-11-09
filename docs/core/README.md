@@ -124,6 +124,20 @@ Cshine/
 
 ## 🚀 快速开始
 
+### ⚠️ 开发规范（必读）
+
+**提交代码前请先阅读**：
+- 📖 [开发规范](DEVELOPMENT_GUIDE.md) - 完整的开发规范和最佳实践
+- ⚡ [快速检查清单](../../QUICK_CHECKLIST.md) - 打印出来贴在显示器旁边！
+
+**核心规则**：
+- ✅ **后端功能更新 = 必须创建部署文档**（`docs/features/DEPLOY_*.md`）
+- ✅ 使用模板：`.github_docs_template.md`
+- ✅ 标注优先级：必须🔴/建议🟡/可选🟢
+- ✅ 详见：[后端更新协议](../deployment/BACKEND_UPDATE_PROTOCOL.md)
+
+---
+
 ### 1. 环境准备
 
 - 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)

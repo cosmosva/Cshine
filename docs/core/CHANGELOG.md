@@ -5,6 +5,143 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.8] - 2025-11-09
+
+### 📖 开发规范文档 - 必读
+
+创建完整的开发规范文档，明确后端功能更新必须创建部署文档的规则。
+
+### Added - 新增
+- 📖 **完整开发规范** (`docs/core/DEVELOPMENT_GUIDE.md`)
+  - 代码提交规范（Conventional Commits）
+  - 后端功能更新规范 ⭐ 核心规则
+  - 文档管理规范
+  - 分支管理规范
+  - 提交前检查清单
+  - 常见问题解答
+
+- ⚡ **快速检查清单** (`QUICK_CHECKLIST.md`)
+  - 一页纸快速参考
+  - 后端更新核心规则
+  - 可打印贴在显示器旁边
+
+### Changed - 优化
+- 📍 **README 添加开发规范入口**
+  - 在"快速开始"部分突出显示
+  - 链接到完整规范和快速清单
+  - 强调核心规则
+
+### 核心规则重申
+
+**后端功能更新规范**：
+1. ✅ 每次后端功能开发完成，**必须**创建部署文档
+2. ✅ 部署文档使用模板：`.github_docs_template.md`
+3. ✅ 部署文档位置：`docs/features/DEPLOY_<功能名>_<日期>.md`
+4. ✅ 必填内容：更新类型、优先级、变更说明、部署步骤、验证方法、回滚方案
+5. ✅ 更新优先级：必须🔴/建议🟡/可选🟢
+6. ✅ 与代码一起提交到 git
+7. ✅ 更新是建议性的，非强制性
+
+**目的**：
+- 确保每次功能更新都有清晰的线上部署方案
+- 降低部署风险，提供回滚保障
+- 形成可追溯的更新记录
+
+---
+
+## [0.4.7] - 2025-11-09
+
+### 🗂️ 文档结构大重组 - 分类管理
+
+建立清晰的文档分类系统，解决文档散乱问题，提升项目可维护性。
+
+### Changed - 重组
+- 📂 **建立文档分类结构**
+  - `docs/core/` - 核心文档（README、CHANGELOG、PRD）
+  - `docs/deployment/` - 部署文档（部署指南、更新协议、配置文档）
+  - `docs/features/` - 功能文档（临时性部署文档，3个月后归档）
+  - `docs/archive/` - 历史归档（过期文档，可定期清理）
+
+- 🔗 **保持向后兼容**
+  - 根目录 `README.md` 软链接到 `docs/core/README.md`
+  - 所有旧链接通过软链接保持有效
+
+### Added - 新增
+- 📚 **文档结构说明** (`docs/README.md`)
+  - 完整的文档分类说明
+  - 文档生命周期管理
+  - 清理规则和最佳实践
+  - 文档索引和快速访问
+
+- 🧹 **自动清理工具** (`docs/cleanup.sh`)
+  - 自动移动 3 个月前的功能文档到归档
+  - 提示删除 1 年前的归档文档
+  - 统计各类文档数量
+  - 显示最近的功能文档
+
+- 📝 **部署文档模板** (`.github_docs_template.md`)
+  - 标准化的部署文档模板
+  - 包含所有必需字段
+  - 快速创建新的部署文档
+
+- 📖 **后端文档导航** (`backend/DOCS.md`)
+  - 后端相关文档快速导航
+  - 指向新的文档位置
+
+### Improved - 优化
+- 🔧 **gitignore 更新**
+  - 临时部署文档不自动提交
+  - `docs/features/DEPLOY_*.md` 需手动决定是否提交
+
+- 📍 **文档链接更新**
+  - 更新所有文档间的相互引用
+  - 指向新的文档路径
+
+### 文档布局对比
+
+**之前**：
+```
+Cshine/
+├── README.md
+├── CHANGELOG.md
+├── PRD-完善版.md
+├── DEPLOYMENT_GUIDE.md
+├── LOGIN.md
+├── OSS_ENVIRONMENT_SETUP.md
+├── BACKEND_UPDATE_PROTOCOL.md
+├── DEPLOYMENT_CHECKLIST.md
+├── RELEASE_v0.4.5.md
+├── ... (20+ 个文档散落在根目录)
+```
+
+**现在**：
+```
+Cshine/
+├── README.md (软链接)
+├── docs/
+│   ├── README.md (文档结构说明)
+│   ├── cleanup.sh (清理工具)
+│   ├── core/ (核心，永久保留)
+│   ├── deployment/ (部署，持续更新)
+│   ├── features/ (功能，待清理区)
+│   └── archive/ (归档，可清理)
+└── backend/
+    └── DOCS.md (后端文档导航)
+```
+
+### 维护规则
+
+**文档生命周期**：
+1. 新功能完成 → 创建 `docs/features/DEPLOY_xxx.md`
+2. 3 个月后 → 移动到 `docs/archive/`
+3. 1 年后 → 可以删除
+
+**定期清理**：
+- 每月运行：`bash docs/cleanup.sh`
+- 每季度审查归档文档
+
+---
+
 ## [0.4.6] - 2025-11-09
 
 ### 📚 文档标准化 - 后端更新协议
