@@ -40,8 +40,10 @@ Page({
     showUploadSheet: false,  // 上传操作 ActionSheet
     showFolderActions: false, // 知识库操作菜单 ✨新增
     
-    // Modal 显示状态
-    showFolderSelector: false,  // 知识库选择 Modal
+    // Modal 显示状态 - 上传文件用
+    showUploadFolderSelector: false,  // 上传文件的知识库选择器
+    tempSelectedFile: null,           // 临时存储选中的文件
+    uploadTargetFolderId: null,       // 上传文件的目标知识库ID
     
     // 知识库管理状态 ✨新增
     selectedFolderId: null,     // 当前操作的知识库ID
@@ -53,7 +55,7 @@ Page({
     meetingCurrentFolderId: null,   // 会议当前所在知识库
     meetingCurrentFolderName: '',   // 会议当前知识库名称
     
-    // 知识库选择器状态
+    // 知识库选择器状态 - 会议复制/移动用
     showFolderSelector: false,      // 显示知识库选择器
     folderSelectorAction: '',       // 'copy' 或 'move'
     selectedTargetFolderId: null,   // 选中的目标知识库ID
@@ -469,7 +471,8 @@ Page({
               size: file.size,
               duration: duration
             },
-            showFolderSelector: true
+            uploadTargetFolderId: this.data.currentFolderId, // 默认选中当前知识库
+            showUploadFolderSelector: true  // 显示上传文件的知识库选择器
           })
         })
       },
@@ -516,12 +519,14 @@ Page({
 
   // 确认知识库选择
   confirmFolderSelection() {
-    this.setData({ showFolderSelector: false })
+    this.setData({ showUploadFolderSelector: false })
 
     // 跳转到上传页面
     const file = this.data.tempSelectedFile
     const fileName = encodeURIComponent(file.name)
-    const folderId = this.data.currentFolderId || ''
+    const folderId = this.data.uploadTargetFolderId || ''
+    
+    console.log('确认上传，目标知识库ID:', folderId)
     
     wx.navigateTo({
       url: `/pages/meeting/upload?fileName=${fileName}&duration=${file.duration}&folderId=${folderId}`
@@ -529,6 +534,17 @@ Page({
 
     // 传递文件路径（通过全局变量）
     getApp().globalData.uploadFile = file
+  },
+  
+  // 选择上传目标知识库
+  selectUploadTargetFolder(e) {
+    const folderId = e.currentTarget.dataset.id
+    this.setData({ uploadTargetFolderId: folderId })
+  },
+  
+  // 取消上传文件选择
+  cancelUploadFolderSelection() {
+    this.setData({ showUploadFolderSelector: false })
   },
 
   // 处理新建知识库（从上传 ActionSheet）

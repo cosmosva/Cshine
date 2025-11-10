@@ -265,6 +265,37 @@
     </view>
   </view>
 
+  <!-- 知识库选择器 Modal（用于上传文件） -->
+  <view class="modal-mask" wx:if="{{showUploadFolderSelector}}" bindtap="cancelUploadFolderSelection" catchtouchmove="preventDefault"></view>
+  <view class="modal {{showUploadFolderSelector ? 'show' : ''}}" catchtap="preventClose">
+    <view class="modal-header">
+      <text class="modal-title">选择知识库</text>
+    </view>
+    <view class="modal-body">
+      <scroll-view class="folder-list" scroll-y>
+        <!-- 录音文件（未分类） -->
+        <view class="folder-option {{uploadTargetFolderId === null ? 'selected' : ''}}"
+              bindtap="selectUploadTargetFolder" data-id="{{null}}">
+          <text class="folder-name">📁 录音文件（未分类）</text>
+          <text class="check-icon" wx:if="{{uploadTargetFolderId === null}}">✓</text>
+        </view>
+
+        <!-- 用户创建的知识库 -->
+        <view class="folder-option {{uploadTargetFolderId === item.id ? 'selected' : ''}}"
+              wx:for="{{folders}}" wx:key="id"
+              bindtap="selectUploadTargetFolder" data-id="{{item.id}}">
+          <text class="folder-name">📁 {{item.name}}</text>
+          <text class="check-icon" wx:if="{{uploadTargetFolderId === item.id}}">✓</text>
+        </view>
+      </scroll-view>
+
+      <view class="modal-actions">
+        <view class="btn-secondary" bindtap="cancelUploadFolderSelection">取消</view>
+        <view class="btn-primary" bindtap="confirmFolderSelection">确认</view>
+      </view>
+    </view>
+  </view>
+
   <!-- 知识库选择器 Modal（用于复制/移动会议） -->
   <view class="modal-mask" wx:if="{{showFolderSelector}}" bindtap="hideFolderSelectorModal" catchtouchmove="preventDefault"></view>
   <view class="modal {{showFolderSelector ? 'show' : ''}}" catchtap="preventClose">
