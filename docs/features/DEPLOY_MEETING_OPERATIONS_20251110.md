@@ -80,7 +80,7 @@ cd /root/Cshine
 bash docs/deployment/UPDATE_SERVER.sh
 
 # 查看服务状态
-sudo systemctl status cshine-backend
+sudo systemctl status cshine-api
 ```
 
 **预计用时**: 2-3 分钟
@@ -106,10 +106,10 @@ cd backend
 source venv/bin/activate
 
 # 5. 重启后端服务
-sudo systemctl restart cshine-backend
+sudo systemctl restart cshine-api
 
 # 6. 检查服务状态
-sudo systemctl status cshine-backend
+sudo systemctl status cshine-api
 
 # 7. 查看日志确认启动成功
 tail -50 logs/cshine.log
@@ -124,7 +124,7 @@ tail -50 logs/cshine.log
 ### 1. 服务状态检查
 ```bash
 # 检查后端服务
-sudo systemctl status cshine-backend
+sudo systemctl status cshine-api
 
 # 检查健康接口
 curl http://localhost:8000/health
@@ -228,17 +228,17 @@ tail -f /root/Cshine/backend/logs/cshine.log
 
 ```bash
 # 1. 停止服务
-sudo systemctl stop cshine-backend
+sudo systemctl stop cshine-api
 
 # 2. 恢复到上一个版本
 cd /root/Cshine
 git reset --hard 310449f  # v0.5.0 的 commit hash
 
 # 3. 重启服务
-sudo systemctl start cshine-backend
+sudo systemctl start cshine-api
 
 # 4. 验证服务状态
-sudo systemctl status cshine-backend
+sudo systemctl status cshine-api
 curl http://localhost:8000/health
 ```
 
@@ -257,7 +257,7 @@ curl http://localhost:8000/health
 | 备份数据库 | ✅ | - | 无需备份（无数据库变更） |
 | 拉取代码 | ⏳ | - | git pull origin main |
 | 更新依赖 | ✅ | - | 无需更新（无依赖变更） |
-| 重启服务 | ⏳ | - | systemctl restart cshine-backend |
+| 重启服务 | ⏳ | - | systemctl restart cshine-api |
 | 功能验证 | ⏳ | - | 测试复制/移动/重命名/删除 |
 
 **更新负责人**: [待填写]  
