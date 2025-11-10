@@ -213,39 +213,6 @@
     </view>
   </view>
 
-  <!-- 知识库选择 Modal -->
-  <view class="modal-mask" wx:if="{{showFolderSelector}}" bindtap="hideFolderSelector" catchtouchmove="preventDefault"></view>
-  <view class="modal folder-selector {{showFolderSelector ? 'show' : ''}}" catchtap="preventClose">
-    <view class="modal-header">
-      <text class="modal-title">选择知识库</text>
-    </view>
-    <view class="modal-body">
-      <text class="current-folder-label">当前知识库：{{currentFolderName}}</text>
-
-      <scroll-view class="folder-list" scroll-y>
-        <!-- 录音文件（全部） -->
-        <view class="folder-option {{currentFolderId === null ? 'selected' : ''}}"
-              bindtap="selectFolderForUpload" data-id="{{null}}" data-name="录音文件">
-          <text class="folder-name">录音文件</text>
-          <text class="check-icon" wx:if="{{currentFolderId === null}}">✓</text>
-        </view>
-
-        <!-- 用户创建的知识库 -->
-        <view class="folder-option {{currentFolderId === item.id ? 'selected' : ''}}"
-              wx:for="{{folders}}" wx:key="id"
-              bindtap="selectFolderForUpload" data-id="{{item.id}}" data-name="{{item.name}}">
-          <text class="folder-name">{{item.name}}</text>
-          <text class="check-icon" wx:if="{{currentFolderId === item.id}}">✓</text>
-        </view>
-      </scroll-view>
-
-      <view class="modal-actions">
-        <view class="btn-secondary" bindtap="handleCreateFolderFromSelector">新建知识库</view>
-        <view class="btn-primary" bindtap="confirmFolderSelection">确认</view>
-      </view>
-    </view>
-  </view>
-
   <!-- 知识库操作菜单 ActionSheet -->
   <view class="action-sheet-mask" wx:if="{{showFolderActions}}" bindtap="hideFolderActions" catchtouchmove="preventDefault"></view>
   <view class="action-sheet {{showFolderActions ? 'show' : ''}}">

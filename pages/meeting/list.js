@@ -501,23 +501,7 @@ Page({
     })
   },
 
-  // 隐藏知识库选择器
-  hideFolderSelector() {
-    this.setData({ showFolderSelector: false })
-  },
-
-  // 选择知识库用于上传
-  selectFolderForUpload(e) {
-    const folderId = e.currentTarget.dataset.id
-    const folderName = e.currentTarget.dataset.name
-
-    this.setData({
-      currentFolderId: folderId,
-      currentFolderName: folderName
-    })
-  },
-
-  // 确认知识库选择
+  // 确认知识库选择（上传文件用）
   confirmFolderSelection() {
     this.setData({ showUploadFolderSelector: false })
 
@@ -578,40 +562,6 @@ Page({
           this.createFolderRequest(name)
         } else {
           console.log('用户取消了')
-        }
-      }
-    })
-  },
-
-  // 处理新建知识库（从知识库选择器）
-  handleCreateFolderFromSelector() {
-    this.setData({
-      showFolderSelector: false
-    })
-    
-    // 使用微信原生 Modal
-    wx.showModal({
-      title: '新建知识库',
-      placeholderText: '请输入知识库名称',
-      editable: true,
-      confirmText: '确认',
-      cancelText: '取消',
-      success: (res) => {
-        if (res.confirm) {
-          const name = (res.content || '').trim()
-          
-          if (!name) {
-            showToast('请输入知识库名称', 'error')
-            // 重新打开知识库选择器
-            this.setData({ showFolderSelector: true })
-            return
-          }
-          
-          // 创建知识库
-          this.createFolderRequest(name)
-        } else {
-          // 重新打开知识库选择器
-          this.setData({ showFolderSelector: true })
         }
       }
     })
