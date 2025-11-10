@@ -12,7 +12,7 @@ from app.dependencies import get_db, get_current_user
 from app.models import User, Folder, Meeting
 from app.schemas import FolderCreate, FolderUpdate, FolderResponse, FolderListResponse, ResponseModel
 
-router = APIRouter(prefix="/api/v1/folders", tags=["folders"])
+router = APIRouter(prefix="/folders", tags=["folders"])
 
 
 @router.post("", response_model=ResponseModel)
@@ -63,7 +63,7 @@ async def get_folders(
     db: Session = Depends(get_db)
 ):
     """获取知识库列表（带会议数量统计）"""
-    
+
     # 查询所有知识库，并关联统计会议数量
     folders_with_count = db.query(
         Folder,
@@ -78,7 +78,7 @@ async def get_folders(
     ).order_by(
         Folder.created_at.desc()
     ).all()
-    
+
     # 构建响应
     items = []
     for folder, count in folders_with_count:
@@ -88,13 +88,22 @@ async def get_folders(
             count=count,
             created_at=folder.created_at
         ))
-    
+
+    # 统计未分类的会议数量（folder_id 为 NULL）
+    uncategorized_count = db.query(func.count(Meeting.id)).filter(
+        Meeting.user_id == current_user.id,
+        Meeting.folder_id == None
+    ).scalar() or 0
+
     response = FolderListResponse(items=items)
-    
+
     return ResponseModel(
         code=200,
         message="success",
-        data=response.dict()
+        data={
+            **response.dict(),
+            "total_count": uncategorized_count
+        }
     )
 
 

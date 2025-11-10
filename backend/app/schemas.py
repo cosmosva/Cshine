@@ -131,6 +131,7 @@ class MeetingUpdate(BaseModel):
     participants: Optional[List[str]] = None
     meeting_date: Optional[datetime] = None
     summary: Optional[str] = None
+    folder_id: Optional[int] = None  # 知识库ID
 
 
 class MeetingResponse(BaseModel):

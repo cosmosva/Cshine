@@ -19,7 +19,7 @@
   <view class="header">
     <view class="header-left">
       <image class="menu-icon" src="/assets/icons/menu.png" mode="aspectFit" bindtap="toggleDrawer"></image>
-      <text class="title">录音文件</text>
+      <text class="title">{{currentFolderName}}</text>
     </view>
     <view class="header-right">
       <image class="icon-btn search-icon" src="/assets/icons/search.png" mode="aspectFit"></image>
@@ -52,6 +52,7 @@
           bindtap="viewMeeting"
           bindlongpress="onMeetingLongPress"
           data-id="{{item.id}}"
+          data-title="{{item.title}}"
           data-status="{{item.status}}"
           data-folder-id="{{item.folder_id}}"
           data-folder-name="{{item.folder_name}}"
@@ -145,66 +146,69 @@
   <!-- 侧边栏抽屉 - 知识库管理 -->
   <view class="drawer-mask {{showDrawer ? 'show' : ''}}" bindtap="closeDrawer" catchtouchmove="preventDefault"></view>
   <view class="drawer {{showDrawer ? 'show' : ''}}">
-    <!-- 抽屉头部 -->
-    <view class="drawer-header">
-      <text class="drawer-title">知识库管理</text>
-    </view>
-
-    <!-- 抽屉内容 -->
-    <scroll-view class="drawer-content" scroll-y>
-      <!-- 录音文件（全部） -->
-      <view class="drawer-item all-files">
-        <view class="item-left">
-          <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
-          <text class="item-name">录音文件</text>
-          <text class="item-count">({{totalCount}})</text>
-        </view>
+    <!-- 整个抽屉滚动区域 -->
+    <scroll-view class="drawer-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 抽屉头部 -->
+      <view class="drawer-header">
+        <text class="drawer-title">知识库管理</text>
       </view>
 
-      <!-- 我创建的分组 -->
-      <view class="drawer-section">
-        <view class="section-header">
-          <text class="section-title">我创建的</text>
-          <view class="section-actions">
-            <image class="action-icon" src="/assets/icons/add-folder.png" mode="aspectFit"></image>
-            <image class="action-icon" src="/assets/icons/sort.png" mode="aspectFit"></image>
+      <!-- 抽屉内容 -->
+      <view class="drawer-content">
+        <!-- 录音文件（全部） -->
+        <view class="drawer-item all-files" bindtap="selectAllFiles">
+          <view class="item-left">
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
+            <text class="item-name">录音文件</text>
+            <text class="item-count">({{totalCount}})</text>
           </view>
         </view>
 
-        <!-- 文件夹列表 -->
-        <view 
-          class="drawer-item folder-item"
-          wx:for="{{folders}}"
-          wx:key="id"
-          bindtap="selectFolder"
-          data-id="{{item.id}}"
-        >
-          <view class="item-left">
-            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
-            <text class="item-name">{{item.name}}</text>
-            <text class="item-count">({{item.count}})</text>
+        <!-- 我创建的分组 -->
+        <view class="drawer-section">
+          <view class="section-header">
+            <text class="section-title">我创建的</text>
+            <view class="section-actions">
+              <image class="action-icon" src="/assets/icons/add-folder.png" mode="aspectFit" bindtap="handleCreateFolder"></image>
+              <image class="action-icon" src="/assets/icons/sort.png" mode="aspectFit"></image>
+            </view>
           </view>
-          <text class="more-icon" catchtap="showFolderMenu" data-id="{{item.id}}" data-name="{{item.name}}">⋯</text>
+
+          <!-- 文件夹列表 -->
+          <view
+            class="drawer-item folder-item"
+            wx:for="{{folders}}"
+            wx:key="id"
+            bindtap="selectFolder"
+            data-id="{{item.id}}"
+          >
+            <view class="item-left">
+              <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit"></image>
+              <text class="item-name">{{item.name}}</text>
+              <text class="item-count">({{item.count}})</text>
+            </view>
+            <text class="more-icon" catchtap="showFolderMenu" data-id="{{item.id}}" data-name="{{item.name}}">⋯</text>
+          </view>
         </view>
       </view>
     </scroll-view>
   </view>
 
-  <!-- 上传操作选择 ActionSheet -->
-  <view class="action-sheet-mask" wx:if="{{showUploadSheet}}" bindtap="hideUploadSheet" catchtouchmove="preventDefault"></view>
-  <view class="action-sheet upload-sheet {{showUploadSheet ? 'show' : ''}}">
-    <view class="action-sheet-header">
-      <text class="action-sheet-title">选择操作</text>
-      <view class="action-sheet-close" bindtap="hideUploadSheet">✕</view>
+  <!-- 上传操作选择 Modal（TicNote 风格） -->
+  <view class="modal-mask {{showUploadSheet ? 'show' : ''}}" wx:if="{{showUploadSheet}}" bindtap="hideUploadSheet" catchtouchmove="preventDefault"></view>
+  <view class="upload-modal modal {{showUploadSheet ? 'show' : ''}}" wx:if="{{showUploadSheet}}" catchtap="preventClose">
+    <view class="modal-header center">
+      <text class="modal-title">上传与新建</text>
+      <view class="modal-close" bindtap="hideUploadSheet">✕</view>
     </view>
-    <view class="action-sheet-body">
-      <view class="action-item upload-action" bindtap="handleUploadFile">
-        <text class="action-icon">📁</text>
-        <text class="action-label">上传文件</text>
+    <view class="modal-body no-padding">
+      <view class="upload-option-item" catchtap="handleUploadFile">
+        <image class="option-icon" src="/assets/icons/upfile.png" mode="aspectFit"></image>
+        <text class="option-label">上传文件</text>
       </view>
-      <view class="action-item create-action" bindtap="handleCreateFolder">
-        <text class="action-icon">➕</text>
-        <text class="action-label">新建知识库</text>
+      <view class="upload-option-item" catchtap="handleCreateFolder">
+        <image class="option-icon" src="/assets/icons/add-folder.png" mode="aspectFit"></image>
+        <text class="option-label">新建知识库</text>
       </view>
     </view>
   </view>
@@ -261,110 +265,35 @@
     </view>
   </view>
 
-  <!-- 重命名知识库 Modal -->
-  <view class="modal-mask" wx:if="{{showRenameModal}}" catchtap="hideRenameModal" catchtouchmove="preventDefault"></view>
-  <view class="modal small {{showRenameModal ? 'show' : ''}}" catchtap="preventClose">
+  <!-- 知识库选择器 Modal（用于复制/移动会议） -->
+  <view class="modal-mask" wx:if="{{showFolderSelector}}" bindtap="hideFolderSelectorModal" catchtouchmove="preventDefault"></view>
+  <view class="modal {{showFolderSelector ? 'show' : ''}}" catchtap="preventClose">
     <view class="modal-header">
-      <text class="modal-title">重命名知识库</text>
-    </view>
-    <view class="modal-body">
-      <input class="folder-name-input"
-             placeholder="请输入新名称"
-             value="{{renameFolderValue}}"
-             bindinput="onRenameInput"
-             maxlength="20"
-             focus="{{showRenameModal}}" />
-    </view>
-    <view class="modal-footer">
-      <view class="btn-secondary" bindtap="hideRenameModal">取消</view>
-      <view class="btn-primary" bindtap="confirmRename">确认</view>
-    </view>
-  </view>
-
-  <!-- 删除确认 Modal -->
-  <view class="modal-mask" wx:if="{{showDeleteConfirm}}" catchtap="hideDeleteConfirm" catchtouchmove="preventDefault"></view>
-  <view class="modal small {{showDeleteConfirm ? 'show' : ''}}" catchtap="preventClose">
-    <view class="modal-header">
-      <text class="modal-title">删除知识库</text>
-    </view>
-    <view class="modal-body">
-      <text class="delete-warning">确定要删除「{{selectedFolderName}}」吗？</text>
-      <text class="delete-note">删除后，其中的会议将移至「录音文件」</text>
-    </view>
-    <view class="modal-footer">
-      <view class="btn-secondary" bindtap="hideDeleteConfirm">取消</view>
-      <view class="btn-danger" bindtap="confirmDelete">删除</view>
-    </view>
-  </view>
-
-  <!-- 新建知识库 Modal -->
-  <view class="modal-mask" wx:if="{{showCreateFolder}}" catchtap="hideCreateFolder" catchtouchmove="preventDefault"></view>
-  <view class="modal small {{showCreateFolder ? 'show' : ''}}" catchtap="preventClose">
-    <view class="modal-header">
-      <text class="modal-title">新建知识库</text>
-    </view>
-    <view class="modal-body">
-      <input class="folder-name-input"
-             placeholder="请输入知识库名称"
-             value="{{newFolderName}}"
-             bindinput="onFolderNameInput"
-             maxlength="20"
-             focus="{{showCreateFolder}}" />
-    </view>
-    <view class="modal-footer">
-      <view class="btn-secondary" bindtap="hideCreateFolder">取消</view>
-      <view class="btn-primary" bindtap="confirmCreateFolder">确认</view>
-    </view>
-  </view>
-
-  <!-- 会议操作菜单 ActionSheet ✨新增 -->
-  <view class="action-sheet-mask" wx:if="{{showMeetingActions}}" bindtap="hideMeetingActions" catchtouchmove="preventDefault"></view>
-  <view class="action-sheet {{showMeetingActions ? 'show' : ''}}">
-    <view class="action-sheet-header">
-      <text class="action-sheet-title">操作</text>
-      <view class="action-sheet-close" bindtap="hideMeetingActions">✕</view>
-    </view>
-    <view class="action-sheet-body">
-      <view class="action-item" bindtap="handleMoveToFolder">
-        <text class="action-icon">📁</text>
-        <text class="action-label">移动到知识库</text>
-      </view>
-      <view class="action-item danger" bindtap="handleDeleteMeetingFromList">
-        <text class="action-icon">🗑️</text>
-        <text class="action-label">删除会议</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- 会议移动：知识库选择器 ✨新增 -->
-  <view class="modal-mask" wx:if="{{showMoveFolderSelector}}" bindtap="hideMoveFolderSelector" catchtouchmove="preventDefault"></view>
-  <view class="modal {{showMoveFolderSelector ? 'show' : ''}}" catchtap="preventClose">
-    <view class="modal-header">
-      <text class="modal-title">移动到知识库</text>
+      <text class="modal-title">{{folderSelectorAction === 'copy' ? '复制到' : '移动到'}}</text>
     </view>
     <view class="modal-body">
       <text class="current-folder-label">当前位置：{{meetingCurrentFolderName}}</text>
 
       <scroll-view class="folder-list" scroll-y>
-        <!-- 录音文件（全部） -->
-        <view class="folder-option {{meetingTargetFolderId === null ? 'selected' : ''}}"
-              bindtap="selectMoveTargetFolder" data-id="{{null}}" data-name="录音文件">
-          <text class="folder-name">📁 录音文件</text>
-          <text class="check-icon" wx:if="{{meetingTargetFolderId === null}}">✓</text>
+        <!-- 录音文件（未分类） -->
+        <view class="folder-option {{selectedTargetFolderId === null ? 'selected' : ''}}"
+              bindtap="selectTargetFolder" data-id="{{null}}">
+          <text class="folder-name">📁 录音文件（未分类）</text>
+          <text class="check-icon" wx:if="{{selectedTargetFolderId === null}}">✓</text>
         </view>
 
         <!-- 用户创建的知识库 -->
-        <view class="folder-option {{meetingTargetFolderId === item.id ? 'selected' : ''}}"
+        <view class="folder-option {{selectedTargetFolderId === item.id ? 'selected' : ''}}"
               wx:for="{{folders}}" wx:key="id"
-              bindtap="selectMoveTargetFolder" data-id="{{item.id}}" data-name="{{item.name}}">
+              bindtap="selectTargetFolder" data-id="{{item.id}}">
           <text class="folder-name">📁 {{item.name}}</text>
-          <text class="check-icon" wx:if="{{meetingTargetFolderId === item.id}}">✓</text>
+          <text class="check-icon" wx:if="{{selectedTargetFolderId === item.id}}">✓</text>
         </view>
       </scroll-view>
 
       <view class="modal-actions">
-        <view class="btn-secondary" bindtap="hideMoveFolderSelector">取消</view>
-        <view class="btn-primary" bindtap="confirmMoveToFolder">确认</view>
+        <view class="btn-secondary" bindtap="hideFolderSelectorModal">取消</view>
+        <view class="btn-primary" bindtap="confirmFolderAction">确认</view>
       </view>
     </view>
   </view>

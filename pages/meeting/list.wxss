@@ -517,6 +517,14 @@ page {
   transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 抽屉滚动容器 */
+.drawer-scroll {
+  width: 100%;
+  height: 100vh;
+  background-color: #F8F9FA;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* 抽屉头部 */
 .drawer-header {
   display: flex;
@@ -526,7 +534,6 @@ page {
   padding-top: calc(env(safe-area-inset-top) + 16px);
   background-color: #FFFFFF;
   border-bottom: 0.5px solid #E5E5E5;
-  flex-shrink: 0;
   min-height: 56px;
 }
 
@@ -559,12 +566,9 @@ page {
 
 /* 抽屉内容 */
 .drawer-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   background-color: #F8F9FA;
   padding: 12px;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 120px);
   box-sizing: border-box;
 }
 
@@ -730,13 +734,13 @@ page {
 }
 
 .modal.small {
-  max-width: 300px;
-  width: 75%;
+  max-width: 340px;
+  width: 80%;
 }
 
 /* Modal 头部 */
 .modal-header {
-  padding: 20px 16px 16px;
+  padding: 24px 20px 18px;
   border-bottom: 0.5px solid #EBEBEB;
 }
 
@@ -748,7 +752,7 @@ page {
 
 /* Modal 内容 */
 .modal-body {
-  padding: 20px 16px;
+  padding: 24px 20px;
   max-height: 400px;
   overflow-y: auto;
 }
@@ -815,19 +819,32 @@ page {
 .modal-footer {
   display: flex;
   gap: 12px;
-  padding: 16px;
-  border-top: 0.5px solid #EBEBEB;
+  padding: 18px 20px 20px;
+  border-top: none;
 }
 
 .btn-primary,
 .btn-secondary {
   flex: 1;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   text-align: center;
   font-size: 16px;
   font-weight: 500;
-  transition: opacity 0.15s;
+  transition: all 0.2s;
+}
+
+/* button 元素重置样式 */
+button.btn-primary,
+button.btn-secondary {
+  border: none;
+  outline: none;
+  line-height: normal;
+}
+
+button.btn-primary::after,
+button.btn-secondary::after {
+  border: none;
 }
 
 .btn-primary {
@@ -836,7 +853,7 @@ page {
 }
 
 .btn-secondary {
-  background-color: #F2F2F7;
+  background-color: #F5F5F5;
   color: #1A1A1A;
 }
 
@@ -848,28 +865,111 @@ page {
 /* 知识库名称输入框 */
 .folder-name-input {
   width: 100%;
-  padding: 12px;
+  padding: 14px 16px;
   border: 1px solid #E5E5E5;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
+  background-color: #F8F9FA;
+  color: #1A1A1A;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+  height: 48px;
 }
 
-/* 上传 ActionSheet 特殊样式 */
-.upload-sheet.show {
-  transform: translateY(calc(-1 * var(--tabbar-height)));
+.folder-name-input:focus {
+  border-color: #4A6FE8;
+  background-color: #FFFFFF;
 }
 
-.action-item .action-icon {
-  font-size: 20px;
-  margin-right: 8px;
+/* Placeholder 样式 */
+.input-placeholder {
+  color: #C7C7CC;
+  font-size: 16px;
 }
 
-.upload-action,
-.create-action {
+/* ========== 上传与新建 Modal（TicNote 风格） ========== */
+
+/* 上传 Modal 容器 */
+.upload-modal {
+  max-width: 320px;
+  width: 85%;
+  z-index: 1003;
+}
+
+/* Modal 头部居中样式 */
+.modal-header.center {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 16px 16px;
+  border-bottom: none;
+}
+
+.modal-header.center .modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A1A1A;
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  font-size: 20px;
+  color: #8E8E93;
+  border-radius: 14px;
+  transition: background-color 0.15s;
+}
+
+.modal-close:active {
+  background-color: #F2F2F7;
+}
+
+/* Modal Body 无 padding 样式 */
+.modal-body.no-padding {
+  padding: 0;
+  max-height: none;
+}
+
+/* 上传选项卡片 */
+.upload-option-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 0.5px solid #F2F2F7;
+  transition: background-color 0.15s;
+}
+
+.upload-option-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.upload-option-item:active {
+  background-color: #F8F8F8;
+}
+
+.option-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.option-label {
+  font-size: 16px;
+  color: #1A1A1A;
+  font-weight: 400;
+  letter-spacing: -0.2px;
 }
 
 /* ========== 知识库管理新增样式 ========== */

@@ -42,44 +42,33 @@ Page({
     
     // Modal 显示状态
     showFolderSelector: false,  // 知识库选择 Modal
-    showCreateFolder: false,    // 新建知识库 Modal
-    showRenameModal: false,     // 重命名 Modal ✨新增
-    showDeleteConfirm: false,   // 删除确认 Modal ✨新增
     
     // 知识库管理状态 ✨新增
     selectedFolderId: null,     // 当前操作的知识库ID
     selectedFolderName: '',     // 当前操作的知识库名称
-    renameFolderValue: '',      // 重命名输入值
     
-    // 会议移动状态 ✨新增
-    showMeetingActions: false,      // 会议操作菜单
-    showMoveFolderSelector: false,  // 会议移动选择器
-    movingMeetingId: null,          // 要移动的会议ID
+    // 会议操作状态 ✨新增
+    movingMeetingId: null,          // 要操作的会议ID
+    movingMeetingTitle: '',         // 要操作的会议标题
     meetingCurrentFolderId: null,   // 会议当前所在知识库
     meetingCurrentFolderName: '',   // 会议当前知识库名称
-    meetingTargetFolderId: null,    // 会议目标知识库ID
+    
+    // 知识库选择器状态
+    showFolderSelector: false,      // 显示知识库选择器
+    folderSelectorAction: '',       // 'copy' 或 'move'
+    selectedTargetFolderId: null,   // 选中的目标知识库ID
     
     // 侧边栏抽屉
     showDrawer: false,
-    totalCount: 55,  // 模拟数据：总文件数
-    folders: [
-      { id: 1, name: '短视频', count: 6 },
-      { id: 2, name: '大海', count: 1 },
-      { id: 3, name: '日常工作', count: 3 },
-      { id: 4, name: 'AI 共创', count: 2 },
-      { id: 5, name: 'AKS', count: 4 },
-      { id: 6, name: 'MFY', count: 1 },
-      { id: 7, name: '注会', count: 1 },
-      { id: 8, name: '期货', count: 7 }
-    ],
+    totalCount: 0,  // 总文件数（从 API 获取）
+    folders: [],    // 知识库列表（从 API 加载）
     
     // 知识库状态
-    currentFolderId: null,        // 当前选中的知识库ID (null = 全部)
-    currentFolderName: '录音文件', // 当前知识库名称
+    currentFolderId: 'uncategorized',  // 当前选中的知识库ID ('uncategorized' = 未分类, 数字ID = 指定知识库, null = 不筛选)
+    currentFolderName: '录音文件',     // 当前知识库名称
     
     // 临时数据
     tempSelectedFile: null,  // 临时存储选中的文件信息
-    newFolderName: '',       // 新建知识库名称输入
     
     // 状态文案映射
     statusTextMap: {
@@ -94,7 +83,8 @@ Page({
   },
 
   onLoad() {
-    this.loadMeetingList()
+    this.loadFolderList()  // 加载知识库列表
+    this.loadMeetingList() // 加载会议列表
   },
 
   onShow() {
@@ -102,6 +92,51 @@ Page({
     if (this._needRefresh) {
       this._needRefresh = false
       this.loadMeetingList(true)
+    }
+  },
+
+  /**
+   * 加载知识库列表
+   */
+  async loadFolderList() {
+    try {
+      console.log('开始加载知识库列表...')
+      const response = await API.getFolders()
+      console.log('知识库列表加载成功:', response)
+
+      // 后端返回的是 { items: [...], total_count: N } 格式
+      const folders = response?.items || response || []
+
+      // total_count = 未分类的会议数量（folder_id 为 null）
+      // 如果后端返回了 total_count，使用它；否则通过 API 获取
+      let totalCount = response?.total_count
+
+      if (totalCount === undefined) {
+        // 如果后端没有返回 total_count，调用会议列表 API 获取未分类数量
+        try {
+          const listData = await API.getMeetingList({
+            page: 1,
+            page_size: 1,
+            folder_id: 'uncategorized' // 查询未分类的会议
+          })
+          totalCount = listData?.total || 0
+        } catch (err) {
+          console.error('获取未分类数量失败:', err)
+          totalCount = 0
+        }
+      }
+
+      // 更新知识库列表
+      this.setData({
+        folders: folders,
+        totalCount: totalCount
+      })
+
+      console.log(`知识库列表更新完成，共 ${folders.length} 个知识库，总计 ${totalCount} 个文件`)
+    } catch (error) {
+      console.error('加载知识库列表失败:', error)
+      // 静默失败，不影响主流程
+      this.setData({ folders: [], totalCount: 0 })
     }
   },
 
@@ -133,14 +168,25 @@ Page({
         page_size: this.data.pageSize,
         sort_by: this.data.currentSort
       }
-      
+
       // 添加筛选条件
       if (this.data.currentFilter === 'favorite') {
         params.is_favorite = true
       } else if (this.data.currentFilter !== 'all') {
         params.status = this.data.currentFilter
       }
-      
+
+      // 添加知识库筛选
+      if (this.data.currentFolderId !== null) {
+        if (this.data.currentFolderId === 'uncategorized') {
+          // 查询未分类的会议
+          params.folder_id = 'uncategorized'
+        } else {
+          // 查询指定知识库的会议
+          params.folder_id = this.data.currentFolderId
+        }
+      }
+
       const listData = await API.getMeetingList(params)
       console.log('会议列表（已解包）:', listData)
       
@@ -358,14 +404,26 @@ Page({
   selectFolder(e) {
     const folderId = e.currentTarget.dataset.id
     const folder = this.data.folders.find(f => f.id === folderId)
-    
+
     this.setData({
       currentFolderId: folderId,
       currentFolderName: folder ? folder.name : '录音文件',
       showDrawer: false
     })
-    
+
     // 重新加载列表 (按文件夹筛选)
+    this.loadMeetingList(true)
+  },
+
+  // 选择全部文件（录音文件 - 未分类的会议）
+  selectAllFiles() {
+    this.setData({
+      currentFolderId: 'uncategorized',
+      currentFolderName: '录音文件',
+      showDrawer: false
+    })
+
+    // 重新加载列表（显示未分类的会议）
     this.loadMeetingList(true)
   },
 
@@ -385,6 +443,7 @@ Page({
 
   // 处理上传文件
   handleUploadFile() {
+    console.log('handleUploadFile 被触发')
     this.setData({ showUploadSheet: false })
 
     wx.chooseMessageFile({
@@ -474,53 +533,84 @@ Page({
 
   // 处理新建知识库（从上传 ActionSheet）
   handleCreateFolder() {
+    console.log('handleCreateFolder 被触发')
+    
+    // 关闭所有弹窗
     this.setData({
       showUploadSheet: false,
-      showFolderSelector: false,
-      showCreateFolder: true,
-      newFolderName: ''
+      showFolderSelector: false
+    })
+    
+    // 使用微信原生 Modal
+    wx.showModal({
+      title: '新建知识库',
+      placeholderText: '请输入知识库名称',
+      editable: true,
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const name = (res.content || '').trim()
+          console.log('用户输入的名称:', name)
+          
+          if (!name) {
+            showToast('请输入知识库名称', 'error')
+            return
+          }
+          
+          // 创建知识库
+          this.createFolderRequest(name)
+        } else {
+          console.log('用户取消了')
+        }
+      }
     })
   },
 
   // 处理新建知识库（从知识库选择器）
   handleCreateFolderFromSelector() {
     this.setData({
-      showFolderSelector: false,
-      showCreateFolder: true,
-      newFolderName: ''
+      showFolderSelector: false
+    })
+    
+    // 使用微信原生 Modal
+    wx.showModal({
+      title: '新建知识库',
+      placeholderText: '请输入知识库名称',
+      editable: true,
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const name = (res.content || '').trim()
+          
+          if (!name) {
+            showToast('请输入知识库名称', 'error')
+            // 重新打开知识库选择器
+            this.setData({ showFolderSelector: true })
+            return
+          }
+          
+          // 创建知识库
+          this.createFolderRequest(name)
+        } else {
+          // 重新打开知识库选择器
+          this.setData({ showFolderSelector: true })
+        }
+      }
     })
   },
 
-  // 隐藏新建知识库 Modal
-  hideCreateFolder() {
-    this.setData({ showCreateFolder: false })
-  },
-
-  // 知识库名称输入
-  onFolderNameInput(e) {
-    this.setData({ newFolderName: e.detail.value })
-  },
-
-  // 确认创建知识库
-  async confirmCreateFolder() {
-    const name = this.data.newFolderName.trim()
-
-    if (!name) {
-      showToast('请输入知识库名称', 'error')
-      return
-    }
-
+  // 创建知识库请求（统一的创建逻辑）
+  async createFolderRequest(name) {
     try {
+      console.log('开始调用 API 创建知识库:', name)
       showLoading('创建中...')
       const newFolder = await API.createFolder({ name })
+      console.log('API 返回结果:', newFolder)
 
-      // 更新本地列表
-      const folders = [...this.data.folders, newFolder]
-      this.setData({
-        folders,
-        showCreateFolder: false,
-        newFolderName: ''
-      })
+      // 重新加载知识库列表
+      await this.loadFolderList()
 
       hideLoading()
       showToast('知识库创建成功', 'success')
@@ -553,48 +643,48 @@ Page({
   
   // 打开重命名 Modal
   handleRenameFolder() {
-    this.setData({
-      showFolderActions: false,
-      showRenameModal: true,
-      renameFolderValue: this.data.selectedFolderName
+    const { selectedFolderId, selectedFolderName } = this.data
+    
+    // 关闭操作菜单
+    this.setData({ showFolderActions: false })
+    
+    // 使用微信原生 Modal
+    wx.showModal({
+      title: '重命名知识库',
+      placeholderText: '请输入新名称',
+      editable: true,
+      content: selectedFolderName, // 预填充当前名称
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const name = (res.content || '').trim()
+          
+          if (!name) {
+            showToast('请输入知识库名称', 'error')
+            return
+          }
+          
+          if (name === selectedFolderName) {
+            showToast('名称未改变', 'none')
+            return
+          }
+          
+          // 执行重命名
+          this.renameFolderRequest(selectedFolderId, name)
+        }
+      }
     })
   },
 
-  // 隐藏重命名 Modal
-  hideRenameModal() {
-    this.setData({ showRenameModal: false })
-  },
-
-  // 重命名输入
-  onRenameInput(e) {
-    this.setData({ renameFolderValue: e.detail.value })
-  },
-
-  // 确认重命名
-  async confirmRename() {
-    const name = this.data.renameFolderValue.trim()
-    const folderId = this.data.selectedFolderId
-
-    if (!name) {
-      showToast('请输入知识库名称', 'error')
-      return
-    }
-
-    if (name === this.data.selectedFolderName) {
-      // 名称未改变，直接关闭
-      this.setData({ showRenameModal: false })
-      return
-    }
-
+  // 重命名知识库请求
+  async renameFolderRequest(folderId, name) {
     try {
       showLoading('重命名中...')
       await API.updateFolder(folderId, { name })
 
-      // 更新本地列表
-      const folders = this.data.folders.map(f =>
-        f.id === folderId ? { ...f, name } : f
-      )
-      this.setData({ folders })
+      // 重新加载知识库列表
+      await this.loadFolderList()
 
       // 如果是当前选中的知识库，同步更新
       if (this.data.currentFolderId === folderId) {
@@ -603,7 +693,6 @@ Page({
 
       hideLoading()
       showToast('重命名成功', 'success')
-      this.setData({ showRenameModal: false })
     } catch (error) {
       console.error('重命名失败:', error)
       hideLoading()
@@ -615,28 +704,35 @@ Page({
   
   // 打开删除确认 Modal
   handleDeleteFolder() {
-    this.setData({
-      showFolderActions: false,
-      showDeleteConfirm: true
+    const { selectedFolderId, selectedFolderName } = this.data
+    
+    // 关闭操作菜单
+    this.setData({ showFolderActions: false })
+    
+    // 使用微信原生确认对话框
+    wx.showModal({
+      title: '删除知识库',
+      content: `确定要删除「${selectedFolderName}」吗？\n删除后，其中的会议将移至「录音文件」`,
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#FF3B30',
+      success: (res) => {
+        if (res.confirm) {
+          // 执行删除
+          this.deleteFolderRequest(selectedFolderId)
+        }
+      }
     })
   },
 
-  // 隐藏删除确认 Modal
-  hideDeleteConfirm() {
-    this.setData({ showDeleteConfirm: false })
-  },
-
-  // 确认删除
-  async confirmDelete() {
-    const folderId = this.data.selectedFolderId
-
+  // 删除知识库请求
+  async deleteFolderRequest(folderId) {
     try {
       showLoading('删除中...')
       await API.deleteFolder(folderId)
 
-      // 更新本地列表
-      const folders = this.data.folders.filter(f => f.id !== folderId)
-      this.setData({ folders })
+      // 重新加载知识库列表
+      await this.loadFolderList()
 
       // 如果删除的是当前选中的知识库，切换到"录音文件"
       if (this.data.currentFolderId === folderId) {
@@ -650,7 +746,6 @@ Page({
 
       hideLoading()
       showToast('知识库已删除', 'success')
-      this.setData({ showDeleteConfirm: false })
     } catch (error) {
       console.error('删除失败:', error)
       hideLoading()
@@ -658,73 +753,204 @@ Page({
     }
   },
 
-  // ========== 会议移动功能 ✨新增 ==========
+  // ========== 会议操作功能 ✨重构 ==========
   
   // 会议长按事件
   onMeetingLongPress(e) {
-    const { id, folderId, folderName } = e.currentTarget.dataset
+    const { id, title, folderId, folderName } = e.currentTarget.dataset
     wx.vibrateShort() // 震动反馈
     
+    // 保存当前会议信息
     this.setData({
       movingMeetingId: id,
+      movingMeetingTitle: title || '会议',
       meetingCurrentFolderId: folderId || null,
-      meetingCurrentFolderName: folderName || '录音文件',
-      showMeetingActions: true
+      meetingCurrentFolderName: folderName || '录音文件'
+    })
+    
+    // 显示微信原生 ActionSheet
+    wx.showActionSheet({
+      itemList: ['重命名', '复制到', '移动到', '删除'],
+      success: (res) => {
+        const tapIndex = res.tapIndex
+        switch (tapIndex) {
+          case 0:
+            this.handleRenameMeeting()
+            break
+          case 1:
+            this.handleCopyMeeting()
+            break
+          case 2:
+            this.handleMoveMeeting()
+            break
+          case 3:
+            this.handleDeleteMeeting()
+            break
+        }
+      }
     })
   },
 
-  // 隐藏会议操作菜单
-  hideMeetingActions() {
-    this.setData({ showMeetingActions: false })
+  // 1. 重命名会议
+  handleRenameMeeting() {
+    const { movingMeetingId, movingMeetingTitle } = this.data
+    
+    wx.showModal({
+      title: '重命名会议',
+      placeholderText: '请输入新标题',
+      editable: true,
+      content: movingMeetingTitle,
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const newTitle = (res.content || '').trim()
+          
+          if (!newTitle) {
+            showToast('请输入会议标题', 'error')
+            return
+          }
+          
+          if (newTitle === movingMeetingTitle) {
+            showToast('标题未改变', 'none')
+            return
+          }
+          
+          // 执行重命名
+          this.renameMeetingRequest(movingMeetingId, newTitle)
+        }
+      }
+    })
   },
 
-  // 打开移动到知识库选择器
-  handleMoveToFolder() {
+  // 重命名会议请求
+  async renameMeetingRequest(meetingId, newTitle) {
+    try {
+      showLoading('重命名中...')
+      await API.updateMeeting(meetingId, { title: newTitle })
+
+      // 重新加载会议列表
+      await this.loadMeetingList(true)
+
+      hideLoading()
+      showToast('重命名成功', 'success')
+    } catch (error) {
+      console.error('重命名失败:', error)
+      hideLoading()
+      showToast(error.message || '重命名失败', 'error')
+    }
+  },
+
+  // 2. 复制会议到其他知识库
+  handleCopyMeeting() {
+    console.log('handleCopyMeeting 被调用')
     this.setData({
-      showMeetingActions: false,
-      showMoveFolderSelector: true,
-      meetingTargetFolderId: this.data.meetingCurrentFolderId
+      showFolderSelector: true,
+      folderSelectorAction: 'copy',
+      selectedTargetFolderId: this.data.meetingCurrentFolderId
     })
   },
 
-  // 隐藏移动选择器
-  hideMoveFolderSelector() {
-    this.setData({ showMoveFolderSelector: false })
+  // 3. 移动会议到其他知识库
+  handleMoveMeeting() {
+    console.log('handleMoveMeeting 被调用')
+    this.setData({
+      showFolderSelector: true,
+      folderSelectorAction: 'move',
+      selectedTargetFolderId: this.data.meetingCurrentFolderId
+    })
+  },
+
+  // 隐藏知识库选择器
+  hideFolderSelectorModal() {
+    this.setData({ showFolderSelector: false })
   },
 
   // 选择目标知识库
-  selectMoveTargetFolder(e) {
+  selectTargetFolder(e) {
     const folderId = e.currentTarget.dataset.id
-    this.setData({ meetingTargetFolderId: folderId })
+    this.setData({ selectedTargetFolderId: folderId })
   },
 
-  // 确认移动会议
-  async confirmMoveToFolder() {
-    const meetingId = this.data.movingMeetingId
-    const targetFolderId = this.data.meetingTargetFolderId
-    const currentFolderId = this.data.meetingCurrentFolderId
-
-    // 如果目标知识库和当前一样，直接关闭
-    if (targetFolderId === currentFolderId) {
-      this.setData({ showMoveFolderSelector: false })
-      return
+  // 确认复制或移动
+  confirmFolderAction() {
+    const { folderSelectorAction, selectedTargetFolderId, folders, movingMeetingId } = this.data
+    
+    // 获取目标知识库名称
+    let targetFolderName = '录音文件'
+    if (selectedTargetFolderId !== null) {
+      const targetFolder = folders.find(f => f.id === selectedTargetFolderId)
+      targetFolderName = targetFolder ? targetFolder.name : '知识库'
     }
+    
+    console.log('确认操作:', folderSelectorAction, '目标:', targetFolderName)
+    
+    // 关闭选择器
+    this.setData({ showFolderSelector: false })
+    
+    // 执行操作
+    if (folderSelectorAction === 'copy') {
+      this.copyMeetingRequest(movingMeetingId, selectedTargetFolderId, targetFolderName)
+    } else {
+      this.moveMeetingRequest(movingMeetingId, selectedTargetFolderId, targetFolderName)
+    }
+  },
 
+  // 复制会议请求
+  async copyMeetingRequest(meetingId, targetFolderId, targetFolderName) {
     try {
-      showLoading('移动中...')
-      await API.updateMeeting(meetingId, { folder_id: targetFolderId })
+      console.log('=== 开始复制会议 ===')
+      console.log('会议ID:', meetingId)
+      console.log('目标知识库ID:', targetFolderId)
+      console.log('目标知识库名称:', targetFolderName)
+      
+      showLoading('复制中...')
+      
+      // 调用复制 API
+      const result = await API.copyMeeting(meetingId, { folder_id: targetFolderId })
+      console.log('API 返回结果:', result)
 
-      // 获取目标知识库名称
-      const targetFolderName = targetFolderId === null
-        ? '录音文件'
-        : this.data.folders.find(f => f.id === targetFolderId)?.name || '知识库'
+      // 重新加载知识库列表
+      await this.loadFolderList()
+
+      hideLoading()
+      showToast(`已复制到「${targetFolderName}」`, 'success')
+      console.log('=== 复制成功 ===')
+      
+      // 跳转到目标知识库
+      this.switchToFolder(targetFolderId, targetFolderName)
+    } catch (error) {
+      console.error('复制失败:', error)
+      hideLoading()
+      showToast(error.message || '复制失败', 'error')
+    }
+  },
+
+  // 移动会议请求
+  async moveMeetingRequest(meetingId, targetFolderId, targetFolderName) {
+    try {
+      console.log('=== 开始移动会议 ===')
+      console.log('会议ID:', meetingId)
+      console.log('目标知识库ID:', targetFolderId)
+      console.log('目标知识库名称:', targetFolderName)
+      
+      showLoading('移动中...')
+      
+      const updateData = { folder_id: targetFolderId }
+      console.log('更新数据:', updateData)
+      
+      const result = await API.updateMeeting(meetingId, updateData)
+      console.log('API 返回结果:', result)
+
+      // 重新加载知识库列表
+      await this.loadFolderList()
 
       hideLoading()
       showToast(`已移动到「${targetFolderName}」`, 'success')
-      this.setData({ showMoveFolderSelector: false })
-
-      // 刷新列表
-      await this.loadMeetingList(true)
+      console.log('=== 移动成功 ===')
+      
+      // 跳转到目标知识库
+      this.switchToFolder(targetFolderId, targetFolderName)
     } catch (error) {
       console.error('移动失败:', error)
       hideLoading()
@@ -732,36 +958,52 @@ Page({
     }
   },
 
-  // 从列表删除会议
-  async handleDeleteMeetingFromList() {
-    const meetingId = this.data.movingMeetingId
+  // 切换到指定知识库
+  switchToFolder(folderId, folderName) {
+    console.log('切换到知识库:', folderName, '(ID:', folderId, ')')
     
-    // 先弹出确认对话框
-    const res = await wx.showModal({
-      title: '删除会议',
-      content: '确定要删除这条会议纪要吗？',
-      confirmText: '删除',
-      confirmColor: '#FF3B30',
-      cancelText: '取消'
+    // 更新当前知识库
+    this.setData({
+      currentFolderId: folderId === null ? 'uncategorized' : folderId,
+      currentFolderName: folderName || '录音文件'
     })
+    
+    // 重新加载会议列表
+    this.loadMeetingList(true)
+  },
 
-    if (!res.confirm) {
-      this.setData({ showMeetingActions: false })
-      return
-    }
+  // 4. 删除会议
+  handleDeleteMeeting() {
+    const { movingMeetingId, movingMeetingTitle } = this.data
+    
+    wx.showModal({
+      title: '删除会议',
+      content: `确定要删除「${movingMeetingTitle}」吗？\n删除后无法恢复`,
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#FF3B30',
+      success: (res) => {
+        if (res.confirm) {
+          this.deleteMeetingRequest(movingMeetingId)
+        }
+      }
+    })
+  },
 
+  // 删除会议请求
+  async deleteMeetingRequest(meetingId) {
     try {
       showLoading('删除中...')
       await API.deleteMeeting(meetingId)
-      
-      hideLoading()
-      showToast('删除成功', 'success')
-      this.setData({ showMeetingActions: false })
 
-      // 刷新列表
+      // 重新加载知识库列表和会议列表
+      await this.loadFolderList()
       await this.loadMeetingList(true)
+
+      hideLoading()
+      showToast('会议已删除', 'success')
     } catch (error) {
-      console.error('删除会议失败:', error)
+      console.error('删除失败:', error)
       hideLoading()
       showToast(error.message || '删除失败', 'error')
     }
@@ -770,6 +1012,17 @@ Page({
   // 阻止关闭
   preventClose() {
     // 空函数，用于阻止点击 Modal 内部关闭
+  },
+
+  // 阻止事件冒泡
+  stopPropagation() {
+    // 空函数，用于阻止事件冒泡到遮罩层
+  },
+
+  // 阻止冒泡（用于 Modal）
+  stopBubbling(e) {
+    console.log('stopBubbling 被调用，阻止事件冒泡')
+    // 空函数，catchtap 会自动阻止冒泡
   },
 
   /**

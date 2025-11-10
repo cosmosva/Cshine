@@ -193,6 +193,15 @@ function updateMeeting(meetingId, data) {
 }
 
 /**
+ * 复制会议纪要
+ * @param {string} meetingId 会议ID
+ * @param {object} data 复制配置 { folder_id: number | null }
+ */
+function copyMeeting(meetingId, data) {
+  return post(`/api/v1/meeting/${meetingId}/copy`, data)
+}
+
+/**
  * 删除会议纪要
  * @param {string} meetingId 会议ID
  */
@@ -239,6 +248,7 @@ module.exports = {
   getMeetingList,
   getMeetingDetail,
   updateMeeting,
+  copyMeeting,
   deleteMeeting,
   getMeetingStatus,
   toggleMeetingFavorite,

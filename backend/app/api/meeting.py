@@ -81,20 +81,24 @@ async def get_meeting_list(
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     status: Optional[str] = Query(None, description="状态筛选"),
     is_favorite: Optional[bool] = Query(None, description="收藏筛选"),
-    folder_id: Optional[int] = Query(None, description="知识库ID筛选"),  # ✨新增
+    folder_id: Optional[str] = Query(None, description="知识库ID筛选，传 'uncategorized' 查询未分类"),  # ✨新增
     sort_by: Optional[str] = Query("time", description="排序方式: time/favorite"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
     获取会议纪要列表
-    
+
     支持分页、状态筛选、收藏筛选、知识库筛选、排序
+    folder_id 参数：
+    - None: 查询所有会议
+    - 'uncategorized': 查询未分类的会议（folder_id 为 NULL）
+    - 数字ID: 查询指定知识库的会议
     """
     try:
         # 构建查询
         query = db.query(Meeting).filter(Meeting.user_id == current_user.id)
-        
+
         # 状态筛选
         if status:
             try:
@@ -102,14 +106,23 @@ async def get_meeting_list(
                 query = query.filter(Meeting.status == status_enum)
             except ValueError:
                 pass  # 忽略无效状态
-        
+
         # 收藏筛选
         if is_favorite is not None:
             query = query.filter(Meeting.is_favorite == is_favorite)
-        
+
         # 知识库筛选 ✨新增
         if folder_id is not None:
-            query = query.filter(Meeting.folder_id == folder_id)
+            if folder_id == 'uncategorized':
+                # 查询未分类的会议
+                query = query.filter(Meeting.folder_id == None)
+            else:
+                # 查询指定知识库的会议
+                try:
+                    folder_id_int = int(folder_id)
+                    query = query.filter(Meeting.folder_id == folder_id_int)
+                except ValueError:
+                    pass  # 忽略无效的 folder_id
         
         # 总数
         total = query.count()
@@ -280,6 +293,68 @@ async def toggle_meeting_favorite(
     except Exception as e:
         db.rollback()
         logger.error(f"Toggle meeting favorite error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{meeting_id}/copy", response_model=ResponseModel)
+async def copy_meeting(
+    meeting_id: str,
+    copy_data: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    复制会议纪要到指定知识库
+    
+    Args:
+        meeting_id: 要复制的会议ID
+        copy_data: {"folder_id": int | null}
+    """
+    # 查找原会议
+    original_meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not original_meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    try:
+        # 创建新的会议副本
+        new_meeting = Meeting(
+            user_id=current_user.id,
+            folder_id=copy_data.get('folder_id'),
+            title=f"{original_meeting.title}（副本）",
+            participants=original_meeting.participants,
+            meeting_date=original_meeting.meeting_date,
+            audio_url=original_meeting.audio_url,
+            audio_duration=original_meeting.audio_duration,
+            transcript=original_meeting.transcript,
+            summary=original_meeting.summary,
+            conversational_summary=original_meeting.conversational_summary,
+            mind_map=original_meeting.mind_map,
+            key_points=original_meeting.key_points,
+            action_items=original_meeting.action_items,
+            tags=original_meeting.tags,
+            status=original_meeting.status,
+            is_favorite=False  # 副本默认不收藏
+        )
+        
+        db.add(new_meeting)
+        db.commit()
+        db.refresh(new_meeting)
+        
+        logger.info(f"Meeting copied: {meeting_id} -> {new_meeting.id}, folder_id={copy_data.get('folder_id')}")
+        
+        return ResponseModel(
+            code=200,
+            message="会议已复制",
+            data=MeetingResponse.from_orm(new_meeting)
+        )
+    
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Copy meeting error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

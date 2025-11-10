@@ -5,6 +5,137 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2025-11-10
+
+### ✨ 功能增强 - 会议操作完善与交互优化
+
+这是一个重要的功能完善版本，全面升级了会议操作功能，使用微信原生组件统一交互体验，并优化了操作后的跳转逻辑。
+
+### Added - 新增功能
+
+#### 会议操作功能 ✨
+- 📝 **重命名会议**
+  - 长按会议卡片弹出操作菜单
+  - 选择"重命名"弹出输入框
+  - 当前标题自动预填充
+  - 支持修改会议标题
+  - 重命名后自动刷新列表
+
+- 📋 **复制会议到知识库**
+  - 长按会议选择"复制到"
+  - 显示所有知识库列表（支持滚动）
+  - 复制会议到指定知识库
+  - 标题自动添加"（副本）"标识
+  - 副本默认不收藏
+  - **复制后自动跳转到目标知识库** ✨
+
+- 📁 **移动会议到知识库**
+  - 长按会议选择"移动到"
+  - 显示所有知识库列表（支持滚动）
+  - 移动会议到指定知识库
+  - 显示当前位置
+  - **移动后自动跳转到目标知识库** ✨
+
+- 🗑️ **删除会议**
+  - 长按会议选择"删除"
+  - 系统原生确认对话框
+  - 红色警告按钮
+  - 提示"删除后无法恢复"
+
+#### 后端 API 新增
+- `POST /api/v1/meeting/{meeting_id}/copy` - 复制会议
+- `PUT /api/v1/meeting/{meeting_id}` - 支持更新 `folder_id`
+
+### Changed - 优化
+
+#### 交互体验提升 ✨
+- 🎯 **智能跳转**
+  - 复制/移动会议后自动跳转到目标知识库
+  - 立即看到操作结果
+  - 更符合用户预期的交互逻辑
+
+- 📱 **统一使用微信原生组件**
+  - 操作菜单：`wx.showActionSheet`
+  - 输入对话框：`wx.showModal` (editable: true)
+  - 确认对话框：`wx.showModal`
+  - 知识库选择：自定义 Modal（支持无限滚动）
+  - 统一的视觉风格和交互体验
+
+- 🎨 **UI 优化**
+  - 知识库选择器支持滚动（突破 ActionSheet 6 项限制）
+  - 显示当前位置信息
+  - 清晰的选中状态（✓ 标识）
+  - 动态标题（"复制到" / "移动到"）
+
+#### 数据管理优化
+- 🔄 **演示数据清理**
+  - 删除硬编码的演示知识库数据
+  - 改为从后端 API 动态加载
+  - 支持实时更新知识库列表
+  - 自动计算未分类文件数量
+
+- 📊 **知识库筛选优化**
+  - 支持按知识库筛选会议
+  - `currentFolderId: 'uncategorized'` 表示未分类
+  - `currentFolderId: null` 表示不筛选
+  - 数字 ID 表示指定知识库
+
+### Fixed - 修复
+
+- 🐛 修复 `MeetingUpdate` schema 缺少 `folder_id` 字段
+- 🐛 修复移动会议后数据未实际更新的问题
+- 🐛 修复 ActionSheet 选项超过 6 个时的错误
+- 🐛 修复知识库列表未从后端加载的问题
+
+### Technical - 技术细节
+
+#### 后端改动
+- `backend/app/api/meeting.py`
+  - 新增 `copy_meeting` 端点
+  - 复制所有会议内容（音频、转写、总结等）
+  - 支持指定目标知识库
+  
+- `backend/app/schemas.py`
+  - `MeetingUpdate` 添加 `folder_id` 字段
+  - 支持更新会议所属知识库
+
+#### 前端改动
+- `pages/meeting/list.js`
+  - 重构会议操作功能，使用原生组件
+  - 新增 `switchToFolder` 方法实现智能跳转
+  - 新增 `loadFolderList` 方法动态加载知识库
+  - 优化 `copyMeetingRequest` 和 `moveMeetingRequest`
+  - 清理不需要的状态字段
+
+- `pages/meeting/list.wxml`
+  - 添加 `data-title` 参数到会议卡片
+  - 新增知识库选择器 Modal
+  - 删除旧的自定义 ActionSheet
+
+- `utils/api.js`
+  - 新增 `copyMeeting` API 方法
+  - 导出到 module.exports
+
+### Documentation - 文档
+
+- 📝 更新 CHANGELOG.md
+- 📝 更新版本号到 v0.5.5
+
+### Migration Guide - 迁移指南
+
+#### 数据库
+无需迁移，`folder_id` 字段已存在。
+
+#### 配置
+无需修改配置。
+
+#### 部署
+1. 拉取最新代码
+2. 重启后端服务
+3. 重新编译小程序
+
+---
+
 ## [0.5.0] - 2025-11-09
 
 ### ✨ 功能增强 - 知识库管理完善
