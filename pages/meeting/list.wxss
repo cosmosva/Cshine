@@ -1052,8 +1052,8 @@ button.btn-secondary::after {
   justify-content: center;
 }
 
-/* Modal 容器 */
-.modal {
+/* 知识库选择器 Modal 容器 */
+.folder-selector-modal {
   position: fixed;
   left: 50%;
   top: 50%;

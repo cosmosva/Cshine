@@ -267,7 +267,7 @@
 
   <!-- 知识库选择器 Modal（用于上传文件） -->
   <view class="modal-mask" wx:if="{{showUploadFolderSelector}}" bindtap="cancelUploadFolderSelection" catchtouchmove="preventDefault"></view>
-  <view class="modal {{showUploadFolderSelector ? 'show' : ''}}" catchtap="preventClose">
+  <view class="folder-selector-modal {{showUploadFolderSelector ? 'show' : ''}}" catchtap="preventClose">
     <view class="modal-header">
       <text class="modal-title">选择知识库</text>
     </view>
@@ -298,7 +298,7 @@
 
   <!-- 知识库选择器 Modal（用于复制/移动会议） -->
   <view class="modal-mask" wx:if="{{showFolderSelector}}" bindtap="hideFolderSelectorModal" catchtouchmove="preventDefault"></view>
-  <view class="modal {{showFolderSelector ? 'show' : ''}}" catchtap="preventClose">
+  <view class="folder-selector-modal {{showFolderSelector ? 'show' : ''}}" catchtap="preventClose">
     <view class="modal-header">
       <text class="modal-title">{{folderSelectorAction === 'copy' ? '复制到' : '移动到'}}</text>
     </view>
