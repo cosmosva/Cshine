@@ -13,16 +13,26 @@ echo ""
 
 # 切换到 backend 目录
 cd "$(dirname "$0")"
-echo "📂 当前目录: $(pwd)"
+BACKEND_DIR=$(pwd)
+PROJECT_ROOT=$(dirname "$BACKEND_DIR")
+echo "📂 Backend 目录: $BACKEND_DIR"
+echo "📂 项目根目录: $PROJECT_ROOT"
 echo ""
 
-# 激活虚拟环境
-if [ -d "venv" ]; then
-    echo "🔧 激活虚拟环境..."
-    source venv/bin/activate
+# 激活虚拟环境（尝试多个可能的位置）
+if [ -d "$PROJECT_ROOT/venv" ]; then
+    echo "🔧 激活虚拟环境（项目根目录）..."
+    source "$PROJECT_ROOT/venv/bin/activate"
+    echo "✅ 虚拟环境已激活"
+elif [ -d "$BACKEND_DIR/venv" ]; then
+    echo "🔧 激活虚拟环境（backend 目录）..."
+    source "$BACKEND_DIR/venv/bin/activate"
     echo "✅ 虚拟环境已激活"
 else
-    echo "❌ 错误：找不到虚拟环境 (venv)"
+    echo "❌ 错误：找不到虚拟环境"
+    echo "   尝试的路径："
+    echo "   - $PROJECT_ROOT/venv"
+    echo "   - $BACKEND_DIR/venv"
     exit 1
 fi
 echo ""
