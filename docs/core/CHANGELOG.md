@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2025-11-10
+
+### Fixed - 修复
+
+- 🐛 修复知识库选择器 Modal 缺少 `wx:if` 导致意外显示的问题
+- 🐛 修复移动会议后原列表未更新的问题
+- 🐛 修复上传文件和会议操作共用选择器导致的冲突
+- 🐛 删除旧的未使用的知识库选择器代码
+
+### Changed - 优化
+
+- 🎨 优化 Modal 布局，底部按钮固定不滚动
+- 🎨 使用 `folder.png` 图标替代 emoji，统一视觉风格
+- 📝 新增版本号自动管理规则
+- 📝 新增资源文件复用规则
+
+### Technical - 技术细节
+
+- 为知识库选择器添加 `wx:if` 条件控制
+- 移动会议后立即从当前列表中过滤掉已移动项
+- 分离上传文件和会议操作的知识库选择器
+- 使用 Flexbox 布局优化 Modal 结构
+- 更新 `.cursorrules` 开发规范
+
+---
+
 ## [0.5.5] - 2025-11-10
 
 ### ✨ 功能增强 - 会议操作完善与交互优化

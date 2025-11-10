@@ -243,7 +243,10 @@
         <!-- 录音文件（未分类） -->
         <view class="folder-option {{uploadTargetFolderId === null ? 'selected' : ''}}"
               bindtap="selectUploadTargetFolder" data-id="{{null}}">
-          <text class="folder-name">📁 录音文件（未分类）</text>
+          <view class="folder-name">
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit" />
+            <text>录音文件（未分类）</text>
+          </view>
           <text class="check-icon" wx:if="{{uploadTargetFolderId === null}}">✓</text>
         </view>
 
@@ -251,7 +254,10 @@
         <view class="folder-option {{uploadTargetFolderId === item.id ? 'selected' : ''}}"
               wx:for="{{folders}}" wx:key="id"
               bindtap="selectUploadTargetFolder" data-id="{{item.id}}">
-          <text class="folder-name">📁 {{item.name}}</text>
+          <view class="folder-name">
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit" />
+            <text>{{item.name}}</text>
+          </view>
           <text class="check-icon" wx:if="{{uploadTargetFolderId === item.id}}">✓</text>
         </view>
       </scroll-view>
@@ -276,7 +282,10 @@
         <!-- 录音文件（未分类） -->
         <view class="folder-option {{selectedTargetFolderId === null ? 'selected' : ''}}"
               bindtap="selectTargetFolder" data-id="{{null}}">
-          <text class="folder-name">📁 录音文件（未分类）</text>
+          <view class="folder-name">
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit" />
+            <text>录音文件（未分类）</text>
+          </view>
           <text class="check-icon" wx:if="{{selectedTargetFolderId === null}}">✓</text>
         </view>
 
@@ -284,7 +293,10 @@
         <view class="folder-option {{selectedTargetFolderId === item.id ? 'selected' : ''}}"
               wx:for="{{folders}}" wx:key="id"
               bindtap="selectTargetFolder" data-id="{{item.id}}">
-          <text class="folder-name">📁 {{item.name}}</text>
+          <view class="folder-name">
+            <image class="folder-icon" src="/assets/icons/folder.png" mode="aspectFit" />
+            <text>{{item.name}}</text>
+          </view>
           <text class="check-icon" wx:if="{{selectedTargetFolderId === item.id}}">✓</text>
         </view>
       </scroll-view>
