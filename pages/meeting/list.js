@@ -170,7 +170,7 @@ Page({
         page_size: this.data.pageSize,
         sort_by: this.data.currentSort
       }
-
+      
       // 添加筛选条件
       if (this.data.currentFilter === 'favorite') {
         params.is_favorite = true
@@ -188,7 +188,7 @@ Page({
           params.folder_id = this.data.currentFolderId
         }
       }
-
+      
       const listData = await API.getMeetingList(params)
       console.log('会议列表（已解包）:', listData)
       
@@ -970,7 +970,15 @@ Page({
       const result = await API.updateMeeting(meetingId, updateData)
       console.log('API 返回结果:', result)
 
-      // 重新加载知识库列表
+      // 从当前列表中移除已移动的会议
+      const newMeetingList = this.data.meetingList.filter(item => item.id !== meetingId)
+      this.setData({ 
+        meetingList: newMeetingList,
+        total: this.data.total - 1
+      })
+      console.log('已从当前列表移除会议')
+
+      // 重新加载知识库列表（更新数量）
       await this.loadFolderList()
 
       hideLoading()
