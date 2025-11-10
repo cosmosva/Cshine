@@ -758,6 +758,13 @@ Page({
   // 会议长按事件
   onMeetingLongPress(e) {
     const { id, title, folderId, folderName } = e.currentTarget.dataset
+    console.log('=== onMeetingLongPress 触发 ===')
+    console.log('dataset:', e.currentTarget.dataset)
+    console.log('会议ID:', id)
+    console.log('会议标题:', title)
+    console.log('知识库ID:', folderId)
+    console.log('知识库名称:', folderName)
+    
     wx.vibrateShort() // 震动反馈
     
     // 保存当前会议信息
@@ -766,6 +773,11 @@ Page({
       movingMeetingTitle: title || '会议',
       meetingCurrentFolderId: folderId || null,
       meetingCurrentFolderName: folderName || '录音文件'
+    })
+    
+    console.log('已保存到 data:', {
+      movingMeetingId: this.data.movingMeetingId,
+      movingMeetingTitle: this.data.movingMeetingTitle
     })
     
     // 显示微信原生 ActionSheet
