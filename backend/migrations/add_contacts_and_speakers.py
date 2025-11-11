@@ -13,6 +13,7 @@ import psycopg2
 from loguru import logger
 import sys
 import os
+from urllib.parse import urlparse
 
 # 添加父目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,14 +23,19 @@ from config import settings
 
 def run_migration():
     """执行迁移"""
+    conn = None
+    cursor = None
     try:
+        # 从 DATABASE_URL 解析连接信息
+        db_url = urlparse(settings.DATABASE_URL)
+        
         # 连接数据库
         conn = psycopg2.connect(
-            host=settings.DB_HOST,
-            port=settings.DB_PORT,
-            database=settings.DB_NAME,
-            user=settings.DB_USER,
-            password=settings.DB_PASSWORD
+            host=db_url.hostname,
+            port=db_url.port or 5432,
+            database=db_url.path.lstrip('/'),
+            user=db_url.username,
+            password=db_url.password
         )
         cursor = conn.cursor()
         
