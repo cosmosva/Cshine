@@ -92,7 +92,7 @@ ssh cshine@8.134.254.88 << 'ENDSSH'
     cd backend
     if [ -f "migrations/add_contacts_and_speakers.py" ]; then
         echo "正在执行数据库迁移..."
-        python migrations/add_contacts_and_speakers.py
+        python3.11 migrations/add_contacts_and_speakers.py
         echo "✅ 数据库迁移完成"
     else
         echo "⚠️  未找到迁移脚本，跳过迁移"
