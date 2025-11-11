@@ -12,39 +12,21 @@
 
   <!-- 主内容 -->
   <view class="page-content" wx:if="{{!loading && meeting}}">
-    <!-- 会议头部 -->
-    <view class="meeting-header">
-      <view class="header-bg"></view>
-      <view class="header-content">
-        <view class="meeting-title">{{meeting.title}}</view>
-        
-        <view class="meeting-meta">
-          <text class="meta-item" wx:if="{{meeting.meeting_date}}">
-            📅 {{formatTime(meeting.meeting_date)}}
-          </text>
-          <text class="meta-item" wx:if="{{meeting.audio_duration}}">
-            ⏱️ {{utils.formatDuration(meeting.audio_duration)}}
-          </text>
-          <text class="meta-item" wx:if="{{meeting.participants && meeting.participants.length > 0}}">
-            👥 {{meeting.participants.join(', ')}}
-          </text>
+    <!-- 音频播放器 -->
+    <view class="audio-player-container" wx:if="{{meeting.audio_url}}">
+      <view class="audio-player">
+        <view class="play-btn" bindtap="toggleAudio">
+          <text class="icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
         </view>
-
-        <!-- 音频播放器 -->
-        <view class="audio-player" wx:if="{{meeting.audio_url}}">
-          <view class="play-btn" bindtap="toggleAudio">
-            <text class="icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+        <view class="audio-info">
+          <view class="audio-progress">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{(currentTime / duration) * 100}}%;"></view>
+            </view>
           </view>
-          <view class="audio-info">
-            <view class="audio-progress">
-              <view class="progress-bar">
-                <view class="progress-fill" style="width: {{(currentTime / duration) * 100}}%;"></view>
-              </view>
-            </view>
-            <view class="audio-time">
-              <text>{{utils.formatDuration(currentTime)}}</text>
-              <text>{{utils.formatDuration(duration || meeting.audio_duration)}}</text>
-            </view>
+          <view class="audio-time">
+            <text>{{utils.formatDuration(currentTime)}}</text>
+            <text>{{utils.formatDuration(duration || meeting.audio_duration)}}</text>
           </view>
         </view>
       </view>

@@ -29,46 +29,10 @@
   overflow: hidden;
 }
 
-/* ========== 会议头部 ========== */
-.meeting-header {
-  position: relative;
+/* ========== 音频播放器容器 ========== */
+.audio-player-container {
+  padding: var(--spacing-md);
   background-color: #fff;
-  overflow: hidden;
-}
-
-.header-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 150px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-  opacity: 0.1;
-}
-
-.header-content {
-  position: relative;
-  padding: var(--spacing-lg) var(--spacing-md);
-}
-
-.meeting-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  line-height: 1.5;
-  margin-bottom: var(--spacing-md);
-}
-
-.meeting-meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
-}
-
-.meta-item {
-  font-size: 13px;
-  color: var(--color-text-secondary);
 }
 
 /* ========== 音频播放器 ========== */
