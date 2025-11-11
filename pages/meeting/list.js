@@ -42,6 +42,7 @@ Page({
     
     // Modal 显示状态 - 上传文件用
     showUploadFolderSelector: false,  // 上传文件的知识库选择器
+    showUploadModal: false,           // 上传进度模态框
     tempSelectedFile: null,           // 临时存储选中的文件
     uploadTargetFolderId: null,       // 上传文件的目标知识库ID
     
@@ -520,21 +521,31 @@ Page({
     await this.uploadAudioFile(file, folderId)
   },
   
-  // 上传音频文件（使用合并接口）
+  // 上传音频文件（使用上传模态框）
   async uploadAudioFile(file, folderId) {
-    const { showToast, showLoading, hideLoading } = require('../../utils/toast')
-    
-    console.log('=== 开始上传流程（合并接口）===')
+    console.log('=== 开始上传流程 ===')
     console.log('文件信息:', file)
     console.log('目标知识库ID:', folderId)
+    
+    // 显示上传模态框
+    this.setData({ showUploadModal: true })
+    
+    // 获取组件实例
+    const uploadModal = this.selectComponent('#upload-modal') || this.selectComponent('upload-modal')
+    if (uploadModal) {
+      uploadModal.startUpload({ title: '上传音频' })
+    }
     
     // 设置上传标志，防止页面刷新
     this._isUploading = true
     
     try {
-      showLoading('上传并创建会议中...')
+      // 模拟进度更新
+      if (uploadModal) {
+        uploadModal.updateProgress(30, '正在上传到云端...')
+      }
       
-      // 使用新的合并接口：一次性完成上传和创建会议
+      // 使用合并接口：一次性完成上传和创建会议
       const result = await API.uploadAudioAndCreateMeeting(file.path, {
         title: file.name,
         folder_id: folderId && folderId !== '' ? parseInt(folderId) : null
@@ -542,8 +553,14 @@ Page({
       
       console.log('上传并创建会议成功:', result)
       
-      hideLoading()
-      showToast('上传成功，正在AI处理...', 'success')
+      if (uploadModal) {
+        uploadModal.updateProgress(100, '创建会议记录...')
+      }
+      
+      // 显示成功
+      if (uploadModal) {
+        uploadModal.showSuccess('上传成功，正在AI处理...')
+      }
       
       // 刷新列表
       this.loadMeetingList()
@@ -552,14 +569,28 @@ Page({
       
     } catch (error) {
       console.error('=== 上传流程失败 ===')
-      console.error('错误类型:', error.constructor.name)
       console.error('错误信息:', error.message)
-      console.error('错误堆栈:', error.stack)
-      hideLoading()
-      showToast(error.message || '上传失败，请重试', 'error')
+      
+      // 显示错误
+      if (uploadModal) {
+        uploadModal.showError(error.message || '上传失败，请重试')
+      }
     } finally {
       // 清除上传标志
       this._isUploading = false
+    }
+  },
+  
+  // 上传模态框关闭
+  onUploadModalClose(e) {
+    const { status } = e.detail
+    console.log('上传模态框关闭，状态:', status)
+    
+    this.setData({ showUploadModal: false })
+    
+    // 如果上传成功，刷新列表
+    if (status === 'success') {
+      this.loadMeetingList(true)
     }
   },
   

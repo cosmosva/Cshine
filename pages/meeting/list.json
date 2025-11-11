@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "navigation-bar": "/components/navigation-bar/navigation-bar"
+    "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "upload-modal": "/components/upload-modal/upload-modal"
   },
   "enablePullDownRefresh": false,
   "navigationStyle": "custom"

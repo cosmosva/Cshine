@@ -308,3 +308,9 @@
     </view>
   </view>
 </view>
+
+<!-- 上传进度模态框 -->
+<upload-modal 
+  show="{{showUploadModal}}" 
+  bind:close="onUploadModalClose"
+/>

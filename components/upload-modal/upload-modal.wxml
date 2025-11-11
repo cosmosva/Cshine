@@ -1,0 +1,40 @@
+<!--上传进度模态框-->
+<view class="upload-modal" wx:if="{{show}}">
+  <view class="modal-mask" catchtap="onMaskTap"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{title}}</text>
+    </view>
+    
+    <view class="modal-body">
+      <!-- 上传中 -->
+      <view wx:if="{{status === 'uploading'}}" class="upload-status">
+        <view class="loading-icon">
+          <view class="spinner"></view>
+        </view>
+        <text class="status-text">{{statusText}}</text>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{progress}}%"></view>
+        </view>
+        <text class="progress-text">{{progress}}%</text>
+      </view>
+      
+      <!-- 成功 -->
+      <view wx:if="{{status === 'success'}}" class="upload-status">
+        <view class="success-icon">✓</view>
+        <text class="status-text success">{{statusText}}</text>
+      </view>
+      
+      <!-- 失败 -->
+      <view wx:if="{{status === 'error'}}" class="upload-status">
+        <view class="error-icon">✕</view>
+        <text class="status-text error">{{statusText}}</text>
+      </view>
+    </view>
+    
+    <view class="modal-footer" wx:if="{{status !== 'uploading'}}">
+      <button class="btn-close" catchtap="onClose">{{status === 'success' ? '完成' : '关闭'}}</button>
+    </view>
+  </view>
+</view>
+
