@@ -123,6 +123,13 @@ class TingwuService:
                 parameters=parameters
             )
             
+            # 打印请求参数（调试用）
+            logger.info(f"📤 发送给通义听悟的参数:")
+            logger.info(f"  - 转写: diarization_enabled={getattr(parameters.transcription, 'diarization_enabled', False)}")
+            logger.info(f"  - 摘要: {getattr(parameters, 'summarization', None)}")
+            logger.info(f"  - 会议助手: {getattr(parameters, 'meeting_assistance', None)}")
+            logger.info(f"  - 章节: {getattr(parameters, 'auto_chapters', None)}")
+            
             # 发送请求
             response = self.client.create_task(request)
             
@@ -218,6 +225,18 @@ class TingwuService:
                     logger.info(f"✅ 转写文本提取成功，长度: {len(result['transcription'])}, 段落数: {len(paragraphs)}")
             
             # 2. 获取智能摘要（result.summarization 就是URL）
+            logger.info(f"🔍 检查摘要字段: hasattr(data, 'result')={hasattr(data, 'result')}")
+            if hasattr(data, 'result'):
+                # 打印所有非空字段
+                result_fields = {}
+                for field in ['transcription', 'summarization', 'meeting_assistance', 'auto_chapters', 
+                             'translation', 'ppt_extraction', 'text_polish', 'custom_prompt']:
+                    value = getattr(data.result, field, None)
+                    if value is not None:
+                        result_fields[field] = str(value)[:100] if isinstance(value, str) else value
+                logger.info(f"🔍 data.result 中非空的字段: {result_fields}")
+                logger.info(f"🔍 summarization 值: {data.result.summarization}")
+            
             if hasattr(data, 'result') and hasattr(data.result, 'summarization') and data.result.summarization:
                 import requests
                 summary_url = data.result.summarization  # 直接是URL字符串
@@ -226,30 +245,36 @@ class TingwuService:
                 
                 if 'Summarization' in summary_data:
                     summaries = summary_data['Summarization']
+                    logger.info(f"📋 通义听悟返回的摘要类型: {[s.get('Type') for s in summaries]}")
                     
                     # 解析不同类型的摘要
                     for summary_item in summaries:
                         summary_type = summary_item.get('Type', '')
+                        summary_content = summary_item.get('Summary', '')
                         
                         if summary_type == 'Paragraph':
                             # 段落摘要（默认摘要）
-                            result['summary'] = summary_item.get('Summary', '')
+                            result['summary'] = summary_content
+                            logger.info(f"✅ 已获取段落摘要，长度: {len(summary_content)}")
                         
                         elif summary_type == 'Conversational':
                             # 发言总结
-                            result['conversational_summary'] = summary_item.get('Summary', '')
-                            logger.info("✅ 已获取发言总结")
+                            result['conversational_summary'] = summary_content
+                            logger.info(f"✅ 已获取发言总结，长度: {len(summary_content)}")
                         
                         elif summary_type == 'MindMap':
                             # 思维导图
-                            result['mind_map'] = summary_item.get('Summary', '')
-                            logger.info("✅ 已获取思维导图")
+                            result['mind_map'] = summary_content
+                            logger.info(f"✅ 已获取思维导图，长度: {len(summary_content)}")
                         
                         elif summary_type == 'QuestionsAnswering':
                             # 问答总结
-                            result['qa_summary'] = summary_item.get('Summary', '')
+                            result['qa_summary'] = summary_content
+                            logger.info(f"✅ 已获取问答总结，长度: {len(summary_content)}")
                     
                     logger.info(f"✅ 摘要解析完成，类型数: {len(summaries)}")
+                else:
+                    logger.warning("⚠️ 摘要数据中没有 Summarization 字段")
             
             # 3. 获取会议助手结果（关键句、行动项）
             if hasattr(data, 'result') and hasattr(data.result, 'meeting_assistance') and data.result.meeting_assistance:

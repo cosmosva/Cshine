@@ -580,7 +580,7 @@ page {
   padding: 13px 16px;
   background-color: #FFFFFF;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.15s;
   width: 100%;
@@ -595,7 +595,7 @@ page {
 .item-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 1;
   min-width: 0;
   overflow: hidden;

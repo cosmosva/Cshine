@@ -502,22 +502,61 @@ Page({
   },
 
   // 确认知识库选择（上传文件用）
-  confirmFolderSelection() {
+  async confirmFolderSelection() {
     this.setData({ showUploadFolderSelector: false })
 
-    // 跳转到上传页面
     const file = this.data.tempSelectedFile
-    const fileName = encodeURIComponent(file.name)
     const folderId = this.data.uploadTargetFolderId || ''
     
     console.log('确认上传，目标知识库ID:', folderId)
     
-    wx.navigateTo({
-      url: `/pages/meeting/upload?fileName=${fileName}&duration=${file.duration}&folderId=${folderId}`
-    })
-
-    // 传递文件路径（通过全局变量）
-    getApp().globalData.uploadFile = file
+    // 直接在列表页上传，不跳转
+    await this.uploadAudioFile(file, folderId)
+  },
+  
+  // 上传音频文件
+  async uploadAudioFile(file, folderId) {
+    const { showToast, showLoading, hideLoading } = require('../../utils/toast')
+    
+    try {
+      showLoading('上传中...')
+      
+      // 1. 上传音频文件到 OSS
+      console.log('开始上传音频文件:', file.path)
+      const uploadResult = await API.uploadAudio(file.path)
+      console.log('上传响应:', uploadResult)
+      
+      if (!uploadResult || !uploadResult.file_url) {
+        throw new Error('文件上传失败')
+      }
+      
+      // 2. 创建会议纪要
+      const meetingData = {
+        title: file.name,
+        audio_url: uploadResult.file_url,
+        audio_duration: file.duration || 0,
+        folder_id: folderId || null
+      }
+      
+      console.log('创建会议纪要，数据:', meetingData)
+      const meetingResult = await API.createMeeting(meetingData)
+      console.log('创建会议响应:', meetingResult)
+      
+      if (!meetingResult || !meetingResult.id) {
+        throw new Error('创建会议失败')
+      }
+      
+      hideLoading()
+      showToast('上传成功，正在处理...', 'success')
+      
+      // 3. 刷新列表
+      this.loadMeetingList()
+      
+    } catch (error) {
+      console.error('上传失败:', error)
+      hideLoading()
+      showToast(error.message || '上传失败', 'error')
+    }
   },
   
   // 选择上传目标知识库

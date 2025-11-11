@@ -5,7 +5,6 @@
     "pages/profile/profile",
     "pages/detail/detail",
     "pages/edit/edit",
-    "pages/meeting/upload",
     "pages/meeting/detail",
     "pages/profile/contacts"
   ],
