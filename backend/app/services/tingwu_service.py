@@ -269,38 +269,50 @@ class TingwuService:
                     
                     if isinstance(summary_data, dict) and 'Summarization' in summary_data:
                         summaries = summary_data['Summarization']
-                        logger.info(f"📋 通义听悟返回的摘要类型: {[s.get('Type') if isinstance(s, dict) else 'Unknown' for s in summaries]}")
+                        logger.info(f"📋 Summarization 类型: {type(summaries)}")
+                        logger.info(f"📋 Summarization 键: {summaries.keys() if isinstance(summaries, dict) else 'N/A'}")
                         
-                        # 解析不同类型的摘要
-                        for summary_item in summaries:
-                            if not isinstance(summary_item, dict):
-                                logger.warning(f"⚠️ 摘要项不是字典: {type(summary_item)}")
-                                continue
-                                
-                            summary_type = summary_item.get('Type', '')
-                            summary_content = summary_item.get('Summary', '')
+                        # 通义听悟的实际格式是字典，不是数组
+                        if isinstance(summaries, dict):
+                            # 1. 段落摘要
+                            if 'ParagraphSummary' in summaries:
+                                result['summary'] = summaries['ParagraphSummary']
+                                logger.info(f"✅ 已获取段落摘要，长度: {len(result['summary'])}")
                             
-                            if summary_type == 'Paragraph':
-                                # 段落摘要（默认摘要）
-                                result['summary'] = summary_content
-                                logger.info(f"✅ 已获取段落摘要，长度: {len(summary_content)}")
+                            # 2. 发言总结（Conversational）
+                            if 'ConversationalSummary' in summaries:
+                                conv_summary = summaries['ConversationalSummary']
+                                # ConversationalSummary 是一个数组，包含每个说话人的总结
+                                if isinstance(conv_summary, list):
+                                    # 转换为 JSON 字符串保存
+                                    import json
+                                    result['conversational_summary'] = json.dumps(conv_summary, ensure_ascii=False)
+                                    logger.info(f"✅ 已获取发言总结，说话人数: {len(conv_summary)}")
+                                else:
+                                    result['conversational_summary'] = str(conv_summary)
+                                    logger.info(f"✅ 已获取发言总结，长度: {len(result['conversational_summary'])}")
                             
-                            elif summary_type == 'Conversational':
-                                # 发言总结
-                                result['conversational_summary'] = summary_content
-                                logger.info(f"✅ 已获取发言总结，长度: {len(summary_content)}")
+                            # 3. 思维导图
+                            if 'MindMapSummary' in summaries:
+                                mind_map_data = summaries['MindMapSummary']
+                                logger.info(f"🗺️ MindMapSummary 类型: {type(mind_map_data)}, 内容: {repr(mind_map_data)[:200]}")
+                                # MindMapSummary 是一个列表，需要转换为 JSON 字符串
+                                if isinstance(mind_map_data, (list, dict)):
+                                    import json
+                                    result['mind_map'] = json.dumps(mind_map_data, ensure_ascii=False)
+                                    logger.info(f"✅ 已获取思维导图，节点数: {len(mind_map_data) if isinstance(mind_map_data, list) else 1}")
+                                else:
+                                    result['mind_map'] = str(mind_map_data)
+                                    logger.info(f"✅ 已获取思维导图，长度: {len(result['mind_map'])}")
                             
-                            elif summary_type == 'MindMap':
-                                # 思维导图
-                                result['mind_map'] = summary_content
-                                logger.info(f"✅ 已获取思维导图，长度: {len(summary_content)}")
+                            # 4. 问答总结
+                            if 'QuestionsAnsweringSummary' in summaries:
+                                result['qa_summary'] = summaries['QuestionsAnsweringSummary']
+                                logger.info(f"✅ 已获取问答总结，长度: {len(result['qa_summary'])}")
                             
-                            elif summary_type == 'QuestionsAnswering':
-                                # 问答总结
-                                result['qa_summary'] = summary_content
-                                logger.info(f"✅ 已获取问答总结，长度: {len(summary_content)}")
-                        
-                        logger.info(f"✅ 摘要解析完成，类型数: {len(summaries)}")
+                            logger.info(f"✅ 摘要解析完成，获取到 {len([k for k in ['summary', 'conversational_summary', 'mind_map', 'qa_summary'] if k in result])} 种摘要")
+                        else:
+                            logger.warning(f"⚠️ Summarization 不是字典格式: {type(summaries)}")
                     else:
                         logger.warning(f"⚠️ 摘要数据格式异常: {type(summary_data)}, 内容: {str(summary_data)[:200]}")
                 except Exception as e:
