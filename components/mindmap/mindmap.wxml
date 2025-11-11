@@ -1,0 +1,20 @@
+<!-- 思维导图组件 -->
+<view class="mindmap-container">
+  <view wx:if="{{nodes.length > 0}}" class="mindmap-tree">
+    <!-- 根节点 -->
+    <view wx:for="{{nodes}}" wx:key="id" class="mindmap-node level-{{item.level}}">
+      <view class="node-content" style="margin-left: {{item.level * 20}}px;">
+        <view class="node-bullet level-{{item.level}}"></view>
+        <text class="node-title">{{item.title}}</text>
+        <text wx:if="{{item.time}}" class="node-time">{{item.time}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view wx:else class="mindmap-empty">
+    <text class="empty-icon">🧠</text>
+    <text class="empty-text">暂无思维导图数据</text>
+  </view>
+</view>
+

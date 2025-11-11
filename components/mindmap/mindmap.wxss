@@ -1,0 +1,124 @@
+/* 思维导图组件样式 */
+.mindmap-container {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+}
+
+.mindmap-tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mindmap-node {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.node-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+  transition: all 0.2s ease;
+}
+
+.node-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 不同层级的样式 */
+.node-bullet.level-0 {
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.node-bullet.level-1 {
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+}
+
+.node-bullet.level-2 {
+  width: 8px;
+  height: 8px;
+  background: var(--color-secondary);
+}
+
+.node-bullet.level-3 {
+  width: 6px;
+  height: 6px;
+  background: var(--color-text-secondary);
+}
+
+.node-title {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+.mindmap-node.level-0 .node-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.mindmap-node.level-1 .node-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mindmap-node.level-2 .node-title {
+  font-size: 14px;
+}
+
+.mindmap-node.level-3 .node-title {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.node-time {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.mindmap-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl) 0;
+  gap: var(--spacing-sm);
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+

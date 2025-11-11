@@ -112,11 +112,7 @@
 
       <!-- 思维导图 Tab -->
       <view class="content-section" wx:if="{{activeTab === 'mindmap'}}">
-        <view class="section-card" wx:if="{{meeting.mind_map}}">
-          <view class="card-title">🧠 思维导图</view>
-          <view class="mindmap-text">{{meeting.mind_map}}</view>
-          <view class="mindmap-hint">💡 提示：思维导图可视化功能正在开发中，当前显示原始数据</view>
-        </view>
+        <mindmap data="{{meeting.mind_map}}" wx:if="{{meeting.mind_map}}"></mindmap>
         
         <!-- 空状态 -->
         <view class="empty-tip" wx:else>
