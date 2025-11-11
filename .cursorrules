@@ -104,6 +104,72 @@ assets/icons/
 
 ---
 
+### 规则 4：线上部署关键检查（必须遵守）
+
+**每次涉及线上部署时，必须检查以下事项：**
+
+#### 4.1 代码推送检查
+- ✅ **本地提交后必须推送到远程仓库**
+  ```bash
+  git commit -m "xxx"
+  git push origin main  # 不要忘记这一步！
+  ```
+- ✅ **在 GitHub 上确认最新提交可见**
+
+#### 4.2 服务器环境适配
+- ✅ **Python 命令使用 `python3.11`**（不是 `python` 或 `python3`）
+- ✅ **虚拟环境路径：`/home/cshine/Cshine/venv`**（项目根目录，不在 backend 下）
+- ✅ **数据库配置使用 `DATABASE_URL`**（不是 DB_HOST 等独立字段）
+
+#### 4.3 数据库迁移脚本
+- ✅ **从 `DATABASE_URL` 解析连接信息**
+  ```python
+  from urllib.parse import urlparse
+  db_url = urlparse(settings.DATABASE_URL)
+  conn = psycopg2.connect(
+      host=db_url.hostname,
+      port=db_url.port or 5432,
+      database=db_url.path.lstrip('/'),
+      user=db_url.username,
+      password=db_url.password
+  )
+  ```
+- ✅ **初始化 `conn = None` 和 `cursor = None`**（避免 UnboundLocalError）
+
+#### 4.4 小程序配置检查
+- ✅ **生产环境必须使用 HTTPS 域名**
+  ```javascript
+  // ❌ 错误
+  production: 'http://8.134.254.88:8000'
+  
+  // ✅ 正确
+  production: 'https://cshine.xuyucloud.com'
+  ```
+
+#### 4.5 部署流程检查
+1. 本地代码已提交并推送
+2. 服务器拉取最新代码
+3. 执行数据库迁移（如有）
+4. 重启服务
+5. 验证服务状态
+6. 验证健康检查
+7. 小程序重新上传（如有前端改动）
+
+#### 4.6 验证命令
+```bash
+# 服务器端验证
+curl http://localhost:8000/health
+curl https://cshine.xuyucloud.com/health
+sudo systemctl status cshine-api
+
+# 查看日志
+sudo journalctl -u cshine-api -n 50
+```
+
+**详细经验文档**：`docs/deployment/LESSONS_LEARNED.md`
+
+---
+
 ## 📝 创建部署文档的标准流程
 
 ### 步骤 1：完成功能开发和测试
