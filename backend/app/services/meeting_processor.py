@@ -67,6 +67,7 @@ def _process_meeting_ai(meeting_id: str, audio_url: str):
             file_url=audio_url,
             source_language="cn",
             enable_summarization=True,  # 开启智能摘要
+            summarization_types=['Paragraph', 'Conversational', 'MindMap'],  # 明确指定三种摘要类型
             enable_chapters=True,  # 开启章节划分（自动识别议题）
             enable_meeting_assistance=True,  # 开启会议助手（行动项识别）
             enable_speaker_diarization=True,  # 开启说话人分离
