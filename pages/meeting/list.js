@@ -514,67 +514,32 @@ Page({
     await this.uploadAudioFile(file, folderId)
   },
   
-  // 上传音频文件
+  // 上传音频文件（使用合并接口）
   async uploadAudioFile(file, folderId) {
     const { showToast, showLoading, hideLoading } = require('../../utils/toast')
     
-    console.log('=== 开始上传流程 ===')
+    console.log('=== 开始上传流程（合并接口）===')
     console.log('文件信息:', file)
     console.log('目标知识库ID:', folderId)
     
     try {
-      showLoading('上传音频中...')
+      showLoading('上传并创建会议中...')
       
-      // 1. 上传音频文件到 OSS
-      console.log('[步骤1] 开始上传音频文件到OSS:', file.path)
-      const uploadResult = await API.uploadAudio(file.path)
-      console.log('[步骤1] OSS上传完成:', uploadResult)
-      
-      if (!uploadResult || !uploadResult.file_url) {
-        console.error('[步骤1] OSS上传失败: 未返回file_url')
-        throw new Error('文件上传失败')
-      }
-      
-      // 更新加载提示
-      showLoading('创建会议记录...')
-      
-      // 2. 创建会议纪要
-      const meetingData = {
+      // 使用新的合并接口：一次性完成上传和创建会议
+      const result = await API.uploadAudioAndCreateMeeting(file.path, {
         title: file.name,
-        audio_url: uploadResult.file_url,
-        audio_duration: file.duration || 0
-      }
+        folder_id: folderId && folderId !== '' ? parseInt(folderId) : null
+      })
       
-      // 只有在 folderId 有值且不为空字符串时才添加
-      if (folderId && folderId !== '') {
-        meetingData.folder_id = parseInt(folderId)
-        console.log('[步骤2] 添加folder_id:', meetingData.folder_id)
-      }
+      console.log('上传并创建会议成功:', result)
       
-      console.log('[步骤2] 准备创建会议，数据:', meetingData)
+      hideLoading()
+      showToast('上传成功，正在AI处理...', 'success')
       
-      try {
-        const meetingResult = await API.createMeeting(meetingData)
-        console.log('[步骤2] 会议创建成功:', meetingResult)
-        
-        if (!meetingResult || !meetingResult.id) {
-          console.error('[步骤2] 会议创建失败: 未返回id')
-          throw new Error('创建会议失败')
-        }
-        
-        hideLoading()
-        showToast('上传成功，正在AI处理...', 'success')
-        
-        // 3. 刷新列表
-        console.log('[步骤3] 刷新会议列表')
-        this.loadMeetingList()
-        
-        console.log('=== 上传流程完成 ===')
-        
-      } catch (createError) {
-        console.error('[步骤2] 创建会议API调用失败:', createError)
-        throw createError
-      }
+      // 刷新列表
+      this.loadMeetingList()
+      
+      console.log('=== 上传流程完成 ===')
       
     } catch (error) {
       console.error('=== 上传流程失败 ===')

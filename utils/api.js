@@ -109,6 +109,16 @@ function uploadAudio(filePath) {
 }
 
 /**
+ * 上传音频并创建会议（合并接口）
+ * @param {string} filePath 文件路径
+ * @param {object} params 参数 { title, folder_id }
+ */
+function uploadAudioAndCreateMeeting(filePath, params = {}) {
+  // 使用合并接口，一次性完成上传和创建会议
+  return upload('/api/v1/upload/audio-and-meeting', filePath, params, { showLoad: false })
+}
+
+/**
  * 获取 OSS 上传签名
  */
 function getOssSignature() {
@@ -322,6 +332,7 @@ module.exports = {
   
   // 文件上传
   uploadAudio,
+  uploadAudioAndCreateMeeting,
   getOssSignature,
   
   // 知识库
