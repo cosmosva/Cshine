@@ -90,6 +90,12 @@ Page({
   },
 
   onShow() {
+    // 如果正在上传，不要刷新
+    if (this._isUploading) {
+      console.log('正在上传，跳过刷新')
+      return
+    }
+    
     // 从详情页返回时刷新列表
     if (this._needRefresh) {
       this._needRefresh = false
@@ -522,6 +528,9 @@ Page({
     console.log('文件信息:', file)
     console.log('目标知识库ID:', folderId)
     
+    // 设置上传标志，防止页面刷新
+    this._isUploading = true
+    
     try {
       showLoading('上传并创建会议中...')
       
@@ -548,6 +557,9 @@ Page({
       console.error('错误堆栈:', error.stack)
       hideLoading()
       showToast(error.message || '上传失败，请重试', 'error')
+    } finally {
+      // 清除上传标志
+      this._isUploading = false
     }
   },
   
