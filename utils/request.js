@@ -178,7 +178,7 @@ function del(url, options = {}) {
  * 上传文件
  */
 function upload(url, filePath, formData = {}, options = {}) {
-  const { needAuth = true, showLoad = false } = options
+  const { needAuth = true, showLoad = false, timeout = 60000 } = options
 
   if (showLoad) {
     showLoading('上传中...')
@@ -193,7 +193,22 @@ function upload(url, filePath, formData = {}, options = {}) {
   const fullUrl = API_BASE_URL + url
 
   return new Promise((resolve, reject) => {
-    wx.uploadFile({
+    let uploadTask = null
+    let isCompleted = false
+    
+    // 设置超时
+    const timer = setTimeout(() => {
+      if (!isCompleted && uploadTask) {
+        console.warn('[Upload] 上传超时，中止任务')
+        uploadTask.abort()
+        if (showLoad) {
+          hideLoading()
+        }
+        reject(new Error('上传超时'))
+      }
+    }, timeout)
+    
+    uploadTask = wx.uploadFile({
       url: fullUrl,
       filePath,
       name: 'file',
@@ -202,6 +217,8 @@ function upload(url, filePath, formData = {}, options = {}) {
         'Authorization': `Bearer ${token}`
       } : {},
       success: (res) => {
+        isCompleted = true
+        clearTimeout(timer)
         console.log('[Upload] 上传响应:', res)
         
         if (showLoad) {
@@ -227,15 +244,31 @@ function upload(url, filePath, formData = {}, options = {}) {
         }
       },
       fail: (err) => {
+        isCompleted = true
+        clearTimeout(timer)
         console.error('[Upload] 上传失败:', err)
         
         if (showLoad) {
           hideLoading()
         }
-        showError('上传失败，请重试')
-        reject(err)
+        
+        // 更友好的错误提示
+        let errorMsg = '上传失败，请重试'
+        if (err.errMsg && err.errMsg.includes('exceed max upload connection')) {
+          errorMsg = '上传连接过多，请稍后重试'
+        } else if (err.errMsg && err.errMsg.includes('timeout')) {
+          errorMsg = '上传超时，请检查网络'
+        }
+        
+        showError(errorMsg)
+        reject(new Error(errorMsg))
       }
     })
+    
+    // 返回 uploadTask 供外部使用（如进度监听）
+    if (options.onProgressUpdate) {
+      uploadTask.onProgressUpdate(options.onProgressUpdate)
+    }
   })
 }
 
