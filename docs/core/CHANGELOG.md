@@ -5,6 +5,126 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.13] - 2025-11-11
+
+### 🎉 重大修复 - 通义听悟摘要功能完全正常工作
+
+经过深入调试和多次迭代，终于完全修复了通义听悟摘要功能，现在能正确获取并保存所有类型的摘要数据！
+
+### Fixed - 问题修复
+
+#### 通义听悟摘要数据解析 🔧
+- 🐛 **修复数据格式解析错误**
+  - 问题：之前假设 `Summarization` 是数组，实际是字典
+  - 修复：正确解析字典格式的摘要数据
+  - 键名：`ParagraphSummary`、`ConversationalSummary`、`MindMapSummary`
+
+- 📋 **修复摘要类型映射**
+  - 段落摘要：`ParagraphSummary` → `summary`
+  - 发言总结：`ConversationalSummary` (列表) → `conversational_summary` (JSON)
+  - 思维导图：`MindMapSummary` (列表) → `mind_map` (JSON)
+
+- ✅ **添加 summarization_enabled 标志**
+  - 根据阿里云官方文档，必须同时设置：
+    1. `summarization_enabled = True`（顶层开关）
+    2. `Summarization.Types`（具体类型）
+  - 同样修复了 `meeting_assistance_enabled` 和 `auto_chapters_enabled`
+
+- 🔍 **增强调试日志**
+  - 详细记录数据类型、键名、内容预览
+  - 便于快速定位数据格式问题
+
+### Added - 新增功能
+
+#### 会议重新处理功能 🔄
+- 🎯 **一键重新处理**
+  - 在会议详情页添加「重新处理」按钮
+  - 支持为旧会议生成新的摘要类型
+  - 确认对话框，避免误操作
+  - 处理完成后自动刷新页面
+
+- 🛠️ **调试和修复工具**
+  - 修复后端代码后可重新处理会议
+  - 调试通义听悟返回的数据格式
+  - 验证摘要功能是否正常工作
+
+### Improved - 改进优化
+
+#### 上传功能优化 📤
+- ⏱️ **超时控制**：60秒后自动中止上传任务
+- 🎯 **任务管理**：保存 uploadTask 对象，支持 abort
+- 💬 **友好提示**：针对不同错误类型显示不同提示
+- 📊 **进度监听**：为未来的进度条功能做准备
+
+#### 参数处理优化 🔧
+- 📝 **folder_id 类型转换**
+  - 后端接收为字符串，手动转换为整数或 None
+  - 前端只在有值时才传递，且转换为字符串
+  - 正确处理未分类（folder_id=null）的情况
+
+- 🏷️ **title 参数优先级**
+  - 优先使用前端传递的 title
+  - 避免使用微信处理后的临时文件名
+  - 确保会议标题正确显示
+
+### Technical - 技术细节
+
+#### 通义听悟数据格式（已验证）
+```json
+{
+  "Summarization": {
+    "ParagraphSummary": "段落摘要文本...",
+    "ParagraphTitle": "标题",
+    "ConversationalSummary": [
+      {
+        "SpeakerId": "1",
+        "SpeakerName": "发言人1",
+        "Summary": "发言总结..."
+      }
+    ],
+    "MindMapSummary": [
+      {
+        "Title": "主题",
+        "Topic": [...]
+      }
+    ]
+  }
+}
+```
+
+#### 测试结果 ✅
+- ✅ conversational_summary: 581 chars
+- ✅ mind_map: 1,498 chars  
+- ✅ summary: 159 chars
+
+**通义听悟摘要功能现已完全正常工作！** 🎉
+
+---
+
+## [0.5.12] - 2025-11-11
+
+### Added - 新增功能
+
+#### 会议重新处理功能 🔄
+- 添加前端 `reprocessMeeting` API 接口
+- 在会议详情页添加「重新处理」按钮
+- 点击后弹窗确认，避免误操作
+- 处理完成后自动刷新页面
+
+---
+
+## [0.5.11] - 2025-11-11
+
+### Fixed - 问题修复
+
+#### 通义听悟摘要功能启用 🔧
+- 添加 `summarization_enabled = True`
+- 添加 `meeting_assistance_enabled = True`
+- 添加 `auto_chapters_enabled = True`
+- 更新日志输出，明确显示 enabled 标志
+
+---
+
 ## [0.5.10] - 2025-11-11
 
 ### ✨ 功能增强 - 音频波形可视化播放器
