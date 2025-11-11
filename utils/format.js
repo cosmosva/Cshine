@@ -3,25 +3,31 @@
  */
 
 /**
- * 格式化时间
- * @param {Date|string|number} time - 时间
+ * 格式化时间（UTC+8时区）
+ * @param {Date|string|number} time - 时间（UTC时间）
  * @param {string} format - 格式（默认 'YYYY-MM-DD HH:mm:ss'）
- * @returns {string} 格式化后的时间字符串
+ * @returns {string} 格式化后的时间字符串（UTC+8）
  */
 function formatTime(time, format = 'YYYY-MM-DD HH:mm:ss') {
-  const date = time instanceof Date ? time : new Date(time)
-  
+  let date = time instanceof Date ? time : new Date(time)
+
   if (isNaN(date.getTime())) {
     return ''
   }
-  
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  
+
+  // 转换为 UTC+8 时区（中国标准时间）
+  // getTime() 返回 UTC 时间戳，加上 8 小时的毫秒数
+  const utc8Offset = 8 * 60 * 60 * 1000  // 8小时的毫秒数
+  const utc8Time = date.getTime() + utc8Offset
+  date = new Date(utc8Time)
+
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const hours = String(date.getUTCHours()).padStart(2, '0')
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0')
+
   return format
     .replace('YYYY', year)
     .replace('MM', month)
@@ -29,6 +35,16 @@ function formatTime(time, format = 'YYYY-MM-DD HH:mm:ss') {
     .replace('HH', hours)
     .replace('mm', minutes)
     .replace('ss', seconds)
+}
+
+/**
+ * 格式化日期时间（formatTime 的别名）
+ * @param {Date|string|number} time - 时间
+ * @param {string} format - 格式
+ * @returns {string} 格式化后的时间字符串
+ */
+function formatDateTime(time, format) {
+  return formatTime(time, format)
 }
 
 /**
@@ -124,6 +140,7 @@ function truncateText(text, maxLength = 50) {
 
 module.exports = {
   formatTime,
+  formatDateTime,
   formatRelativeTime,
   formatDuration,
   formatFileSize,

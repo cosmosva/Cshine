@@ -126,9 +126,24 @@ class TingwuService:
             # 打印请求参数（调试用）
             logger.info(f"📤 发送给通义听悟的参数:")
             logger.info(f"  - 转写: diarization_enabled={getattr(parameters.transcription, 'diarization_enabled', False)}")
-            logger.info(f"  - 摘要: {getattr(parameters, 'summarization', None)}")
+            
+            # 详细打印摘要参数
+            if hasattr(parameters, 'summarization') and parameters.summarization:
+                summarization_obj = parameters.summarization
+                logger.info(f"  - 摘要对象: {summarization_obj}")
+                logger.info(f"  - 摘要类型: {getattr(summarization_obj, 'types', None)}")
+                # 转换为字典查看
+                if hasattr(summarization_obj, 'to_map'):
+                    logger.info(f"  - 摘要序列化: {summarization_obj.to_map()}")
+            else:
+                logger.info(f"  - 摘要: None 或未设置")
+            
             logger.info(f"  - 会议助手: {getattr(parameters, 'meeting_assistance', None)}")
             logger.info(f"  - 章节: {getattr(parameters, 'auto_chapters', None)}")
+            
+            # 打印完整的 parameters 对象
+            if hasattr(parameters, 'to_map'):
+                logger.info(f"📋 完整参数序列化: {parameters.to_map()}")
             
             # 发送请求
             response = self.client.create_task(request)

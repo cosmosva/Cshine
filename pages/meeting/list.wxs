@@ -4,20 +4,73 @@
  */
 
 /**
- * 格式化完整时间
- * 输入: 2025-11-07 16:24:36.872975
- * 输出: 2025-11-07 16:24:36
+ * 格式化完整时间（UTC+8 时区）
+ * 输入: 2025-11-07 16:24:36.872975 (UTC)
+ * 输出: 2025-11-08 00:24:36 (UTC+8)
  */
 var formatFullTime = function(dateStr) {
   if (!dateStr) return ''
-  
+
   // 移除毫秒部分
   var str = dateStr.toString().split('.')[0]
-  
+
   // 替换 T 为空格（如果是ISO格式）
   str = str.replace('T', ' ')
-  
-  return str
+
+  // 解析时间字符串
+  var parts = str.split(' ')
+  if (parts.length !== 2) return str
+
+  var datePart = parts[0]  // 2025-11-07
+  var timePart = parts[1]  // 16:24:36
+
+  var dateComponents = datePart.split('-')
+  var timeComponents = timePart.split(':')
+
+  if (dateComponents.length !== 3 || timeComponents.length !== 3) return str
+
+  var year = parseInt(dateComponents[0])
+  var month = parseInt(dateComponents[1])
+  var day = parseInt(dateComponents[2])
+  var hour = parseInt(timeComponents[0])
+  var minute = parseInt(timeComponents[1])
+  var second = parseInt(timeComponents[2])
+
+  // 加8小时
+  hour = hour + 8
+
+  // 处理小时进位
+  if (hour >= 24) {
+    hour = hour - 24
+    day = day + 1
+
+    // 处理日期进位（简化处理，不考虑闰年）
+    var daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    // 闰年判断
+    if (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
+      daysInMonth[2] = 29
+    }
+
+    if (day > daysInMonth[month]) {
+      day = 1
+      month = month + 1
+
+      if (month > 12) {
+        month = 1
+        year = year + 1
+      }
+    }
+  }
+
+  // 格式化输出（补零）
+  var monthStr = month < 10 ? '0' + month : '' + month
+  var dayStr = day < 10 ? '0' + day : '' + day
+  var hourStr = hour < 10 ? '0' + hour : '' + hour
+  var minuteStr = minute < 10 ? '0' + minute : '' + minute
+  var secondStr = second < 10 ? '0' + second : '' + second
+
+  return year + '-' + monthStr + '-' + dayStr + ' ' + hourStr + ':' + minuteStr + ':' + secondStr
 }
 
 /**

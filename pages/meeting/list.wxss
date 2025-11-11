@@ -12,7 +12,7 @@ page {
 .meeting-list-page {
   width: 100%;
   height: 100vh;
-  background-color: #FFFFFF;
+  background-color: #F5F7FA;
   display: flex;
   flex-direction: column;
 }
@@ -217,7 +217,7 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   min-height: 22px;
 }
 
@@ -251,7 +251,7 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .timestamp {
@@ -595,7 +595,7 @@ page {
 .item-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
   min-width: 0;
   overflow: hidden;

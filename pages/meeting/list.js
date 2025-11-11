@@ -534,8 +534,12 @@ Page({
       const meetingData = {
         title: file.name,
         audio_url: uploadResult.file_url,
-        audio_duration: file.duration || 0,
-        folder_id: folderId || null
+        audio_duration: file.duration || 0
+      }
+      
+      // 只有在 folderId 有值时才添加
+      if (folderId) {
+        meetingData.folder_id = parseInt(folderId)
       }
       
       console.log('创建会议纪要，数据:', meetingData)
