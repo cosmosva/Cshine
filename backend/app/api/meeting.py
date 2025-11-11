@@ -548,4 +548,48 @@ async def get_meeting_speakers(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/{meeting_id}/reprocess", response_model=ResponseModel)
+async def reprocess_meeting(
+    meeting_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    重新处理会议音频
+    
+    用于为旧会议生成新的摘要类型（发言总结、思维导图等）
+    """
+    # 验证会议权限
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    if not meeting.audio_url:
+        raise HTTPException(status_code=400, detail="该会议没有音频文件")
+    
+    try:
+        # 重置状态为 PENDING
+        meeting.status = MeetingStatus.PENDING
+        db.commit()
+        
+        # 触发 AI 重新处理
+        process_meeting_ai_async(meeting.id, meeting.audio_url)
+        logger.info(f"会议重新处理已启动: meeting_id={meeting_id}")
+        
+        return ResponseModel(
+            code=200,
+            message="会议重新处理已启动，请稍候刷新查看结果",
+            data={"meeting_id": meeting_id, "status": "processing"}
+        )
+    
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Reprocess meeting error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
