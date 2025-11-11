@@ -66,9 +66,17 @@ Page({
     this.setData({ audioContext })
   },
 
+  onHide() {
+    // 页面隐藏时暂停音频
+    if (this.data.audioContext && this.data.isPlaying) {
+      this.data.audioContext.pause()
+    }
+  },
+
   onUnload() {
     // 销毁音频上下文
     if (this.data.audioContext) {
+      this.data.audioContext.pause()
       this.data.audioContext.destroy()
     }
   },

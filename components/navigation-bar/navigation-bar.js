@@ -91,12 +91,27 @@ Component({
     },
     back() {
       const data = this.data
+      console.log('[NavigationBar] 返回按钮被点击, delta:', data.delta)
+      
+      // 触发自定义事件
+      this.triggerEvent('back', { delta: data.delta }, {})
+      
+      // 执行返回操作
       if (data.delta) {
         wx.navigateBack({
-          delta: data.delta
+          delta: data.delta,
+          fail: (err) => {
+            console.error('[NavigationBar] 返回失败:', err)
+            // 如果返回失败，尝试跳转到首页
+            wx.switchTab({
+              url: '/pages/index/index',
+              fail: (err2) => {
+                console.error('[NavigationBar] 跳转首页也失败:', err2)
+              }
+            })
+          }
         })
       }
-      this.triggerEvent('back', { delta: data.delta }, {})
     }
   },
 })
