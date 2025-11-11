@@ -51,6 +51,7 @@ class User(Base):
     meetings = relationship("Meeting", back_populates="user", cascade="all, delete-orphan")
     tags = relationship("Tag", back_populates="user", cascade="all, delete-orphan")
     folders = relationship("Folder", back_populates="user", cascade="all, delete-orphan")
+    contacts = relationship("Contact", back_populates="user", cascade="all, delete-orphan")
 
 
 class Flash(Base):
@@ -97,9 +98,11 @@ class Meeting(Base):
     audio_url = Column(Text, nullable=True)
     audio_duration = Column(Integer, nullable=True)  # 秒
     transcript = Column(Text, nullable=True)
+    transcript_paragraphs = Column(Text, nullable=True)  # 段落级转录数据（JSON格式）✨新增
     summary = Column(Text, nullable=True)  # 段落摘要
     conversational_summary = Column(Text, nullable=True)  # 发言总结 ✨新增
     mind_map = Column(Text, nullable=True)  # 思维导图 ✨新增
+    waveform_data = Column(Text, nullable=True)  # 音频波形数据（JSON格式）✨新增
     key_points = Column(Text, nullable=True)  # 存储为 JSON 字符串
     action_items = Column(Text, nullable=True)  # 存储为 JSON 字符串
     is_favorite = Column(Boolean, default=False, nullable=False)  # 收藏状态 ✨新增
@@ -110,6 +113,7 @@ class Meeting(Base):
     # 关系
     user = relationship("User", back_populates="meetings")
     folder = relationship("Folder", back_populates="meetings")
+    speakers = relationship("MeetingSpeaker", back_populates="meeting", cascade="all, delete-orphan")
 
 
 class Tag(Base):
@@ -154,5 +158,39 @@ class Folder(Base):
     # 关系
     user = relationship("User", back_populates="folders")
     meetings = relationship("Meeting", back_populates="folder", cascade="all, delete-orphan")
+
+
+class Contact(Base):
+    """常用联系人表 ✨新增"""
+    __tablename__ = "contacts"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(50), nullable=False)
+    position = Column(String(50), nullable=True)
+    phone = Column(String(20), nullable=True)
+    email = Column(String(100), nullable=True)
+    avatar = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # 关系
+    user = relationship("User", back_populates="contacts")
+    meeting_speakers = relationship("MeetingSpeaker", back_populates="contact")
+
+
+class MeetingSpeaker(Base):
+    """会议说话人映射表 ✨新增"""
+    __tablename__ = "meeting_speakers"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    meeting_id = Column(String(36), ForeignKey("meetings.id", ondelete="CASCADE"), nullable=False, index=True)
+    speaker_id = Column(String(20), nullable=False)  # "说话人1", "说话人2" 等
+    contact_id = Column(Integer, ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True, index=True)
+    custom_name = Column(String(50), nullable=True)  # 自定义名称（不关联联系人时使用）
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # 关系
+    meeting = relationship("Meeting", back_populates="speakers")
+    contact = relationship("Contact", back_populates="meeting_speakers")
 
 

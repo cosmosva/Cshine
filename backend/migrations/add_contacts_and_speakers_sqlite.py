@@ -1,0 +1,177 @@
+"""
+数据库迁移：新增联系人和说话人映射表（SQLite版本）
+版本：v0.5.10
+日期：2025-11-11
+
+变更内容：
+1. 新增 contacts 表（常用联系人）
+2. 新增 meeting_speakers 表（会议说话人映射）
+3. meetings 表新增 transcript_paragraphs 字段
+"""
+
+import sqlite3
+import os
+import sys
+from loguru import logger
+
+# 添加父目录到路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config import settings
+
+
+def get_db_path():
+    """获取SQLite数据库路径"""
+    # 从 DATABASE_URL 中提取路径
+    # 格式: sqlite:///path/to/db.db
+    if settings.DATABASE_URL.startswith('sqlite:///'):
+        return settings.DATABASE_URL.replace('sqlite:///', '')
+    else:
+        # 默认路径
+        return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cshine.db')
+
+
+def run_migration():
+    """执行迁移"""
+    db_path = get_db_path()
+    
+    if not os.path.exists(db_path):
+        logger.error(f"数据库文件不存在: {db_path}")
+        return False
+    
+    try:
+        # 连接数据库
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        logger.info(f"开始SQLite数据库迁移... 数据库: {db_path}")
+        
+        # 1. 创建 contacts 表
+        logger.info("创建 contacts 表...")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS contacts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id VARCHAR(36) NOT NULL,
+                name VARCHAR(50) NOT NULL,
+                position VARCHAR(50),
+                phone VARCHAR(20),
+                email VARCHAR(100),
+                avatar VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
+        logger.info("✅ contacts 表创建成功")
+        
+        # 2. 创建 meeting_speakers 表
+        logger.info("创建 meeting_speakers 表...")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS meeting_speakers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                meeting_id VARCHAR(36) NOT NULL,
+                speaker_id VARCHAR(20) NOT NULL,
+                contact_id INTEGER,
+                custom_name VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE,
+                FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL,
+                UNIQUE(meeting_id, speaker_id)
+            );
+        """)
+        logger.info("✅ meeting_speakers 表创建成功")
+        
+        # 3. 为 meetings 表添加 transcript_paragraphs 字段
+        logger.info("为 meetings 表添加 transcript_paragraphs 字段...")
+        
+        # 检查字段是否已存在
+        cursor.execute("PRAGMA table_info(meetings)")
+        columns = [col[1] for col in cursor.fetchall()]
+        
+        if 'transcript_paragraphs' not in columns:
+            cursor.execute("""
+                ALTER TABLE meetings ADD COLUMN transcript_paragraphs TEXT;
+            """)
+            logger.info("✅ transcript_paragraphs 字段添加成功")
+        else:
+            logger.info("⚠️  transcript_paragraphs 字段已存在，跳过")
+        
+        # 4. 创建索引
+        logger.info("创建索引...")
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_meeting_speakers_meeting_id ON meeting_speakers(meeting_id);
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_meeting_speakers_contact_id ON meeting_speakers(contact_id);
+        """)
+        logger.info("✅ 索引创建成功")
+        
+        # 提交事务
+        conn.commit()
+        logger.info("✅ SQLite数据库迁移完成！")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ SQLite数据库迁移失败: {e}")
+        if conn:
+            conn.rollback()
+        raise
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def rollback_migration():
+    """回滚迁移"""
+    db_path = get_db_path()
+    
+    if not os.path.exists(db_path):
+        logger.error(f"数据库文件不存在: {db_path}")
+        return False
+    
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        logger.info("开始回滚SQLite迁移...")
+        
+        # 删除表（注意顺序，先删除有外键依赖的表）
+        cursor.execute("DROP TABLE IF EXISTS meeting_speakers;")
+        cursor.execute("DROP TABLE IF EXISTS contacts;")
+        
+        # SQLite 不支持 DROP COLUMN，需要重建表
+        # 这里简化处理，只在必要时手动处理
+        logger.warning("⚠️  SQLite 不支持删除列，transcript_paragraphs 字段保留")
+        
+        conn.commit()
+        logger.info("✅ 回滚完成")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ 回滚失败: {e}")
+        if conn:
+            conn.rollback()
+        raise
+        
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "rollback":
+        rollback_migration()
+    else:
+        run_migration()
+

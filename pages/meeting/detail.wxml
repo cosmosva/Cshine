@@ -1,7 +1,9 @@
 <!--会议纪要详情页-->
+<wxs module="utils" src="./detail.wxs"></wxs>
+
 <view class="meeting-detail-page">
   <!-- 自定义导航栏 -->
-  <navigation-bar title="会议详情" showBack="{{true}}" rightText="•••" bind:rightClick="showActionMenu" />
+  <navigation-bar title="会议详情" back="{{true}}" />
 
   <!-- 加载中 -->
   <view class="loading-state" wx:if="{{loading}}">
@@ -21,30 +23,20 @@
             📅 {{formatTime(meeting.meeting_date)}}
           </text>
           <text class="meta-item" wx:if="{{meeting.audio_duration}}">
-            ⏱️ {{formatDuration(meeting.audio_duration)}}
+            ⏱️ {{utils.formatDuration(meeting.audio_duration)}}
           </text>
           <text class="meta-item" wx:if="{{meeting.participants && meeting.participants.length > 0}}">
             👥 {{meeting.participants.join(', ')}}
           </text>
         </view>
 
-        <!-- 音频播放器 -->
-        <view class="audio-player" wx:if="{{meeting.audio_url}}">
-          <view class="play-btn" bindtap="toggleAudio">
-            <text class="icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
-          </view>
-          <view class="audio-info">
-            <view class="audio-progress">
-              <view class="progress-bar">
-                <view class="progress-fill" style="width: {{(currentTime / duration) * 100}}%;"></view>
-              </view>
-            </view>
-            <view class="audio-time">
-              <text>{{formatDuration(currentTime)}}</text>
-              <text>{{formatDuration(duration || meeting.audio_duration)}}</text>
-            </view>
-          </view>
-        </view>
+        <!-- 音频波形播放器 -->
+        <waveform-player 
+          wx:if="{{meeting.audio_url}}"
+          audio-url="{{meeting.audio_url}}"
+          duration="{{meeting.audio_duration}}"
+          meeting-id="{{meeting.id}}"
+        />
       </view>
     </view>
 
@@ -63,67 +55,120 @@
 
     <!-- Tab 内容 -->
     <scroll-view class="tab-content" scroll-y enhanced show-scrollbar="{{false}}">
-      <!-- 摘要 -->
+      <!-- 总结 Tab -->
       <view class="content-section" wx:if="{{activeTab === 'summary'}}">
-        <view class="section-card">
+        <!-- 段落摘要 -->
+        <view class="section-card" wx:if="{{meeting.summary}}">
           <view class="card-title">📝 会议摘要</view>
-          <view class="summary-text">
-            {{meeting.summary || '暂无摘要'}}
-          </view>
+          <view class="summary-text">{{meeting.summary}}</view>
+        </view>
+        
+        <!-- 发言总结 -->
+        <view class="section-card" wx:if="{{meeting.conversational_summary}}">
+          <view class="card-title">💬 发言总结</view>
+          <view class="summary-text">{{meeting.conversational_summary}}</view>
+        </view>
+        
+        <!-- 空状态 -->
+        <view class="empty-tip" wx:if="{{!meeting.summary && !meeting.conversational_summary}}">
+          暂无总结信息
         </view>
       </view>
 
-      <!-- 要点 -->
-      <view class="content-section" wx:if="{{activeTab === 'keyPoints'}}">
-        <view class="key-points-list" wx:if="{{meeting.key_points && meeting.key_points.length > 0}}">
-          <view class="point-card" wx:for="{{meeting.key_points}}" wx:key="index">
-            <view class="point-header">
-              <text class="point-timestamp">{{item.timestamp}}</text>
-              <text class="point-speaker" wx:if="{{item.speaker}}">{{item.speaker}}</text>
-            </view>
-            <view class="point-topic">{{item.topic}}</view>
-            <view class="point-content">{{item.content}}</view>
-          </view>
-        </view>
-        <view class="empty-tip" wx:else>
-          暂无要点信息
-        </view>
-      </view>
-
-      <!-- 行动项 -->
-      <view class="content-section" wx:if="{{activeTab === 'actions'}}">
-        <view class="action-list" wx:if="{{meeting.action_items && meeting.action_items.length > 0}}">
-          <view class="action-card" wx:for="{{meeting.action_items}}" wx:key="index">
-            <view class="action-header">
-              <view class="action-checkbox {{item.status === 'completed' ? 'checked' : ''}}">
-                {{item.status === 'completed' ? '✓' : ''}}
-              </view>
-              <view class="action-priority priority-{{item.priority}}">
-                {{item.priority === 'high' ? '高' : item.priority === 'low' ? '低' : '中'}}
-              </view>
-            </view>
-            <view class="action-content">{{item.content}}</view>
-            <view class="action-footer">
-              <text class="action-assignee" wx:if="{{item.assignee}}">👤 {{item.assignee}}</text>
-              <text class="action-deadline" wx:if="{{item.deadline}}">📅 {{item.deadline}}</text>
-            </view>
-          </view>
-        </view>
-        <view class="empty-tip" wx:else>
-          暂无行动项
-        </view>
-      </view>
-
-      <!-- 全文 -->
+      <!-- 转录 Tab（时间轴式） -->
       <view class="content-section" wx:if="{{activeTab === 'transcript'}}">
-        <view class="section-card">
-          <view class="card-title">📄 会议全文</view>
-          <view class="transcript-text">
-            {{meeting.transcript || '暂无转写文本'}}
+        <view class="transcript-timeline" wx:if="{{meeting.transcript_paragraphs && meeting.transcript_paragraphs.length > 0}}">
+          <view 
+            class="transcript-item" 
+            wx:for="{{meeting.transcript_paragraphs}}" 
+            wx:key="index"
+          >
+            <!-- 说话人和时间 -->
+            <view class="transcript-header">
+              <text 
+                class="speaker-name-text" 
+                data-speaker="SPEAKER_{{item.SpeakerId}}"
+                bindtap="showSpeakerAnnotation"
+              >
+                {{utils.getSpeakerName('SPEAKER_' + item.SpeakerId, speakerMap)}}
+              </text>
+              <text class="timestamp-text">{{utils.formatDuration(item.Words[0].Start / 1000)}}</text>
+            </view>
+            
+            <!-- 发言内容 -->
+            <view class="transcript-content">
+              <text wx:for="{{item.Words}}" wx:for-item="word" wx:key="index">{{word.Text}}</text>
+            </view>
           </view>
+        </view>
+        
+        <!-- 兜底：显示原始转录文本 -->
+        <view class="section-card" wx:elif="{{meeting.transcript}}">
+          <view class="card-title">📄 会议转录</view>
+          <view class="transcript-text">{{meeting.transcript}}</view>
+        </view>
+        
+        <!-- 空状态 -->
+        <view class="empty-tip" wx:else>
+          暂无转录信息
+        </view>
+      </view>
+
+      <!-- 思维导图 Tab -->
+      <view class="content-section" wx:if="{{activeTab === 'mindmap'}}">
+        <view class="section-card" wx:if="{{meeting.mind_map}}">
+          <view class="card-title">🧠 思维导图</view>
+          <view class="mindmap-text">{{meeting.mind_map}}</view>
+          <view class="mindmap-hint">💡 提示：思维导图可视化功能正在开发中，当前显示原始数据</view>
+        </view>
+        
+        <!-- 空状态 -->
+        <view class="empty-tip" wx:else>
+          暂无思维导图
         </view>
       </view>
     </scroll-view>
+  </view>
+
+  <!-- 说话人标注弹窗 -->
+  <view class="modal-mask" wx:if="{{showSpeakerModal}}" bindtap="closeSpeakerModal">
+    <view class="modal-content" catchtap="doNothing">
+      <view class="modal-header">
+        <text class="modal-title">标注说话人</text>
+        <view class="modal-close" bindtap="closeSpeakerModal">✕</view>
+      </view>
+      
+      <view class="modal-body">
+        <text class="modal-subtitle">选择联系人</text>
+        
+        <scroll-view class="contacts-list" scroll-y>
+          <view 
+            class="contact-item" 
+            wx:for="{{contacts}}" 
+            wx:key="id"
+            data-contact-id="{{item.id}}"
+            bindtap="selectContact"
+          >
+            <view class="contact-avatar">
+              <text class="avatar-text">{{item.name.substring(0, 1)}}</text>
+            </view>
+            <view class="contact-info">
+              <text class="contact-name">{{item.name}}</text>
+              <text class="contact-position" wx:if="{{item.position}}">{{item.position}}</text>
+            </view>
+          </view>
+          
+          <view class="empty-contacts" wx:if="{{contacts.length === 0}}">
+            暂无联系人，请先在"我的"页面添加
+          </view>
+        </scroll-view>
+        
+        <view class="custom-name-btn" bindtap="customNameAnnotation">
+          <text class="btn-icon">✏️</text>
+          <text class="btn-text">自定义名称</text>
+        </view>
+      </view>
+    </view>
   </view>
 </view>
 

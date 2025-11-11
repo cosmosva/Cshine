@@ -1,0 +1,48 @@
+/**
+ * 会议详情页 WXS 工具函数
+ */
+
+/**
+ * 获取说话人显示名称
+ * @param {string} speakerId 说话人ID
+ * @param {object} speakerMap 说话人映射表
+ */
+function getSpeakerName(speakerId, speakerMap) {
+  if (speakerMap && speakerMap[speakerId]) {
+    return speakerMap[speakerId]
+  }
+  return speakerId
+}
+
+/**
+ * 格式化时长（秒转 HH:MM:SS）
+ * @param {number} seconds 秒数
+ */
+function formatDuration(seconds) {
+  if (!seconds || seconds < 0) {
+    return '00:00'
+  }
+  
+  var hours = Math.floor(seconds / 3600)
+  var minutes = Math.floor((seconds % 3600) / 60)
+  var secs = Math.floor(seconds % 60)
+  
+  if (hours > 0) {
+    return padZero(hours) + ':' + padZero(minutes) + ':' + padZero(secs)
+  } else {
+    return padZero(minutes) + ':' + padZero(secs)
+  }
+}
+
+/**
+ * 补零
+ */
+function padZero(num) {
+  return num < 10 ? '0' + num : '' + num
+}
+
+module.exports = {
+  getSpeakerName: getSpeakerName,
+  formatDuration: formatDuration
+}
+

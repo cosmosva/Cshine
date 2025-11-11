@@ -76,6 +76,13 @@ const API_ENDPOINTS = {
   FOLDER_UPDATE: '/api/v1/folders/',  // 需要拼接 ID
   FOLDER_DELETE: '/api/v1/folders/',  // 需要拼接 ID
 
+  // 联系人相关
+  CONTACT_CREATE: '/api/v1/contacts/create',
+  CONTACT_LIST: '/api/v1/contacts/list',
+  CONTACT_DETAIL: '/api/v1/contacts',  // 需要拼接 ID
+  CONTACT_UPDATE: '/api/v1/contacts',  // 需要拼接 ID
+  CONTACT_DELETE: '/api/v1/contacts',  // 需要拼接 ID
+
   // 文件上传
   UPLOAD_AUDIO: '/api/v1/upload/audio'
 }

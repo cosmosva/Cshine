@@ -45,6 +45,14 @@
 
     <!-- 功能列表 -->
     <view class="menu-section">
+      <view class="menu-item" bindtap="goToContacts">
+        <view class="menu-left">
+          <text class="menu-icon">👥</text>
+          <text class="menu-label">常用联系人</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
       <view class="menu-item" bindtap="goToSettings">
         <view class="menu-left">
           <text class="menu-icon">⚙️</text>

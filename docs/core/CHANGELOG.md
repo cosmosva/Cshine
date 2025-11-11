@@ -5,6 +5,77 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.10] - 2025-11-11
+
+### ✨ 功能增强 - 音频波形可视化播放器
+
+这是一个重要的体验优化版本，为会议详情页实现了音频波形可视化播放器，大幅提升音频播放体验。
+
+### Added - 新增功能
+
+#### 音频波形播放器 ✨
+- 🎵 **真实音频波形可视化**
+  - 使用 librosa 提取音频实际波形数据
+  - Canvas 实时绘制波形图
+  - 已播放部分红色高亮，未播放部分黑色
+  - 波形数据缓存到数据库，避免重复提取
+
+- ⚡ **增强播放控制**
+  - 倍速播放：支持 0.5x / 1.0x / 1.5x / 2.0x
+  - 快进/快退：一键跳转 ±15 秒
+  - 时间显示：当前时间 / 总时长
+  - 播放进度与波形实时同步
+
+- 🎨 **优雅的 UI 设计**
+  - 独立的波形播放器组件
+  - 现代化的控制按钮布局
+  - 流畅的动画效果
+  - 响应式设计，适配不同设备
+
+### Changed - 优化
+
+- 🔄 **替换原有音频播放器**
+  - 移除旧的简单进度条播放器
+  - 集成新的波形可视化播放器
+  - 保持向后兼容，没有波形数据时优雅降级
+
+- 📦 **性能优化**
+  - 波形数据缓存机制（首次提取 5-15 秒，后续秒级响应）
+  - Canvas 绘制优化（使用 requestAnimationFrame）
+  - 波形数据降采样到 800 个点
+
+### Technical - 技术细节
+
+#### 后端
+- 新增 `backend/app/services/waveform_service.py` - 波形提取服务
+- 新增 `GET /api/v1/meeting/{meeting_id}/waveform` API 接口
+- 新增 `meetings.waveform_data` 字段（TEXT，存储 JSON 格式波形数据）
+- 新增依赖：`librosa==0.10.2`, `numpy==1.26.4`
+
+#### 前端
+- 新增 `components/waveform-player/` - 波形播放器组件
+  - Canvas 波形绘制
+  - 音频播放控制
+  - 进度同步
+  - 倍速/快进快退功能
+- 更新 `pages/meeting/detail.*` - 集成波形播放器
+- 新增 `utils/api.js::getMeetingWaveform` - 波形数据 API 调用
+
+#### 数据库迁移
+- PostgreSQL: `backend/migrations/add_waveform_data.py`
+- SQLite: `backend/migrations/add_waveform_data_sqlite.py`
+
+### Documentation - 文档
+
+- 📝 新增部署文档：`docs/features/DEPLOY_WAVEFORM_PLAYER_20251111.md`
+  - 详细的部署步骤
+  - 依赖安装说明
+  - 验证方法
+  - 回滚方案
+  - 注意事项
+
+---
+
 ## [0.5.6] - 2025-11-10
 
 ### Fixed - 修复

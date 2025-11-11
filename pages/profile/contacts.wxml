@@ -1,0 +1,130 @@
+<!--常用联系人管理页面-->
+<view class="contacts-page">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="常用联系人" showBack="{{true}}" />
+
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 联系人列表 -->
+  <view class="page-content" wx:if="{{!loading}}">
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{contacts.length === 0}}">
+      <text class="empty-icon">👤</text>
+      <text class="empty-text">还没有常用联系人</text>
+      <text class="empty-hint">添加联系人后，可快速标注会议说话人</text>
+    </view>
+
+    <!-- 联系人卡片 -->
+    <view class="contacts-list" wx:else>
+      <view 
+        class="contact-card" 
+        wx:for="{{contacts}}" 
+        wx:key="id"
+      >
+        <view class="contact-info">
+          <view class="contact-avatar">
+            <text class="avatar-text">{{item.name.substring(0, 1)}}</text>
+          </view>
+          <view class="contact-details">
+            <view class="contact-name">{{item.name}}</view>
+            <view class="contact-position" wx:if="{{item.position}}">{{item.position}}</view>
+            <view class="contact-meta">
+              <text wx:if="{{item.phone}}">📱 {{item.phone}}</text>
+              <text wx:if="{{item.email}}">📧 {{item.email}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="contact-actions">
+          <view 
+            class="action-btn edit-btn" 
+            data-contact="{{item}}"
+            bindtap="showEditModalForContact"
+          >
+            编辑
+          </view>
+          <view 
+            class="action-btn delete-btn" 
+            data-contact="{{item}}"
+            bindtap="deleteContact"
+          >
+            删除
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 新增按钮 -->
+  <view class="add-btn-wrapper">
+    <view class="add-btn" bindtap="showAddModal">
+      <text class="add-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showEditModal}}" bindtap="closeEditModal">
+    <view class="modal-content" catchtap="doNothing">
+      <view class="modal-header">
+        <text class="modal-title">{{editMode === 'add' ? '新增联系人' : '编辑联系人'}}</text>
+        <view class="modal-close" bindtap="closeEditModal">✕</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">姓名 <text class="required">*</text></text>
+          <input 
+            class="form-input" 
+            placeholder="请输入姓名"
+            value="{{formData.name}}"
+            data-field="name"
+            bindinput="onInput"
+          />
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">职位</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入职位"
+            value="{{formData.position}}"
+            data-field="position"
+            bindinput="onInput"
+          />
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">电话</text>
+          <input 
+            class="form-input" 
+            type="number"
+            placeholder="请输入电话"
+            value="{{formData.phone}}"
+            data-field="phone"
+            bindinput="onInput"
+          />
+        </view>
+        
+        <view class="form-item">
+          <text class="form-label">邮箱</text>
+          <input 
+            class="form-input" 
+            placeholder="请输入邮箱"
+            value="{{formData.email}}"
+            data-field="email"
+            bindinput="onInput"
+          />
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <view class="modal-btn cancel-btn" bindtap="closeEditModal">取消</view>
+        <view class="modal-btn confirm-btn" bindtap="saveContact">保存</view>
+      </view>
+    </view>
+  </view>
+</view>
+

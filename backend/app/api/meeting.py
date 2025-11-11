@@ -10,7 +10,7 @@ from loguru import logger
 import json
 
 from app.database import get_db
-from app.models import User, Meeting, MeetingStatus
+from app.models import User, Meeting, MeetingStatus, MeetingSpeaker, Contact
 from app.dependencies import get_current_user
 from app.schemas import (
     MeetingCreate,
@@ -18,9 +18,15 @@ from app.schemas import (
     MeetingResponse,
     MeetingListResponse,
     MeetingStatusResponse,
+    SpeakerMapRequest,
+    SpeakerResponse,
+    SpeakerListResponse,
+    ContactResponse,
+    WaveformResponse,
     ResponseModel
 )
 from app.services.meeting_processor import process_meeting_ai_async, check_meeting_ai_status
+from app.services.waveform_service import WaveformService
 
 router = APIRouter()
 
@@ -390,4 +396,229 @@ async def get_meeting_status(
     except Exception as e:
         logger.error(f"Get meeting status error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{meeting_id}/speakers/map", response_model=ResponseModel)
+async def map_speaker(
+    meeting_id: str,
+    speaker_data: SpeakerMapRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    标注会议说话人
+    
+    将"说话人1"、"说话人2"等映射到联系人或自定义名称
+    
+    Args:
+        meeting_id: 会议ID
+        speaker_data: {
+            "speaker_id": "说话人1",
+            "contact_id": 123  # 可选，关联到联系人
+            "custom_name": "张三"  # 可选，自定义名称
+        }
+    """
+    # 验证会议权限
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    # 验证至少提供一种映射方式
+    if not speaker_data.contact_id and not speaker_data.custom_name:
+        raise HTTPException(status_code=400, detail="请提供联系人ID或自定义名称")
+    
+    # 如果提供了联系人ID，验证联系人是否存在
+    if speaker_data.contact_id:
+        contact = db.query(Contact).filter(
+            Contact.id == speaker_data.contact_id,
+            Contact.user_id == current_user.id
+        ).first()
+        
+        if not contact:
+            raise HTTPException(status_code=404, detail="联系人不存在")
+    
+    try:
+        # 查找或创建说话人映射
+        speaker_map = db.query(MeetingSpeaker).filter(
+            MeetingSpeaker.meeting_id == meeting_id,
+            MeetingSpeaker.speaker_id == speaker_data.speaker_id
+        ).first()
+        
+        if speaker_map:
+            # 更新已有映射
+            speaker_map.contact_id = speaker_data.contact_id
+            speaker_map.custom_name = speaker_data.custom_name
+        else:
+            # 创建新映射
+            speaker_map = MeetingSpeaker(
+                meeting_id=meeting_id,
+                speaker_id=speaker_data.speaker_id,
+                contact_id=speaker_data.contact_id,
+                custom_name=speaker_data.custom_name
+            )
+            db.add(speaker_map)
+        
+        db.commit()
+        db.refresh(speaker_map)
+        
+        # 构建响应
+        display_name = speaker_data.custom_name
+        contact_info = None
+        
+        if speaker_data.contact_id:
+            contact = db.query(Contact).filter(Contact.id == speaker_data.contact_id).first()
+            if contact:
+                display_name = contact.name
+                contact_info = ContactResponse.from_orm(contact)
+        
+        logger.info(f"Speaker mapped: meeting={meeting_id}, speaker={speaker_data.speaker_id}, name={display_name}")
+        
+        return ResponseModel(
+            code=200,
+            message="标注成功",
+            data=SpeakerResponse(
+                speaker_id=speaker_data.speaker_id,
+                display_name=display_name,
+                contact_id=speaker_data.contact_id,
+                contact=contact_info
+            )
+        )
+    
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Map speaker error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{meeting_id}/speakers", response_model=ResponseModel)
+async def get_meeting_speakers(
+    meeting_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    获取会议的说话人映射关系
+    
+    返回该会议中所有说话人的标注信息
+    """
+    # 验证会议权限
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    try:
+        # 查询所有说话人映射
+        speaker_maps = db.query(MeetingSpeaker).filter(
+            MeetingSpeaker.meeting_id == meeting_id
+        ).all()
+        
+        # 构建响应
+        speakers = []
+        for speaker_map in speaker_maps:
+            display_name = speaker_map.custom_name or speaker_map.speaker_id
+            contact_info = None
+            
+            if speaker_map.contact_id:
+                contact = db.query(Contact).filter(Contact.id == speaker_map.contact_id).first()
+                if contact:
+                    display_name = contact.name
+                    contact_info = ContactResponse.from_orm(contact)
+            
+            speakers.append(SpeakerResponse(
+                speaker_id=speaker_map.speaker_id,
+                display_name=display_name,
+                contact_id=speaker_map.contact_id,
+                contact=contact_info
+            ))
+        
+        return ResponseModel(
+            code=200,
+            message="success",
+            data=SpeakerListResponse(items=speakers)
+        )
+    
+    except Exception as e:
+        logger.error(f"Get meeting speakers error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{meeting_id}/waveform", response_model=ResponseModel)
+async def get_meeting_waveform(
+    meeting_id: str,
+    num_points: int = Query(800, ge=100, le=2000, description="波形数据点数量"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    获取会议音频的波形数据
+    
+    用于前端Canvas可视化绘制
+    
+    Args:
+        meeting_id: 会议ID
+        num_points: 需要的波形数据点数量（默认800）
+        
+    Returns:
+        波形数据数组（归一化到0-1）
+    """
+    # 验证会议权限
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+    
+    if not meeting.audio_url:
+        raise HTTPException(status_code=400, detail="该会议没有音频文件")
+    
+    try:
+        # 检查是否有缓存的波形数据
+        cached = False
+        if meeting.waveform_data:
+            try:
+                waveform = json.loads(meeting.waveform_data)
+                cached = True
+                logger.info(f"使用缓存的波形数据: meeting_id={meeting_id}")
+            except:
+                waveform = None
+        else:
+            waveform = None
+        
+        # 如果没有缓存，提取波形数据
+        if not waveform:
+            logger.info(f"开始提取波形数据: meeting_id={meeting_id}, audio_url={meeting.audio_url}")
+            
+            # 从URL提取波形
+            waveform = WaveformService.extract_waveform_from_url(meeting.audio_url, num_points)
+            
+            # 保存到数据库缓存
+            meeting.waveform_data = json.dumps(waveform)
+            db.commit()
+            
+            logger.info(f"波形数据已缓存: meeting_id={meeting_id}, points={len(waveform)}")
+        
+        return ResponseModel(
+            code=200,
+            message="success",
+            data=WaveformResponse(
+                meeting_id=meeting_id,
+                waveform=waveform,
+                num_points=len(waveform),
+                cached=cached
+            )
+        )
+    
+    except Exception as e:
+        logger.error(f"Get meeting waveform error: {e}")
+        raise HTTPException(status_code=500, detail=f"获取波形数据失败: {str(e)}")
 

@@ -71,6 +71,15 @@ Page({
   },
 
   /**
+   * 跳转到常用联系人页面
+   */
+  goToContacts() {
+    wx.navigateTo({
+      url: '/pages/profile/contacts'
+    })
+  },
+
+  /**
    * 完善资料（获取微信头像和昵称）
    * ⚠️ 注意：wx.getUserProfile() 必须在用户点击事件的同步上下文中调用
    */

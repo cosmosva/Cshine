@@ -12,53 +12,31 @@ Page({
     meeting: null,
     loading: true,
     
-    // 音频播放状态
-    audioContext: null,
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    
     // Tab 切换
-    activeTab: 'summary',  // summary / keyPoints / actions / transcript
+    activeTab: 'summary',  // summary / transcript / mindmap
     tabs: [
-      { id: 'summary', name: '摘要' },
-      { id: 'keyPoints', name: '要点' },
-      { id: 'actions', name: '行动项' },
-      { id: 'transcript', name: '全文' }
-    ]
+      { id: 'summary', name: '总结' },
+      { id: 'transcript', name: '转录' },
+      { id: 'mindmap', name: '思维导图' }
+    ],
+    
+    // 说话人映射
+    speakerMap: {},  // { "说话人1": "张三", "说话人2": "李四" }
+    
+    // 联系人列表（用于标注）
+    contacts: [],
+    
+    // 标注弹窗
+    showSpeakerModal: false,
+    currentSpeaker: null
   },
 
   onLoad(options) {
     if (options.id) {
       this.setData({ meetingId: options.id })
       this.loadMeetingDetail()
-    }
-    
-    // 创建音频上下文
-    const audioContext = wx.createInnerAudioContext()
-    audioContext.onPlay(() => {
-      this.setData({ isPlaying: true })
-    })
-    audioContext.onPause(() => {
-      this.setData({ isPlaying: false })
-    })
-    audioContext.onEnded(() => {
-      this.setData({ isPlaying: false, currentTime: 0 })
-    })
-    audioContext.onTimeUpdate(() => {
-      this.setData({
-        currentTime: audioContext.currentTime,
-        duration: audioContext.duration
-      })
-    })
-    
-    this.setData({ audioContext })
-  },
-
-  onUnload() {
-    // 销毁音频上下文
-    if (this.data.audioContext) {
-      this.data.audioContext.destroy()
+      this.loadSpeakerMap()
+      this.loadContacts()
     }
   },
 
@@ -77,11 +55,6 @@ Page({
           meeting: meeting,
           loading: false
         })
-        
-        // 设置音频地址
-        if (meeting.audio_url && this.data.audioContext) {
-          this.data.audioContext.src = meeting.audio_url
-        }
       }
     } catch (error) {
       console.error('加载会议详情失败:', error)
@@ -96,19 +69,6 @@ Page({
   switchTab(e) {
     const tabId = e.currentTarget.dataset.tab
     this.setData({ activeTab: tabId })
-  },
-
-  /**
-   * 播放/暂停音频
-   */
-  toggleAudio() {
-    if (!this.data.audioContext) return
-    
-    if (this.data.isPlaying) {
-      this.data.audioContext.pause()
-    } else {
-      this.data.audioContext.play()
-    }
   },
 
   /**
@@ -193,6 +153,131 @@ Page({
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  },
+
+  /**
+   * 加载说话人映射
+   */
+  async loadSpeakerMap() {
+    try {
+      const response = await API.getMeetingSpeakers(this.data.meetingId)
+      console.log('说话人映射:', response)
+      
+      const speakerMap = {}
+      if (response.items) {
+        response.items.forEach(item => {
+          speakerMap[item.speaker_id] = item.display_name
+        })
+      }
+      
+      this.setData({ speakerMap })
+    } catch (error) {
+      console.error('加载说话人映射失败:', error)
+    }
+  },
+
+  /**
+   * 加载联系人列表
+   */
+  async loadContacts() {
+    try {
+      const response = await API.getContacts()
+      this.setData({ contacts: response.items || [] })
+    } catch (error) {
+      console.error('加载联系人失败:', error)
+    }
+  },
+
+  /**
+   * 显示说话人标注弹窗
+   */
+  showSpeakerAnnotation(e) {
+    const speakerId = e.currentTarget.dataset.speaker
+    this.setData({
+      showSpeakerModal: true,
+      currentSpeaker: speakerId
+    })
+  },
+
+  /**
+   * 关闭说话人标注弹窗
+   */
+  closeSpeakerModal() {
+    this.setData({ showSpeakerModal: false })
+  },
+
+  /**
+   * 阻止事件冒泡（用于弹窗内容区域）
+   */
+  doNothing() {
+    // 空函数，用于阻止点击事件冒泡到遮罩层
+  },
+
+  /**
+   * 选择联系人标注
+   */
+  async selectContact(e) {
+    const contactId = e.currentTarget.dataset.contactId
+    const { currentSpeaker, meetingId } = this.data
+    
+    showLoading('标注中...')
+    
+    try {
+      await API.mapSpeaker(meetingId, {
+        speaker_id: currentSpeaker,
+        contact_id: contactId
+      })
+      
+      showToast('标注成功', 'success')
+      this.closeSpeakerModal()
+      this.loadSpeakerMap()
+    } catch (error) {
+      console.error('标注失败:', error)
+      showToast('标注失败', 'error')
+    } finally {
+      hideLoading()
+    }
+  },
+
+  /**
+   * 自定义名称标注
+   */
+  async customNameAnnotation() {
+    const { currentSpeaker, meetingId } = this.data
+    
+    wx.showModal({
+      title: '自定义名称',
+      editable: true,
+      placeholderText: '请输入说话人姓名',
+      success: async (res) => {
+        if (res.confirm && res.content) {
+          showLoading('标注中...')
+          
+          try {
+            await API.mapSpeaker(meetingId, {
+              speaker_id: currentSpeaker,
+              custom_name: res.content
+            })
+            
+            showToast('标注成功', 'success')
+            this.closeSpeakerModal()
+            this.loadSpeakerMap()
+          } catch (error) {
+            console.error('标注失败:', error)
+            showToast('标注失败', 'error')
+          } finally {
+            hideLoading()
+          }
+        }
+      }
+    })
+  },
+
+  /**
+   * 获取说话人显示名称
+   */
+  getSpeakerName(speakerId) {
+    return this.data.speakerMap[speakerId] || speakerId
   }
 })
 

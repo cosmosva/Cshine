@@ -143,6 +143,7 @@ class MeetingResponse(BaseModel):
     audio_url: str
     audio_duration: Optional[int]
     transcript: Optional[str]
+    transcript_paragraphs: Optional[List[dict]] = None  # 段落级转录数据 ✨新增
     summary: Optional[str]  # 段落摘要
     conversational_summary: Optional[str] = None  # 发言总结 ✨新增
     mind_map: Optional[str] = None  # 思维导图 ✨新增
@@ -151,6 +152,7 @@ class MeetingResponse(BaseModel):
     is_favorite: Optional[bool] = False  # 收藏状态 ✨新增
     tags: Optional[List[str]] = None  # AI生成的标签 ✨新增
     folder_id: Optional[int] = None  # 知识库ID ✨新增
+    waveform_data: Optional[List[float]] = None  # 音频波形数据 ✨新增
     status: str
     created_at: datetime
     
@@ -169,6 +171,7 @@ class MeetingResponse(BaseModel):
             "audio_url": obj.audio_url,
             "audio_duration": obj.audio_duration,
             "transcript": obj.transcript,
+            "transcript_paragraphs": json.loads(obj.transcript_paragraphs) if (hasattr(obj, 'transcript_paragraphs') and obj.transcript_paragraphs) else None,
             "summary": obj.summary,
             "conversational_summary": obj.conversational_summary if hasattr(obj, 'conversational_summary') else None,
             "mind_map": obj.mind_map if hasattr(obj, 'mind_map') else None,
@@ -177,6 +180,7 @@ class MeetingResponse(BaseModel):
             "is_favorite": obj.is_favorite if hasattr(obj, 'is_favorite') else False,
             "tags": json.loads(obj.tags) if (hasattr(obj, 'tags') and obj.tags) else None,
             "folder_id": obj.folder_id if hasattr(obj, 'folder_id') else None,
+            "waveform_data": json.loads(obj.waveform_data) if (hasattr(obj, 'waveform_data') and obj.waveform_data) else None,
             "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,
             "created_at": obj.created_at
         }
@@ -272,5 +276,80 @@ class FolderResponse(BaseModel):
 class FolderListResponse(BaseModel):
     """知识库列表响应"""
     items: List[FolderResponse]
+
+
+# ============ 联系人相关 ✨新增 ============
+
+class ContactCreate(BaseModel):
+    """创建联系人请求"""
+    name: str = Field(..., min_length=1, max_length=50, description="联系人姓名")
+    position: Optional[str] = Field(None, max_length=50, description="职位")
+    phone: Optional[str] = Field(None, max_length=20, description="电话")
+    email: Optional[str] = Field(None, max_length=100, description="邮箱")
+    avatar: Optional[str] = Field(None, max_length=255, description="头像URL")
+
+
+class ContactUpdate(BaseModel):
+    """更新联系人请求"""
+    name: Optional[str] = Field(None, min_length=1, max_length=50, description="联系人姓名")
+    position: Optional[str] = Field(None, max_length=50, description="职位")
+    phone: Optional[str] = Field(None, max_length=20, description="电话")
+    email: Optional[str] = Field(None, max_length=100, description="邮箱")
+    avatar: Optional[str] = Field(None, max_length=255, description="头像URL")
+
+
+class ContactResponse(BaseModel):
+    """联系人响应"""
+    id: int
+    name: str
+    position: Optional[str]
+    phone: Optional[str]
+    email: Optional[str]
+    avatar: Optional[str]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class ContactListResponse(BaseModel):
+    """联系人列表响应"""
+    total: int
+    items: List[ContactResponse]
+
+
+# ============ 说话人映射相关 ✨新增 ============
+
+class SpeakerMapRequest(BaseModel):
+    """说话人映射请求"""
+    speaker_id: str = Field(..., description="说话人ID（如：说话人1）")
+    contact_id: Optional[int] = Field(None, description="关联的联系人ID")
+    custom_name: Optional[str] = Field(None, max_length=50, description="自定义名称")
+
+
+class SpeakerResponse(BaseModel):
+    """说话人响应"""
+    speaker_id: str
+    display_name: str  # 显示名称（联系人名称或自定义名称）
+    contact_id: Optional[int]
+    contact: Optional[ContactResponse]  # 关联的联系人信息
+    
+    class Config:
+        from_attributes = True
+
+
+class SpeakerListResponse(BaseModel):
+    """说话人列表响应"""
+    items: List[SpeakerResponse]
+
+
+# ============ 音频波形相关 ✨新增 ============
+
+class WaveformResponse(BaseModel):
+    """音频波形响应"""
+    meeting_id: str
+    waveform: List[float] = Field(..., description="波形数据点数组（归一化到0-1）")
+    num_points: int = Field(..., description="数据点数量")
+    cached: bool = Field(False, description="是否使用缓存数据")
 
 

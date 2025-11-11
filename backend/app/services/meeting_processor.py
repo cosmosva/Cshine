@@ -118,6 +118,7 @@ def _process_meeting_ai(meeting_id: str, audio_url: str):
         
         # 10. 更新数据库
         meeting.transcript = transcription
+        meeting.transcript_paragraphs = json.dumps(paragraphs, ensure_ascii=False) if paragraphs else None  # ✨新增：保存段落数据
         meeting.summary = summary
         meeting.conversational_summary = conversational_summary  # ✨新增
         meeting.mind_map = mind_map  # ✨新增

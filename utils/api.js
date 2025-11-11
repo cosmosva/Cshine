@@ -226,6 +226,80 @@ function toggleMeetingFavorite(meetingId) {
 }
 
 /**
+ * ==================== 联系人相关 ====================
+ */
+
+/**
+ * 创建联系人
+ * @param {object} data 联系人数据
+ */
+function createContact(data) {
+  return post(API_ENDPOINTS.CONTACT_CREATE, data, { showLoad: true })
+}
+
+/**
+ * 获取联系人列表
+ */
+function getContacts() {
+  return get(API_ENDPOINTS.CONTACT_LIST)
+}
+
+/**
+ * 获取联系人详情
+ * @param {number} contactId 联系人ID
+ */
+function getContactDetail(contactId) {
+  return get(`${API_ENDPOINTS.CONTACT_DETAIL}/${contactId}`)
+}
+
+/**
+ * 更新联系人
+ * @param {number} contactId 联系人ID
+ * @param {object} data 更新数据
+ */
+function updateContact(contactId, data) {
+  return put(`${API_ENDPOINTS.CONTACT_UPDATE}/${contactId}`, data, { showLoad: true })
+}
+
+/**
+ * 删除联系人
+ * @param {number} contactId 联系人ID
+ */
+function deleteContact(contactId) {
+  return del(`${API_ENDPOINTS.CONTACT_DELETE}/${contactId}`, {}, { showLoad: true })
+}
+
+/**
+ * ==================== 说话人标注相关 ====================
+ */
+
+/**
+ * 标注会议说话人
+ * @param {string} meetingId 会议ID
+ * @param {object} data { speaker_id, contact_id, custom_name }
+ */
+function mapSpeaker(meetingId, data) {
+  return post(`${API_ENDPOINTS.MEETING_DETAIL}${meetingId}/speakers/map`, data, { showLoad: true })
+}
+
+/**
+ * 获取会议说话人映射
+ * @param {string} meetingId 会议ID
+ */
+function getMeetingSpeakers(meetingId) {
+  return get(`${API_ENDPOINTS.MEETING_DETAIL}${meetingId}/speakers`)
+}
+
+/**
+ * 获取会议音频波形数据
+ * @param {string} meetingId 会议ID
+ * @param {number} numPoints 波形数据点数量（默认800）
+ */
+function getMeetingWaveform(meetingId, numPoints = 800) {
+  return get(`${API_ENDPOINTS.MEETING_DETAIL}${meetingId}/waveform?num_points=${numPoints}`)
+}
+
+/**
  * ==================== 导出 ====================
  */
 
@@ -261,6 +335,20 @@ module.exports = {
   createFolder,
   getFolders,
   updateFolder,
-  deleteFolder
+  deleteFolder,
+  
+  // 联系人
+  createContact,
+  getContacts,
+  getContactDetail,
+  updateContact,
+  deleteContact,
+  
+  // 说话人标注
+  mapSpeaker,
+  getMeetingSpeakers,
+  
+  // 音频波形
+  getMeetingWaveform
 }
 
