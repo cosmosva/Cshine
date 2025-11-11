@@ -97,23 +97,27 @@ class TingwuService:
                 if summarization_types is None:
                     summarization_types = ['Paragraph', 'Conversational', 'MindMap']
                 
+                # 关键：必须同时设置 summarization_enabled 和 summarization 对象
+                parameters.summarization_enabled = True
                 summarization = tingwu_models.CreateTaskRequestParametersSummarization()
                 summarization.types = summarization_types
                 parameters.summarization = summarization
-                logger.info(f"已开启智能摘要: {', '.join(summarization_types)}")
+                logger.info(f"已开启智能摘要: summarization_enabled=True, types={', '.join(summarization_types)}")
             
             # 如果开启会议助手
             if enable_meeting_assistance:
+                parameters.meeting_assistance_enabled = True
                 meeting_assistance = tingwu_models.CreateTaskRequestParametersMeetingAssistance()
                 meeting_assistance.types = ['Actions']  # 行动项识别
                 parameters.meeting_assistance = meeting_assistance
-                logger.info("已开启会议助手")
+                logger.info("已开启会议助手: meeting_assistance_enabled=True")
             
             # 如果开启章节划分
             if enable_chapters:
+                parameters.auto_chapters_enabled = True
                 auto_chapters = tingwu_models.CreateTaskRequestParametersAutoChapters()
                 parameters.auto_chapters = auto_chapters
-                logger.info("已开启章节划分")
+                logger.info("已开启章节划分: auto_chapters_enabled=True")
             
             # 创建请求
             request = tingwu_models.CreateTaskRequest(
