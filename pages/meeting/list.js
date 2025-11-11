@@ -546,10 +546,17 @@ Page({
       }
       
       // 使用合并接口：一次性完成上传和创建会议
-      const result = await API.uploadAudioAndCreateMeeting(file.path, {
-        title: file.name,
-        folder_id: folderId && folderId !== '' ? parseInt(folderId) : null
-      })
+      const params = {
+        title: file.name
+      }
+      
+      // 只有在 folderId 有值时才添加（转换为字符串）
+      if (folderId && folderId !== '') {
+        params.folder_id = String(folderId)
+      }
+      
+      console.log('上传参数:', params)
+      const result = await API.uploadAudioAndCreateMeeting(file.path, params)
       
       console.log('上传并创建会议成功:', result)
       

@@ -126,7 +126,7 @@ async def upload_audio(
 async def upload_audio_and_create_meeting(
     file: UploadFile = File(..., description="音频文件"),
     title: str = Form(None),
-    folder_id: int = Form(None),
+    folder_id: str = Form(None),  # 先接收为字符串，再转换
     current_user: User = Depends(get_current_user)
 ):
     """
@@ -187,11 +187,23 @@ async def upload_audio_and_create_meeting(
         from app.database import SessionLocal
         db = SessionLocal()
         try:
+            # 处理 folder_id：转换为整数或 None
+            parsed_folder_id = None
+            if folder_id and folder_id != 'null' and folder_id != '':
+                try:
+                    parsed_folder_id = int(folder_id)
+                except (ValueError, TypeError):
+                    logger.warning(f"无效的 folder_id: {folder_id}")
+            
+            # 使用传入的 title，如果没有则使用文件名
+            meeting_title = title if title else file.filename
+            logger.info(f"创建会议: title={meeting_title}, folder_id={parsed_folder_id}")
+            
             meeting_data = MeetingCreate(
-                title=title or file.filename,
+                title=meeting_title,
                 audio_url=oss_url,
                 audio_duration=0,  # TODO: 从音频文件提取
-                folder_id=folder_id
+                folder_id=parsed_folder_id
             )
             
             # 调用创建会议的逻辑
