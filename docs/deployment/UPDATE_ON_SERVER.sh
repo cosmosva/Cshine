@@ -1,12 +1,17 @@
 #!/bin/bash
 # Cshine 服务器端更新脚本
-# 直接在服务器上执行
-# 使用方法: bash docs/deployment/UPDATE_ON_SERVER.sh
+# 直接在服务器上执行（需要 sudo 权限）
+# 
+# 使用方法:
+#   方式1（推荐）: sudo bash docs/deployment/UPDATE_ON_SERVER.sh
+#   方式2: bash docs/deployment/UPDATE_ON_SERVER.sh  (会在需要时提示输入密码)
+#
+# 注意: 数据库迁移部分可以在 cshine 用户下执行，只有重启服务需要 sudo
 
 set -e
 
 echo "=========================================="
-echo "  🚀 Cshine 后端更新 v0.5.5 → v0.5.15"
+echo "  🚀 Cshine 后端更新 v0.5.5 → v0.5.17"
 echo "=========================================="
 echo ""
 
@@ -76,7 +81,7 @@ fi
 # 执行 PostgreSQL 迁移
 echo "正在执行数据库迁移..."
 if [ -f "migrations/add_contacts_and_speakers.py" ]; then
-    python migrations/add_contacts_and_speakers.py
+    python3.11 migrations/add_contacts_and_speakers.py
     echo "✅ 数据库迁移完成"
 else
     echo "⚠️  未找到迁移脚本"
@@ -139,16 +144,25 @@ echo "  ✅ 更新完成！"
 echo "=========================================="
 echo ""
 echo "📊 更新摘要:"
-echo "   - 版本: v0.5.5 → v0.5.15"
+echo "   - 版本: v0.5.5 → v0.5.17"
 echo "   - 新增表: contacts, meeting_speakers"
 echo "   - 新增字段: meetings.transcript_paragraphs"
 echo "   - 服务状态: 运行中"
 echo ""
+echo "🎯 主要更新内容:"
+echo "   - ✅ 会议详情页重构（总结/转录/思维导图）"
+echo "   - ✅ 联系人管理功能"
+echo "   - ✅ 说话人映射功能"
+echo "   - ✅ 思维导图可视化"
+echo "   - ✅ 上传流程优化"
+echo "   - ✅ 重新处理功能"
+echo ""
 echo "📝 后续步骤:"
 echo "   1. 查看服务日志: sudo journalctl -u cshine-api -f --lines=50"
-echo "   2. 测试上传功能"
-echo "   3. 测试摘要生成"
-echo "   4. 测试思维导图"
+echo "   2. 测试上传功能（新的合并接口）"
+echo "   3. 测试会议详情页（三个标签页）"
+echo "   4. 测试思维导图显示"
+echo "   5. 测试重新处理功能"
 echo ""
 echo "📖 详细文档: docs/deployment/DEPLOY_v0.5.15_20251111.md"
 echo ""

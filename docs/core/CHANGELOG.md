@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.17] - 2025-11-12
+
+### Fixed - 部署脚本修复
+
+#### 数据库迁移脚本 🔧
+- 🐛 **修复 DATABASE_URL 解析**
+  - 问题：迁移脚本尝试访问不存在的 `settings.DB_HOST` 等字段
+  - 原因：服务器配置使用 `DATABASE_URL` 连接字符串
+  - 修复：使用 `urllib.parse.urlparse` 解析 PostgreSQL URL
+  - 支持：自动提取 host, port, database, user, password
+
+- ✅ **改进错误处理**
+  - 初始化 `conn = None` 和 `cursor = None`
+  - 避免 `UnboundLocalError` 异常
+  - 更清晰的错误信息
+
+#### 部署脚本优化 📦
+- 🔧 **修复 Python 命令**
+  - 服务器环境使用 `python3.11` 而不是 `python`
+  - 确保使用正确的 Python 版本执行迁移
+
+- 📝 **更新服务器端脚本**
+  - 更新版本号 v0.5.5 → v0.5.17
+  - 添加详细的使用说明
+  - 改进更新摘要信息
+
+### Changed - 改进
+
+#### 部署文档 📖
+- 📋 **完善部署说明**
+  - 说明数据库迁移可在 cshine 用户下执行
+  - 只有重启服务需要 sudo 权限
+  - 提供两种执行方式
+
+## [0.5.16] - 2025-11-12
+
+### Fixed - 部署脚本修复
+
+- 🔧 **更新部署脚本使用 python3.11**
+  - 服务器环境需要明确使用 `python3.11` 命令
+  - 修改数据库迁移脚本执行命令
+
 ## [0.5.13] - 2025-11-11
 
 ### 🎉 重大修复 - 通义听悟摘要功能完全正常工作
