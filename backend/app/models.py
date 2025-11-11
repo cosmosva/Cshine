@@ -102,7 +102,6 @@ class Meeting(Base):
     summary = Column(Text, nullable=True)  # 段落摘要
     conversational_summary = Column(Text, nullable=True)  # 发言总结 ✨新增
     mind_map = Column(Text, nullable=True)  # 思维导图 ✨新增
-    waveform_data = Column(Text, nullable=True)  # 音频波形数据（JSON格式）✨新增
     key_points = Column(Text, nullable=True)  # 存储为 JSON 字符串
     action_items = Column(Text, nullable=True)  # 存储为 JSON 字符串
     is_favorite = Column(Boolean, default=False, nullable=False)  # 收藏状态 ✨新增

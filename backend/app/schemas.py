@@ -152,7 +152,6 @@ class MeetingResponse(BaseModel):
     is_favorite: Optional[bool] = False  # 收藏状态 ✨新增
     tags: Optional[List[str]] = None  # AI生成的标签 ✨新增
     folder_id: Optional[int] = None  # 知识库ID ✨新增
-    waveform_data: Optional[List[float]] = None  # 音频波形数据 ✨新增
     status: str
     created_at: datetime
     
@@ -180,7 +179,6 @@ class MeetingResponse(BaseModel):
             "is_favorite": obj.is_favorite if hasattr(obj, 'is_favorite') else False,
             "tags": json.loads(obj.tags) if (hasattr(obj, 'tags') and obj.tags) else None,
             "folder_id": obj.folder_id if hasattr(obj, 'folder_id') else None,
-            "waveform_data": json.loads(obj.waveform_data) if (hasattr(obj, 'waveform_data') and obj.waveform_data) else None,
             "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,
             "created_at": obj.created_at
         }
@@ -341,15 +339,5 @@ class SpeakerResponse(BaseModel):
 class SpeakerListResponse(BaseModel):
     """说话人列表响应"""
     items: List[SpeakerResponse]
-
-
-# ============ 音频波形相关 ✨新增 ============
-
-class WaveformResponse(BaseModel):
-    """音频波形响应"""
-    meeting_id: str
-    waveform: List[float] = Field(..., description="波形数据点数组（归一化到0-1）")
-    num_points: int = Field(..., description="数据点数量")
-    cached: bool = Field(False, description="是否使用缓存数据")
 
 
