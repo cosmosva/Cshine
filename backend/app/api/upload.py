@@ -4,7 +4,7 @@
 
 import os
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from loguru import logger
 
 from app.models import User
@@ -125,8 +125,8 @@ async def upload_audio(
 @router.post("/audio-and-meeting", response_model=ResponseModel)
 async def upload_audio_and_create_meeting(
     file: UploadFile = File(..., description="音频文件"),
-    title: str = None,
-    folder_id: int = None,
+    title: str = Form(None),
+    folder_id: int = Form(None),
     current_user: User = Depends(get_current_user)
 ):
     """
@@ -140,6 +140,8 @@ async def upload_audio_and_create_meeting(
     from app.database import get_db
     
     temp_file_path = None
+    
+    logger.info(f"收到上传请求: filename={file.filename}, title={title}, folder_id={folder_id}")
     
     try:
         # 1. 验证文件类型
