@@ -76,11 +76,30 @@ ssh cshine@8.134.254.88 << 'ENDSSH'
     echo ""
     
     echo "=========================================="
-    echo "📦 步骤 5/6: 更新依赖"
+    echo "📦 步骤 5/6: 执行数据库迁移"
     echo "=========================================="
-    source venv/bin/activate
+    cd ~/Cshine
+    
+    # 激活虚拟环境（在项目根目录）
+    if [ -d "venv" ]; then
+        source venv/bin/activate
+        echo "✅ 虚拟环境已激活"
+    else
+        echo "⚠️  未找到虚拟环境，使用系统 Python"
+    fi
+    
+    # 执行数据库迁移
+    cd backend
+    if [ -f "migrations/add_contacts_and_speakers.py" ]; then
+        echo "正在执行数据库迁移..."
+        python migrations/add_contacts_and_speakers.py
+        echo "✅ 数据库迁移完成"
+    else
+        echo "⚠️  未找到迁移脚本，跳过迁移"
+    fi
     
     # 检查依赖是否需要更新
+    cd ~/Cshine/backend
     if git diff HEAD@{1} HEAD -- requirements.txt | grep -q "^+" 2>/dev/null; then
         echo "📦 检测到依赖变化，正在更新..."
         pip install -r requirements.txt --quiet
@@ -123,16 +142,22 @@ ssh cshine@8.134.254.88 << 'ENDSSH'
         echo "响应: $HEALTH_STATUS"
     fi
     
-    # 配置检查
+    # 数据库验证
     echo ""
-    echo "🔍 配置检查..."
-    python -c "
-from config import settings
-print(f'   AppID: {settings.WECHAT_APPID}')
-print(f'   Secret: {\"✅ 已配置\" if settings.WECHAT_SECRET else \"❌ 未配置\"}')
-print(f'   OSS Bucket: {settings.OSS_BUCKET_NAME}')
-print(f'   Storage Type: {settings.STORAGE_TYPE}')
-"
+    echo "🔍 数据库验证..."
+    TABLE_COUNT=$(sudo -u postgres psql cshine_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('contacts', 'meeting_speakers');" 2>/dev/null || echo "0")
+    if [ "$TABLE_COUNT" -eq 2 ]; then
+        echo "✅ 新表已创建: contacts, meeting_speakers"
+    else
+        echo "⚠️  新表验证失败（找到 $TABLE_COUNT 个表）"
+    fi
+    
+    COLUMN_COUNT=$(sudo -u postgres psql cshine_db -t -c "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'meetings' AND column_name = 'transcript_paragraphs';" 2>/dev/null || echo "0")
+    if [ "$COLUMN_COUNT" -eq 1 ]; then
+        echo "✅ 新字段已添加: transcript_paragraphs"
+    else
+        echo "⚠️  新字段验证失败"
+    fi
     
     echo ""
     echo "=========================================="
