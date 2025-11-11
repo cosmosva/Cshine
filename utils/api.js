@@ -104,7 +104,8 @@ function getAIStatus(flashId) {
  * @param {string} filePath 文件路径
  */
 function uploadAudio(filePath) {
-  return upload(API_ENDPOINTS.UPLOAD_AUDIO, filePath, {}, { showLoad: true })
+  // 不使用 showLoad，由调用方控制 loading 状态
+  return upload(API_ENDPOINTS.UPLOAD_AUDIO, filePath, {}, { showLoad: false })
 }
 
 /**
@@ -160,7 +161,8 @@ function deleteFolder(folderId) {
  * @param {object} data 会议数据
  */
 function createMeeting(data) {
-  return post(API_ENDPOINTS.MEETING_CREATE, data, { showLoad: true })
+  // 不使用 showLoad，由调用方控制 loading 状态
+  return post(API_ENDPOINTS.MEETING_CREATE, data, { showLoad: false })
 }
 
 /**
