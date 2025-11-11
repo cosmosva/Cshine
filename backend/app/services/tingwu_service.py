@@ -260,40 +260,51 @@ class TingwuService:
                 import requests
                 summary_url = data.result.summarization  # 直接是URL字符串
                 logger.info(f"下载摘要文件: {summary_url[:100]}...")
-                summary_data = requests.get(summary_url).json()
                 
-                if 'Summarization' in summary_data:
-                    summaries = summary_data['Summarization']
-                    logger.info(f"📋 通义听悟返回的摘要类型: {[s.get('Type') for s in summaries]}")
+                try:
+                    response = requests.get(summary_url)
+                    response.raise_for_status()
+                    summary_data = response.json()
+                    logger.info(f"📥 摘要数据类型: {type(summary_data)}, 键: {summary_data.keys() if isinstance(summary_data, dict) else 'N/A'}")
                     
-                    # 解析不同类型的摘要
-                    for summary_item in summaries:
-                        summary_type = summary_item.get('Type', '')
-                        summary_content = summary_item.get('Summary', '')
+                    if isinstance(summary_data, dict) and 'Summarization' in summary_data:
+                        summaries = summary_data['Summarization']
+                        logger.info(f"📋 通义听悟返回的摘要类型: {[s.get('Type') if isinstance(s, dict) else 'Unknown' for s in summaries]}")
                         
-                        if summary_type == 'Paragraph':
-                            # 段落摘要（默认摘要）
-                            result['summary'] = summary_content
-                            logger.info(f"✅ 已获取段落摘要，长度: {len(summary_content)}")
+                        # 解析不同类型的摘要
+                        for summary_item in summaries:
+                            if not isinstance(summary_item, dict):
+                                logger.warning(f"⚠️ 摘要项不是字典: {type(summary_item)}")
+                                continue
+                                
+                            summary_type = summary_item.get('Type', '')
+                            summary_content = summary_item.get('Summary', '')
+                            
+                            if summary_type == 'Paragraph':
+                                # 段落摘要（默认摘要）
+                                result['summary'] = summary_content
+                                logger.info(f"✅ 已获取段落摘要，长度: {len(summary_content)}")
+                            
+                            elif summary_type == 'Conversational':
+                                # 发言总结
+                                result['conversational_summary'] = summary_content
+                                logger.info(f"✅ 已获取发言总结，长度: {len(summary_content)}")
+                            
+                            elif summary_type == 'MindMap':
+                                # 思维导图
+                                result['mind_map'] = summary_content
+                                logger.info(f"✅ 已获取思维导图，长度: {len(summary_content)}")
+                            
+                            elif summary_type == 'QuestionsAnswering':
+                                # 问答总结
+                                result['qa_summary'] = summary_content
+                                logger.info(f"✅ 已获取问答总结，长度: {len(summary_content)}")
                         
-                        elif summary_type == 'Conversational':
-                            # 发言总结
-                            result['conversational_summary'] = summary_content
-                            logger.info(f"✅ 已获取发言总结，长度: {len(summary_content)}")
-                        
-                        elif summary_type == 'MindMap':
-                            # 思维导图
-                            result['mind_map'] = summary_content
-                            logger.info(f"✅ 已获取思维导图，长度: {len(summary_content)}")
-                        
-                        elif summary_type == 'QuestionsAnswering':
-                            # 问答总结
-                            result['qa_summary'] = summary_content
-                            logger.info(f"✅ 已获取问答总结，长度: {len(summary_content)}")
-                    
-                    logger.info(f"✅ 摘要解析完成，类型数: {len(summaries)}")
-                else:
-                    logger.warning("⚠️ 摘要数据中没有 Summarization 字段")
+                        logger.info(f"✅ 摘要解析完成，类型数: {len(summaries)}")
+                    else:
+                        logger.warning(f"⚠️ 摘要数据格式异常: {type(summary_data)}, 内容: {str(summary_data)[:200]}")
+                except Exception as e:
+                    logger.error(f"❌ 下载或解析摘要文件失败: {e}")
             
             # 3. 获取会议助手结果（关键句、行动项）
             if hasattr(data, 'result') and hasattr(data.result, 'meeting_assistance') and data.result.meeting_assistance:

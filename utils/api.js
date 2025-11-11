@@ -222,6 +222,14 @@ function deleteMeeting(meetingId) {
 }
 
 /**
+ * 重新处理会议
+ * @param {string} meetingId 会议ID
+ */
+function reprocessMeeting(meetingId) {
+  return post(`/api/v1/meeting/${meetingId}/reprocess`, {})
+}
+
+/**
  * 查询会议处理状态
  * @param {string} meetingId 会议ID
  */
@@ -350,6 +358,9 @@ module.exports = {
   
   // 说话人标注
   mapSpeaker,
-  getMeetingSpeakers
+  getMeetingSpeakers,
+  
+  // 会议处理
+  reprocessMeeting
 }
 

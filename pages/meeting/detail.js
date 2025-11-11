@@ -240,6 +240,44 @@ Page({
   },
 
   /**
+   * 重新处理会议
+   */
+  async reprocessMeeting() {
+    const { meeting } = this.data
+    if (!meeting || !meeting.id) return
+
+    wx.showModal({
+      title: '重新处理',
+      content: '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中...' })
+            await API.reprocessMeeting(meeting.id)
+            wx.hideLoading()
+            wx.showToast({
+              title: '已开始重新处理',
+              icon: 'success',
+              duration: 2000
+            })
+            // 3秒后刷新页面
+            setTimeout(() => {
+              this.loadMeetingDetail()
+            }, 3000)
+          } catch (error) {
+            wx.hideLoading()
+            wx.showToast({
+              title: error.message || '处理失败',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        }
+      }
+    })
+  },
+
+  /**
    * 显示说话人标注弹窗
    */
   showSpeakerAnnotation(e) {

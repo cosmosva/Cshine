@@ -30,6 +30,10 @@
           </view>
         </view>
       </view>
+      <!-- 重新处理按钮 -->
+      <view class="reprocess-btn" bindtap="reprocessMeeting">
+        <text class="btn-text">🔄 重新处理</text>
+      </view>
     </view>
 
     <!-- Tab 导航 -->
