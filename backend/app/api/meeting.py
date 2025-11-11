@@ -22,11 +22,9 @@ from app.schemas import (
     SpeakerResponse,
     SpeakerListResponse,
     ContactResponse,
-    WaveformResponse,
     ResponseModel
 )
 from app.services.meeting_processor import process_meeting_ai_async, check_meeting_ai_status
-from app.services.waveform_service import WaveformService
 
 router = APIRouter()
 
@@ -550,75 +548,4 @@ async def get_meeting_speakers(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{meeting_id}/waveform", response_model=ResponseModel)
-async def get_meeting_waveform(
-    meeting_id: str,
-    num_points: int = Query(800, ge=100, le=2000, description="波形数据点数量"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    获取会议音频的波形数据
-    
-    用于前端Canvas可视化绘制
-    
-    Args:
-        meeting_id: 会议ID
-        num_points: 需要的波形数据点数量（默认800）
-        
-    Returns:
-        波形数据数组（归一化到0-1）
-    """
-    # 验证会议权限
-    meeting = db.query(Meeting).filter(
-        Meeting.id == meeting_id,
-        Meeting.user_id == current_user.id
-    ).first()
-    
-    if not meeting:
-        raise HTTPException(status_code=404, detail="会议纪要不存在")
-    
-    if not meeting.audio_url:
-        raise HTTPException(status_code=400, detail="该会议没有音频文件")
-    
-    try:
-        # 检查是否有缓存的波形数据
-        cached = False
-        if meeting.waveform_data:
-            try:
-                waveform = json.loads(meeting.waveform_data)
-                cached = True
-                logger.info(f"使用缓存的波形数据: meeting_id={meeting_id}")
-            except:
-                waveform = None
-        else:
-            waveform = None
-        
-        # 如果没有缓存，提取波形数据
-        if not waveform:
-            logger.info(f"开始提取波形数据: meeting_id={meeting_id}, audio_url={meeting.audio_url}")
-            
-            # 从URL提取波形
-            waveform = WaveformService.extract_waveform_from_url(meeting.audio_url, num_points)
-            
-            # 保存到数据库缓存
-            meeting.waveform_data = json.dumps(waveform)
-            db.commit()
-            
-            logger.info(f"波形数据已缓存: meeting_id={meeting_id}, points={len(waveform)}")
-        
-        return ResponseModel(
-            code=200,
-            message="success",
-            data=WaveformResponse(
-                meeting_id=meeting_id,
-                waveform=waveform,
-                num_points=len(waveform),
-                cached=cached
-            )
-        )
-    
-    except Exception as e:
-        logger.error(f"Get meeting waveform error: {e}")
-        raise HTTPException(status_code=500, detail=f"获取波形数据失败: {str(e)}")
 

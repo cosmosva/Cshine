@@ -291,15 +291,6 @@ function getMeetingSpeakers(meetingId) {
 }
 
 /**
- * 获取会议音频波形数据
- * @param {string} meetingId 会议ID
- * @param {number} numPoints 波形数据点数量（默认800）
- */
-function getMeetingWaveform(meetingId, numPoints = 800) {
-  return get(`${API_ENDPOINTS.MEETING_DETAIL}${meetingId}/waveform?num_points=${numPoints}`)
-}
-
-/**
  * ==================== 导出 ====================
  */
 
@@ -346,9 +337,6 @@ module.exports = {
   
   // 说话人标注
   mapSpeaker,
-  getMeetingSpeakers,
-  
-  // 音频波形
-  getMeetingWaveform
+  getMeetingSpeakers
 }
 

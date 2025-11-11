@@ -12,6 +12,12 @@ Page({
     meeting: null,
     loading: true,
     
+    // 音频播放状态
+    audioContext: null,
+    isPlaying: false,
+    currentTime: 0,
+    duration: 0,
+    
     // Tab 切换
     activeTab: 'summary',  // summary / transcript / mindmap
     tabs: [
@@ -38,6 +44,33 @@ Page({
       this.loadSpeakerMap()
       this.loadContacts()
     }
+    
+    // 创建音频上下文
+    const audioContext = wx.createInnerAudioContext()
+    audioContext.onPlay(() => {
+      this.setData({ isPlaying: true })
+    })
+    audioContext.onPause(() => {
+      this.setData({ isPlaying: false })
+    })
+    audioContext.onEnded(() => {
+      this.setData({ isPlaying: false, currentTime: 0 })
+    })
+    audioContext.onTimeUpdate(() => {
+      this.setData({
+        currentTime: audioContext.currentTime,
+        duration: audioContext.duration
+      })
+    })
+    
+    this.setData({ audioContext })
+  },
+
+  onUnload() {
+    // 销毁音频上下文
+    if (this.data.audioContext) {
+      this.data.audioContext.destroy()
+    }
   },
 
   /**
@@ -55,6 +88,11 @@ Page({
           meeting: meeting,
           loading: false
         })
+        
+        // 设置音频地址
+        if (meeting.audio_url && this.data.audioContext) {
+          this.data.audioContext.src = meeting.audio_url
+        }
       }
     } catch (error) {
       console.error('加载会议详情失败:', error)
@@ -69,6 +107,19 @@ Page({
   switchTab(e) {
     const tabId = e.currentTarget.dataset.tab
     this.setData({ activeTab: tabId })
+  },
+
+  /**
+   * 播放/暂停音频
+   */
+  toggleAudio() {
+    if (!this.data.audioContext) return
+    
+    if (this.data.isPlaying) {
+      this.data.audioContext.pause()
+    } else {
+      this.data.audioContext.play()
+    }
   },
 
   /**

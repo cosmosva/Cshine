@@ -30,13 +30,23 @@
           </text>
         </view>
 
-        <!-- 音频波形播放器 -->
-        <waveform-player 
-          wx:if="{{meeting.audio_url}}"
-          audio-url="{{meeting.audio_url}}"
-          duration="{{meeting.audio_duration}}"
-          meeting-id="{{meeting.id}}"
-        />
+        <!-- 音频播放器 -->
+        <view class="audio-player" wx:if="{{meeting.audio_url}}">
+          <view class="play-btn" bindtap="toggleAudio">
+            <text class="icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+          </view>
+          <view class="audio-info">
+            <view class="audio-progress">
+              <view class="progress-bar">
+                <view class="progress-fill" style="width: {{(currentTime / duration) * 100}}%;"></view>
+              </view>
+            </view>
+            <view class="audio-time">
+              <text>{{utils.formatDuration(currentTime)}}</text>
+              <text>{{utils.formatDuration(duration || meeting.audio_duration)}}</text>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
 
