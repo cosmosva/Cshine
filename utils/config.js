@@ -6,8 +6,7 @@
 const API_CONFIG = {
   development: 'http://localhost:8000',           // 开发环境（模拟器）
   // development: 'http://192.168.3.206:8000',   // 真机测试时取消注释并填写电脑 IP
-  production: 'http://8.134.254.88:8000'          // 生产环境（临时使用 IP:端口，待 Nginx 配置完成后改回域名）
-  // production: 'https://cshine.xuyucloud.com'  // 生产环境（Nginx 配置完成后使用）
+  production: 'https://cshine.xuyucloud.com'      // 生产环境（已配置 Nginx 和 SSL）
 }
 
 /**
