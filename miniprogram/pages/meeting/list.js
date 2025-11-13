@@ -530,21 +530,10 @@ Page({
     // 显示上传模态框
     this.setData({ showUploadModal: true })
     
-    // 获取组件实例
-    const uploadModal = this.selectComponent('#upload-modal') || this.selectComponent('upload-modal')
-    if (uploadModal) {
-      uploadModal.startUpload({ title: '上传音频' })
-    }
-    
     // 设置上传标志，防止页面刷新
     this._isUploading = true
     
     try {
-      // 模拟进度更新
-      if (uploadModal) {
-        uploadModal.updateProgress(30, '正在上传到云端...')
-      }
-      
       // 使用合并接口：一次性完成上传和创建会议
       const params = {
         title: file.name
@@ -559,49 +548,40 @@ Page({
       const result = await API.uploadAudioAndCreateMeeting(file.path, params)
       
       console.log('上传并创建会议成功:', result)
-      
-      if (uploadModal) {
-        uploadModal.updateProgress(100, '创建会议记录...')
-      }
-      
-      // 显示成功
-      if (uploadModal) {
-        uploadModal.showSuccess('上传成功！')
-      }
-      
-      // 等待 1 秒后跳转到详情页
-      setTimeout(() => {
-        this._isUploading = false
-        this.setData({ showUploadModal: false })
-        
-        // 跳转到详情页，让用户点击「立即生成」
-        // 兼容两种返回格式：id 或 meeting_id
-        const meetingId = result.id || result.meeting_id
-        console.log('跳转到详情页，会议ID:', meetingId)
-        
-        if (meetingId) {
-          wx.navigateTo({
-            url: `/pages/meeting/detail?id=${meetingId}`
-          })
-        } else {
-          console.error('未获取到会议ID，无法跳转')
-          showToast('上传成功，但无法跳转到详情页', 'error')
-        }
-      }, 1000)
-      
       console.log('=== 上传流程完成 ===')
+      
+      // 清除上传标志
+      this._isUploading = false
+      
+      // 关闭上传 Modal
+      this.setData({ showUploadModal: false })
+      
+      // 显示成功提示
+      showToast('上传成功！', 'success')
+      
+      // 立即跳转到详情页
+      const meetingId = result.id || result.meeting_id
+      console.log('跳转到详情页，会议ID:', meetingId)
+      
+      if (meetingId) {
+        wx.navigateTo({
+          url: `/pages/meeting/detail?id=${meetingId}`
+        })
+      } else {
+        console.error('未获取到会议ID，无法跳转')
+        showToast('上传成功，但无法跳转到详情页', 'error')
+      }
       
     } catch (error) {
       console.error('=== 上传流程失败 ===')
       console.error('错误信息:', error.message)
       
-      // 显示错误
-      if (uploadModal) {
-        uploadModal.showError(error.message || '上传失败，请重试')
-      }
-    } finally {
       // 清除上传标志
       this._isUploading = false
+      
+      // 关闭 Modal 并显示错误
+      this.setData({ showUploadModal: false })
+      showToast(error.message || '上传失败，请重试', 'error')
     }
   },
   
