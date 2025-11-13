@@ -206,10 +206,16 @@ page {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.15s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .meeting-card:active {
   background-color: #F8F8F8;
+}
+
+.meeting-card-hover {
+  background-color: #F0F0F0;
 }
 
 /* 第一行：标题 + 收藏（TicNote 布局 - 同一行） */

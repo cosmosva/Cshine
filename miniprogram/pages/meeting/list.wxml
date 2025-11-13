@@ -46,7 +46,7 @@
     >
       <view class="meeting-list">
         <view 
-          class="meeting-card"
+          class="meeting-card {{item.id}}"
           wx:for="{{meetingList}}"
           wx:key="id"
           bindtap="viewMeeting"
@@ -56,6 +56,7 @@
           data-status="{{item.status}}"
           data-folder-id="{{item.folder_id}}"
           data-folder-name="{{item.folder_name}}"
+          hover-class="meeting-card-hover"
         >
           <!-- 第一行：标题 + 收藏 -->
           <view class="card-row-1">

@@ -340,12 +340,23 @@ Page({
   },
 
   viewMeeting(e) {
+    console.log('=== viewMeeting 被调用 ===')
+    console.log('事件对象:', e)
+    console.log('currentTarget:', e.currentTarget)
+    console.log('dataset:', e.currentTarget?.dataset)
+    
     const meetingId = e.currentTarget.dataset.id
     const status = e.currentTarget.dataset.status
 
     console.log('=== 点击会议卡片 ===')
     console.log('会议ID:', meetingId)
     console.log('会议状态:', status)
+
+    if (!meetingId) {
+      console.error('❌ 会议ID为空！')
+      showToast('会议ID无效', 'error')
+      return
+    }
 
     // ✨ 改动：所有状态都跳转到详情页
     // 详情页会根据状态显示不同的按钮：
@@ -360,6 +371,7 @@ Page({
       },
       fail: (err) => {
         console.error('❌ 跳转失败:', err)
+        showToast('页面跳转失败', 'error')
       }
     })
 
