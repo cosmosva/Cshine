@@ -225,14 +225,16 @@ async def upload_audio_and_create_meeting(
             
             logger.info(f"会议记录已创建: {meeting.id}")
             
+            # ✨ 改动：不再自动触发 AI 处理，等待用户手动点击"立即生成"
             # 触发 AI 处理
-            process_meeting_ai_async(meeting.id, meeting.audio_url)
-            logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
+            # process_meeting_ai_async(meeting.id, meeting.audio_url)
+            # logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
             
             return ResponseModel(
                 code=200,
-                message="上传成功，正在处理...",
+                message="上传成功，请点击「立即生成」开始处理",
                 data={
+                    "id": meeting.id,  # 改为 "id" 以便前端获取
                     "meeting_id": meeting.id,
                     "file_url": oss_url,
                     "file_size": file_size

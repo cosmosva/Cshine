@@ -566,11 +566,22 @@ Page({
       
       // 显示成功
       if (uploadModal) {
-        uploadModal.showSuccess('上传成功，正在AI处理...')
+        uploadModal.showSuccess('上传成功！')
       }
       
-      // 刷新列表
-      this.loadMeetingList()
+      // 等待 1 秒后跳转到详情页
+      setTimeout(() => {
+        this._isUploading = false
+        this.setData({ showUploadModal: false })
+        
+        // 跳转到详情页，让用户点击「立即生成」
+        const meetingId = result.id
+        console.log('跳转到详情页，会议ID:', meetingId)
+        
+        wx.navigateTo({
+          url: `/pages/meeting/detail?id=${meetingId}`
+        })
+      }, 1000)
       
       console.log('=== 上传流程完成 ===')
       
