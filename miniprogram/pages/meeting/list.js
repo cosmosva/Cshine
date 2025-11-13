@@ -575,12 +575,18 @@ Page({
         this.setData({ showUploadModal: false })
         
         // 跳转到详情页，让用户点击「立即生成」
-        const meetingId = result.id
+        // 兼容两种返回格式：id 或 meeting_id
+        const meetingId = result.id || result.meeting_id
         console.log('跳转到详情页，会议ID:', meetingId)
         
-        wx.navigateTo({
-          url: `/pages/meeting/detail?id=${meetingId}`
-        })
+        if (meetingId) {
+          wx.navigateTo({
+            url: `/pages/meeting/detail?id=${meetingId}`
+          })
+        } else {
+          console.error('未获取到会议ID，无法跳转')
+          showToast('上传成功，但无法跳转到详情页', 'error')
+        }
       }, 1000)
       
       console.log('=== 上传流程完成 ===')
