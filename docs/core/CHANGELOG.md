@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-11-13
+
+### Added - Web 管理后台 🎨
+
+#### 核心功能
+- 🎨 **轻量级 Web 管理后台界面**
+  - 使用 Bootstrap 5 构建现代化 UI
+  - 响应式设计，支持移动端访问
+  - 清爽的渐变色主题
+  
+- 🤖 **AI 模型可视化管理**
+  - 添加、编辑、删除 AI 模型
+  - 模型列表展示（名称、提供商、状态、默认标记）
+  - 模型连接测试功能
+  - 支持设置默认模型和启用/禁用状态
+  
+- 📝 **提示词模板管理**
+  - 查看系统预置的提示词模板
+  - 按场景分类（会议摘要、闪记分类、行动项提取等）
+  - 支持查看模板详细内容
+  
+- 🔐 **安全认证**
+  - JWT Token 认证机制
+  - 管理员登录/登出
+  - Token 自动续期
+  - 登录状态检查
+
+#### 技术实现
+- **前端技术栈**
+  - HTML5 + Vanilla JavaScript
+  - Bootstrap 5.3.0（UI 框架）
+  - Font Awesome 6.4.0（图标库）
+  - 使用 CDN 加速资源加载
+  
+- **后端集成**
+  - FastAPI StaticFiles 挂载静态文件
+  - 与现有 API 完美集成
+  - 统一的 CORS 配置
+  
+- **用户体验**
+  - 单页应用（SPA）设计
+  - 平滑的页面切换动画
+  - 友好的错误提示
+  - 加载状态反馈
+
+#### 访问地址
+- **本地开发**：`http://localhost:8000/static/admin/login.html`
+- **生产环境**：`https://your-domain.com/static/admin/login.html`
+- **默认账号**：`admin` / `admin123456`
+
+#### 新增文件
+- `backend/static/admin/login.html` - 管理后台登录页面
+- `backend/static/admin/index.html` - 管理后台主页面
+- `backend/static/admin/app.js` - 前端业务逻辑
+- `backend/static/admin/README.md` - Web 管理后台使用文档
+
+#### 修改文件
+- `backend/main.py` - 添加静态文件服务支持
+
+#### 安全建议
+1. 首次部署后立即修改默认密码
+2. 生产环境必须使用 HTTPS
+3. 配置防火墙或 Nginx 限制访问 IP
+4. 定期更新系统和依赖
+5. 确保 API Key 的安全存储
+
+#### 后续计划
+- [ ] 提示词模板的完整 CRUD 操作
+- [ ] 管理员账号管理功能
+- [ ] 系统日志查看功能
+- [ ] 使用统计和成本监控
+- [ ] 导出/导入配置功能
+
+---
+
 ## [0.7.0] - 2025-11-13
 
 ### Changed - AI 调用逻辑重构 🔄
