@@ -5,6 +5,84 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.19] - 2025-11-13
+
+### Changed - 会议处理交互优化 ✨
+
+#### 手动触发 AI 处理
+- 🎯 **上传后不自动处理**
+  - 上传录音后不再自动启动 AI 转录
+  - 保持 `pending` 状态，等待用户触发
+  - 节省 AI 资源，给用户确认时间
+
+- ✨ **立即生成按钮**
+  - 会议详情页新增"立即生成"按钮
+  - 点击后确认对话框，告知预计处理时间
+  - 状态变为 `processing`，显示处理中提示
+  - 自动轮询状态，完成后刷新页面
+
+- 🔄 **智能状态轮询**
+  - 每 3 秒检查一次处理状态
+  - 完成或失败时停止轮询
+  - 页面卸载时自动清除定时器
+  - 处理完成后自动刷新内容
+
+- 🎨 **精美 UI 设计**
+  - **立即生成**：蓝紫渐变按钮 + 阴影效果
+  - **处理中**：灰色背景 + 旋转动画图标
+  - **重新处理**：紫色渐变按钮（completed/failed 状态显示）
+  - 按钮点击有缩放反馈
+
+#### 后端改动
+- 📦 **修改创建会议 API**
+  - 注释掉自动触发 AI 处理的代码
+  - 返回消息改为"请点击「立即生成」开始处理"
+  - 会议初始状态保持 `pending`
+
+- 🔌 **复用 reprocess API**
+  - 利用现有的 `/api/v1/meeting/{meeting_id}/reprocess` 接口
+  - 既可用于首次处理，也可用于重新处理
+  - 统一的处理逻辑
+
+#### 前端改动
+- 📱 **会议详情页（miniprogram/pages/meeting/detail.*）**
+  - 新增 `startProcessing()` 方法 - 触发首次处理
+  - 新增 `startStatusPolling()` 方法 - 开始状态轮询
+  - 新增 `checkProcessingStatus()` 方法 - 检查处理状态
+  - 优化 `reprocessMeeting()` 方法 - 统一轮询逻辑
+  - 页面卸载时清除轮询定时器
+
+- 🎨 **UI 状态管理**
+  - `pending` 状态：显示"立即生成"按钮
+  - `processing` 状态：显示"处理中"提示 + 旋转动画
+  - `completed`/`failed` 状态：显示"重新处理"按钮
+
+### Technical - 技术细节
+
+**状态流转**：
+```
+上传音频 → pending（待处理）
+  ↓ 点击"立即生成"
+processing（处理中）→ 每 3 秒轮询
+  ↓ AI 处理完成
+completed（已完成）→ 显示内容 + "重新处理"按钮
+```
+
+**轮询机制**：
+- 定时器：`setInterval(checkStatus, 3000)`
+- 状态变化后停止轮询
+- 页面卸载时清除定时器
+- 避免内存泄漏
+
+**用户体验**：
+- ✅ 上传即刻返回，无需等待
+- ✅ 手动控制处理时机
+- ✅ 实时进度反馈
+- ✅ 处理完成自动刷新
+- ✅ 流畅的动画效果
+
+---
+
 ## [0.5.18] - 2025-11-13
 
 ### Changed - 项目结构重构 🏗️

@@ -12,39 +12,49 @@
       "outputPath": ""
     },
     "useCompilerPlugins": false,
-    "minifyWXML": true
+    "minifyWXML": true,
+    "compileWorklet": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
   },
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
   "packOptions": {
     "ignore": [
       {
-        "type": "folder",
-        "value": "backend"
+        "value": "backend",
+        "type": "folder"
       },
       {
-        "type": "file",
-        "value": ".DS_Store"
+        "value": ".DS_Store",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "*.md"
+        "value": "*.md",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "*.sh"
+        "value": "*.sh",
+        "type": "file"
       },
       {
-        "type": "folder",
-        "value": ".git"
+        "value": ".git",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "node_modules"
+        "value": "node_modules",
+        "type": "folder"
       }
     ],
     "include": []
   },
   "appid": "wx68cb1f3f6a2bcf17",
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "3.11.1"
 }

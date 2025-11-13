@@ -79,6 +79,12 @@ Page({
       this.data.audioContext.pause()
       this.data.audioContext.destroy()
     }
+    
+    // 清除状态轮询定时器
+    if (this.statusTimer) {
+      clearInterval(this.statusTimer)
+      this.statusTimer = null
+    }
   },
 
   /**
@@ -248,41 +254,123 @@ Page({
   },
 
   /**
+   * 开始处理会议（立即生成）
+   */
+  async startProcessing() {
+    const { meeting } = this.data
+    if (!meeting || !meeting.id) return
+
+    // 确认对话框
+    const res = await showModal(
+      '开始处理',
+      '即将开始 AI 分析，生成会议摘要、转录和思维导图，大约需要几分钟时间。'
+    )
+    
+    if (!res.confirm) return
+    
+    try {
+      showLoading('启动处理中...')
+      
+      // 调用 reprocess 接口触发处理
+      await API.reprocessMeeting(meeting.id)
+      
+      hideLoading()
+      showToast('处理已启动', 'success')
+      
+      // 更新状态为 processing
+      this.setData({
+        'meeting.status': 'processing'
+      })
+      
+      // 开始轮询状态
+      this.startStatusPolling()
+      
+    } catch (error) {
+      hideLoading()
+      console.error('启动处理失败:', error)
+      showToast('启动失败，请重试', 'error')
+    }
+  },
+
+  /**
+   * 开始状态轮询
+   */
+  startStatusPolling() {
+    // 清除之前的定时器
+    if (this.statusTimer) {
+      clearInterval(this.statusTimer)
+    }
+    
+    // 每 3 秒轮询一次
+    this.statusTimer = setInterval(() => {
+      this.checkProcessingStatus()
+    }, 3000)
+  },
+
+  /**
+   * 检查处理状态
+   */
+  async checkProcessingStatus() {
+    const { meeting } = this.data
+    if (!meeting || !meeting.id) return
+    
+    try {
+      const status = await API.getMeetingStatus(meeting.id)
+      console.log('会议状态:', status)
+      
+      // 如果状态变为 completed 或 failed，停止轮询并刷新详情
+      if (status.status === 'completed' || status.status === 'failed') {
+        clearInterval(this.statusTimer)
+        this.statusTimer = null
+        
+        // 刷新详情页
+        this.loadMeetingDetail()
+        
+        if (status.status === 'completed') {
+          showToast('处理完成', 'success')
+        } else {
+          showToast('处理失败，请重试', 'error')
+        }
+      }
+      
+    } catch (error) {
+      console.error('检查状态失败:', error)
+    }
+  },
+
+  /**
    * 重新处理会议
    */
   async reprocessMeeting() {
     const { meeting } = this.data
     if (!meeting || !meeting.id) return
 
-    wx.showModal({
-      title: '重新处理',
-      content: '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。',
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            wx.showLoading({ title: '处理中...' })
-            await API.reprocessMeeting(meeting.id)
-            wx.hideLoading()
-            wx.showToast({
-              title: '已开始重新处理',
-              icon: 'success',
-              duration: 2000
-            })
-            // 3秒后刷新页面
-            setTimeout(() => {
-              this.loadMeetingDetail()
-            }, 3000)
-          } catch (error) {
-            wx.hideLoading()
-            wx.showToast({
-              title: error.message || '处理失败',
-              icon: 'none',
-              duration: 2000
-            })
-          }
-        }
-      }
-    })
+    const res = await showModal(
+      '重新处理',
+      '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。'
+    )
+    
+    if (!res.confirm) return
+    
+    try {
+      showLoading('启动处理中...')
+      await API.reprocessMeeting(meeting.id)
+      hideLoading()
+      showToast('处理已启动', 'success')
+      
+      // 更新状态为 processing
+      this.setData({
+        'meeting.status': 'processing'
+      })
+      
+      // 开始轮询状态
+      this.startStatusPolling()
+      
+    } catch (error) {
+      hideLoading()
+      console.error('重新处理失败:', error)
+      showToast('启动失败，请重试', 'error')
+    }
   },
 
   /**

@@ -30,9 +30,26 @@
           </view>
         </view>
       </view>
-      <!-- 重新处理按钮 -->
-      <view class="reprocess-btn" bindtap="reprocessMeeting">
-        <text class="btn-text">🔄 重新处理</text>
+      
+      <!-- 状态按钮区域 -->
+      <view class="status-actions">
+        <!-- 立即生成按钮（pending 状态） -->
+        <view class="generate-btn" wx:if="{{meeting.status === 'pending'}}" bindtap="startProcessing">
+          <text class="btn-icon">✨</text>
+          <text class="btn-text">立即生成</text>
+        </view>
+        
+        <!-- 处理中提示（processing 状态） -->
+        <view class="processing-tip" wx:if="{{meeting.status === 'processing'}}">
+          <text class="tip-icon">⏳</text>
+          <text class="tip-text">AI 处理中，请稍候...</text>
+        </view>
+        
+        <!-- 重新处理按钮（completed/failed 状态） -->
+        <view class="reprocess-btn" wx:if="{{meeting.status === 'completed' || meeting.status === 'failed'}}" bindtap="reprocessMeeting">
+          <text class="btn-icon">🔄</text>
+          <text class="btn-text">重新处理</text>
+        </view>
       </view>
     </view>
 

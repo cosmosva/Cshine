@@ -59,17 +59,18 @@ async def create_meeting(
         
         logger.info(f"Meeting created: {meeting.id} by user {current_user.id}")
         
+        # ✨ 改动：不再自动触发 AI 处理，等待用户手动点击"立即生成"
         # 触发 AI 处理
-        try:
-            process_meeting_ai_async(meeting.id, meeting.audio_url)
-            logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
-        except Exception as e:
-            logger.error(f"启动会议 AI 处理失败: {e}")
-            # 不影响创建流程，继续返回
+        # try:
+        #     process_meeting_ai_async(meeting.id, meeting.audio_url)
+        #     logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
+        # except Exception as e:
+        #     logger.error(f"启动会议 AI 处理失败: {e}")
+        #     # 不影响创建流程，继续返回
         
         return ResponseModel(
             code=200,
-            message="会议创建成功，正在处理中...",
+            message="会议上传成功，请点击「立即生成」开始处理",
             data=MeetingResponse.from_orm(meeting)
         )
     
