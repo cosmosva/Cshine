@@ -343,17 +343,15 @@ Page({
     const meetingId = e.currentTarget.dataset.id
     const status = e.currentTarget.dataset.status
 
-    // 如果还在处理中，跳转到上传页查看进度
-    if (status === 'processing' || status === 'pending') {
-      wx.navigateTo({
-        url: `/pages/meeting/upload?meetingId=${meetingId}&mode=view`
-      })
-    } else {
-      // 已完成，跳转到详情页
-      wx.navigateTo({
-        url: `/pages/meeting/detail?id=${meetingId}`
-      })
-    }
+    // ✨ 改动：所有状态都跳转到详情页
+    // 详情页会根据状态显示不同的按钮：
+    // - pending: 显示「立即生成」按钮
+    // - processing: 显示「处理中」提示
+    // - completed: 显示内容 + 「重新处理」按钮
+    // - failed: 显示「重新处理」按钮
+    wx.navigateTo({
+      url: `/pages/meeting/detail?id=${meetingId}`
+    })
 
     // 标记需要刷新
     this._needRefresh = true
