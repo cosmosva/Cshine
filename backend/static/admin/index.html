@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cshine 管理后台</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+        .sidebar {
+            background: white;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .sidebar-brand h4 {
+            color: #667eea;
+            margin: 0;
+        }
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            padding: 0;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 12px 20px;
+            color: #6c757d;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .sidebar-nav a:hover {
+            background: #f8f9fa;
+            color: #667eea;
+        }
+        .sidebar-nav a.active {
+            background: #667eea;
+            color: white;
+        }
+        .main-content {
+            padding: 30px;
+        }
+        .top-bar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin: -30px -30px 30px -30px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #eee;
+            padding: 15px 20px;
+        }
+        .badge-active {
+            background: #28a745;
+        }
+        .badge-inactive {
+            background: #6c757d;
+        }
+        .btn-primary {
+            background: #667eea;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .modal-header {
+            background: #667eea;
+            color: white;
+        }
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-2 sidebar">
+                <div class="sidebar-brand">
+                    <h4><i class="fas fa-sparkles"></i> Cshine</h4>
+                    <small class="text-muted">AI 管理后台</small>
+                </div>
+                <ul class="sidebar-nav">
+                    <li><a href="#models" class="nav-link active" onclick="showPage('models')">
+                        <i class="fas fa-robot"></i> AI 模型管理
+                    </a></li>
+                    <li><a href="#prompts" class="nav-link" onclick="showPage('prompts')">
+                        <i class="fas fa-file-alt"></i> 提示词管理
+                    </a></li>
+                    <li><a href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> 退出登录
+                    </a></li>
+                </ul>
+            </div>
+            
+            <!-- 主内容区 -->
+            <div class="col-md-10 main-content">
+                <!-- 顶部栏 -->
+                <div class="top-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" id="pageTitle">AI 模型管理</h5>
+                        <div>
+                            <span class="text-muted">欢迎，</span>
+                            <strong id="username"></strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI 模型管理页面 -->
+                <div id="modelsPage" class="page-content">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">模型列表</h6>
+                            <button class="btn btn-primary btn-sm" onclick="showAddModelModal()">
+                                <i class="fas fa-plus"></i> 添加模型
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>模型名称</th>
+                                            <th>提供商</th>
+                                            <th>模型ID</th>
+                                            <th>状态</th>
+                                            <th>默认</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modelsTableBody">
+                                        <tr>
+                                            <td colspan="6" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 提示词管理页面 -->
+                <div id="promptsPage" class="page-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">提示词模板列表</h6>
+                            <button class="btn btn-primary btn-sm" onclick="showAddPromptModal()">
+                                <i class="fas fa-plus"></i> 添加模板
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>名称</th>
+                                            <th>场景</th>
+                                            <th>状态</th>
+                                            <th>默认</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="promptsTableBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center">加载中...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑模型对话框 -->
+    <div class="modal fade" id="modelModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modelModalTitle">添加 AI 模型</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="modelForm">
+                        <input type="hidden" id="modelId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">模型名称 *</label>
+                                <input type="text" class="form-control" id="modelName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">提供商 *</label>
+                                <select class="form-select" id="modelProvider" required>
+                                    <option value="">请选择</option>
+                                    <option value="openai">OpenAI (GPT)</option>
+                                    <option value="anthropic">Anthropic (Claude)</option>
+                                    <option value="doubao">字节豆包</option>
+                                    <option value="qwen">阿里通义</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">模型 ID *</label>
+                                <input type="text" class="form-control" id="modelModelId" required 
+                                       placeholder="例如: gpt-4, claude-3-opus-20240229">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">API Base URL</label>
+                                <input type="text" class="form-control" id="modelApiBase" 
+                                       placeholder="可选，留空使用默认">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">API Key *</label>
+                            <input type="password" class="form-control" id="modelApiKey" required 
+                                   placeholder="请输入 API Key">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">最大 Token</label>
+                                <input type="number" class="form-control" id="modelMaxTokens" 
+                                       value="4096" min="1" max="100000">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">温度 (0-100)</label>
+                                <input type="number" class="form-control" id="modelTemperature" 
+                                       value="70" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">描述</label>
+                            <textarea class="form-control" id="modelDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="modelIsActive" checked>
+                            <label class="form-check-label" for="modelIsActive">启用此模型</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modelIsDefault">
+                            <label class="form-check-label" for="modelIsDefault">设为默认模型</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveModel()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+

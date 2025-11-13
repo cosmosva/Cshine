@@ -6,8 +6,10 @@ FastAPI 应用初始化
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 import sys
+import os
 
 from config import settings
 from app.database import engine, Base
@@ -55,6 +57,13 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(api_router, prefix="/api/v1")
+
+
+# 挂载静态文件（Web 管理后台）
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    logger.info("✅ 静态文件服务已启用: /static")
 
 
 # 根路径

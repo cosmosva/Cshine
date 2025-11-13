@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cshine 管理后台 - 登录</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .logo p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <h1>✨ Cshine</h1>
+            <p>AI 模型管理后台</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名</label>
+                <input type="text" class="form-control" id="username" required autocomplete="username">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">密码</label>
+                <input type="password" class="form-control" id="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">登录</button>
+        </form>
+        
+        <div id="error" class="alert alert-danger mt-3" style="display: none;"></div>
+    </div>
+
+    <script>
+        // API 配置
+        const API_BASE = '/api/v1/api';
+        
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.code === 200) {
+                    // 保存 token
+                    localStorage.setItem('admin_token', result.data.token);
+                    localStorage.setItem('admin_username', result.data.username);
+                    localStorage.setItem('admin_is_superuser', result.data.is_superuser);
+                    
+                    // 跳转到管理页面
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.textContent = result.message || '登录失败';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = '网络错误，请稍后重试';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
+
