@@ -38,11 +38,17 @@ Page({
   },
 
   onLoad(options) {
+    console.log('=== 详情页 onLoad ===')
+    console.log('options:', options)
+    
     if (options.id) {
+      console.log('开始加载会议:', options.id)
       this.setData({ meetingId: options.id })
       this.loadMeetingDetail()
       this.loadSpeakerMap()
       this.loadContacts()
+    } else {
+      console.error('❌ 缺少会议ID参数')
     }
     
     // 创建音频上下文

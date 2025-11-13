@@ -105,7 +105,7 @@
               >
                 {{utils.getSpeakerName('SPEAKER_' + item.SpeakerId, speakerMap)}}
               </text>
-              <text class="timestamp-text">{{utils.formatDuration(item.Words[0].Start / 1000)}}</text>
+              <text class="timestamp-text" wx:if="{{item.Words && item.Words.length > 0}}">{{utils.formatDuration(item.Words[0].Start / 1000)}}</text>
             </view>
             
             <!-- 发言内容 -->

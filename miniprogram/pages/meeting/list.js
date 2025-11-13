@@ -343,6 +343,10 @@ Page({
     const meetingId = e.currentTarget.dataset.id
     const status = e.currentTarget.dataset.status
 
+    console.log('=== 点击会议卡片 ===')
+    console.log('会议ID:', meetingId)
+    console.log('会议状态:', status)
+
     // ✨ 改动：所有状态都跳转到详情页
     // 详情页会根据状态显示不同的按钮：
     // - pending: 显示「立即生成」按钮
@@ -350,7 +354,13 @@ Page({
     // - completed: 显示内容 + 「重新处理」按钮
     // - failed: 显示「重新处理」按钮
     wx.navigateTo({
-      url: `/pages/meeting/detail?id=${meetingId}`
+      url: `/pages/meeting/detail?id=${meetingId}`,
+      success: () => {
+        console.log('✅ 跳转成功')
+      },
+      fail: (err) => {
+        console.error('❌ 跳转失败:', err)
+      }
     })
 
     // 标记需要刷新
