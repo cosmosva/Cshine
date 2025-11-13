@@ -42,11 +42,11 @@ class AIProvider(str, enum.Enum):
 
 class PromptScenario(str, enum.Enum):
     """提示词使用场景"""
-    MEETING_SUMMARY = "meeting_summary"
-    FLASH_CLASSIFY = "flash_classify"
-    ACTION_EXTRACT = "action_extract"
-    KEY_POINTS = "key_points"
-    GENERAL_CHAT = "general_chat"
+    meeting_summary = "meeting_summary"
+    flash_classify = "flash_classify"
+    action_extract = "action_extract"
+    key_points = "key_points"
+    general_chat = "general_chat"
 
 
 class User(Base):
