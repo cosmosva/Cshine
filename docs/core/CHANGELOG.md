@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2025-11-13
+
+### Changed - AI 调用逻辑重构 🔄
+
+#### 核心改造
+- 🤖 **LLM 分类器**
+  - 创建 `LLMClassifier` 基于统一 LLM 层的智能分类器
+  - 支持使用可配置的 AI 模型进行内容分类
+  - 支持智能关键词提取
+  - 支持行动项识别和提取
+  - 自动降级机制：LLM 调用失败时自动降级到规则分类器
+
+- 📊 **AI 处理器改造**
+  - `ai_processor.py` (闪记处理) 支持 AI 模型选择
+  - `meeting_processor.py` (会议处理) 支持 AI 模型选择
+  - 条件使用 LLM：指定 AI 模型时使用 LLM，否则使用传统规则分类
+  - 完整的错误处理和降级逻辑
+
+- 📦 **Schema 更新**
+  - `FlashCreate` 添加 `ai_model_id` 字段（可选）
+  - `MeetingCreate` 添加 `ai_model_id` 字段（可选）
+  - 向后兼容：不传 `ai_model_id` 时使用原有的规则分类
+
+- 🔧 **API 增强**
+  - `POST /api/v1/flash/create` - 支持传递 `ai_model_id`
+  - `POST /api/v1/meeting/create` - 支持传递 `ai_model_id`
+  - `POST /api/v1/meeting/{id}/reprocess` - 使用会议记录中保存的 AI 模型
+
+#### 技术特性
+- ✅ 向后兼容：不传 `ai_model_id` 时完全使用原有逻辑
+- ✅ 灵活降级：LLM 调用失败自动降级到规则方法，不影响用户体验
+- ✅ 统一接口：所有 AI 功能通过统一的 LLM 工厂调用
+- ✅ 清晰日志：每个步骤都有详细的日志记录
+
+#### 新增文件
+- `backend/app/services/llm_classifier.py` - 基于 LLM 的智能分类器
+
+#### 优化点
+- 代码结构更清晰，易于扩展新的 AI 功能
+- 支持多种 AI 模型，用户可自由选择
+- 完善的错误处理，提高系统稳定性
+
+---
+
 ## [0.6.0] - 2025-11-13
 
 ### Added - AI 模型统一管理系统 🤖
