@@ -341,3 +341,156 @@ class SpeakerListResponse(BaseModel):
     items: List[SpeakerResponse]
 
 
+# ============ 管理员相关 ✨新增 ============
+
+class AdminLoginRequest(BaseModel):
+    """管理员登录请求"""
+    username: str = Field(..., min_length=3, max_length=50, description="用户名")
+    password: str = Field(..., min_length=6, description="密码")
+
+
+class AdminLoginResponse(BaseModel):
+    """管理员登录响应"""
+    token: str
+    admin_id: str
+    username: str
+    is_superuser: bool
+
+
+class AdminUserResponse(BaseModel):
+    """管理员用户响应"""
+    id: str
+    username: str
+    email: Optional[str]
+    is_active: bool
+    is_superuser: bool
+    created_at: datetime
+    last_login: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+
+# ============ AI 模型相关 ✨新增 ============
+
+class AIModelCreate(BaseModel):
+    """创建 AI 模型请求"""
+    name: str = Field(..., min_length=1, max_length=100, description="模型名称")
+    provider: str = Field(..., description="提供商：openai/anthropic/doubao/qwen")
+    model_id: str = Field(..., min_length=1, max_length=100, description="模型ID")
+    api_key: str = Field(..., description="API密钥")
+    api_base_url: Optional[str] = Field(None, max_length=255, description="API基础URL")
+    max_tokens: int = Field(4096, ge=1, le=128000, description="最大token数")
+    temperature: int = Field(70, ge=0, le=100, description="温度参数(0-100)")
+    is_active: bool = Field(True, description="是否启用")
+    is_default: bool = Field(False, description="是否为默认模型")
+    description: Optional[str] = Field(None, description="模型描述")
+
+
+class AIModelUpdate(BaseModel):
+    """更新 AI 模型请求"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    model_id: Optional[str] = Field(None, min_length=1, max_length=100)
+    api_key: Optional[str] = None
+    api_base_url: Optional[str] = Field(None, max_length=255)
+    max_tokens: Optional[int] = Field(None, ge=1, le=128000)
+    temperature: Optional[int] = Field(None, ge=0, le=100)
+    is_active: Optional[bool] = None
+    is_default: Optional[bool] = None
+    description: Optional[str] = None
+
+
+class AIModelResponse(BaseModel):
+    """AI 模型响应"""
+    id: str
+    name: str
+    provider: str
+    model_id: str
+    api_base_url: Optional[str]
+    max_tokens: int
+    temperature: int
+    is_active: bool
+    is_default: bool
+    description: Optional[str]
+    created_at: datetime
+    updated_at: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+
+class AIModelListResponse(BaseModel):
+    """AI 模型列表响应"""
+    total: int
+    items: List[AIModelResponse]
+
+
+class AIModelTestRequest(BaseModel):
+    """测试 AI 模型连接请求"""
+    model_id: Optional[str] = Field(None, description="模型ID，如果不传则测试指定配置")
+    provider: Optional[str] = None
+    api_key: Optional[str] = None
+    api_base_url: Optional[str] = None
+
+
+# ============ AI 提示词相关 ✨新增 ============
+
+class AIPromptCreate(BaseModel):
+    """创建提示词模板请求"""
+    name: str = Field(..., min_length=1, max_length=100, description="模板名称")
+    scenario: str = Field(..., description="使用场景")
+    prompt_template: str = Field(..., min_length=1, description="提示词模板")
+    variables: Optional[str] = Field(None, description="变量说明（JSON格式）")
+    is_active: bool = Field(True, description="是否启用")
+    is_default: bool = Field(False, description="是否为默认模板")
+
+
+class AIPromptUpdate(BaseModel):
+    """更新提示词模板请求"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    prompt_template: Optional[str] = Field(None, min_length=1)
+    variables: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_default: Optional[bool] = None
+
+
+class AIPromptResponse(BaseModel):
+    """提示词模板响应"""
+    id: str
+    name: str
+    scenario: str
+    prompt_template: str
+    variables: Optional[str]
+    is_active: bool
+    is_default: bool
+    created_at: datetime
+    updated_at: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+
+class AIPromptListResponse(BaseModel):
+    """提示词模板列表响应"""
+    total: int
+    items: List[AIPromptResponse]
+
+
+# ============ AI 聊天相关 ✨新增 ============
+
+class AIChatRequest(BaseModel):
+    """AI 对话请求"""
+    message: str = Field(..., min_length=1, description="用户消息")
+    model_id: Optional[str] = Field(None, description="使用的模型ID，不传则使用默认模型")
+    system_prompt: Optional[str] = Field(None, description="系统提示词")
+    temperature: Optional[int] = Field(None, ge=0, le=100, description="温度参数(0-100)")
+    max_tokens: Optional[int] = Field(None, ge=1, description="最大token数")
+
+
+class AIChatResponse(BaseModel):
+    """AI 对话响应"""
+    message: str
+    model: str
+    usage: Optional[dict] = None
+
+

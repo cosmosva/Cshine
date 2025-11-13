@@ -93,6 +93,12 @@ class Settings(BaseSettings):
     QWEN_API_KEY: str = ""
     QWEN_MODEL: str = "qwen-turbo"
     
+    # 管理员配置 ✨新增
+    ADMIN_DEFAULT_PASSWORD: str = Field(
+        default="admin123456",
+        description="管理员默认密码（首次初始化时使用）"
+    )
+    
     # 日志配置
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "./logs/cshine.log"

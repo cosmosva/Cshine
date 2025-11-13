@@ -5,6 +5,93 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-11-13
+
+### Added - AI 模型统一管理系统 🤖
+
+#### 核心功能
+- 🤖 **多 AI 模型支持**
+  - 支持 OpenAI (GPT)、Anthropic (Claude)、字节豆包、阿里通义千问
+  - 统一的 LLM 调用接口，屏蔽底层差异
+  - 支持动态配置和切换模型
+  - 支持测试模型连接
+
+- 👨‍💼 **管理员系统**
+  - 独立的管理员账号体系
+  - 基于 JWT 的认证机制
+  - 支持超级管理员权限
+  - 默认账号：admin / admin123456
+
+- 📝 **提示词模板管理**
+  - 支持多场景提示词（会议摘要、闪记分类、行动项提取等）
+  - 支持变量占位符
+  - 可设置默认模板
+
+- 👤 **用户端功能**
+  - 查看可用的 AI 模型列表
+  - 选择不同模型进行对话
+  - 自定义温度、最大 token 等参数
+
+#### 数据库变更
+- 新增 `ai_models` 表 - AI 模型配置
+- 新增 `ai_prompts` 表 - 提示词模板
+- 新增 `admin_users` 表 - 管理员账号
+- `flashes` 表新增 `ai_model_id` 字段
+- `meetings` 表新增 `ai_model_id` 字段
+
+#### API 接口
+**管理员接口**：
+- `POST /api/v1/api/admin/login` - 管理员登录
+- `GET /api/v1/api/admin/me` - 获取当前管理员信息
+- `GET /api/v1/api/admin/ai-models` - 获取 AI 模型列表
+- `POST /api/v1/api/admin/ai-models` - 创建 AI 模型
+- `PUT /api/v1/api/admin/ai-models/{id}` - 更新模型配置
+- `DELETE /api/v1/api/admin/ai-models/{id}` - 删除模型
+- `POST /api/v1/api/admin/ai-models/{id}/test` - 测试模型连接
+- `GET /api/v1/api/admin/ai-prompts` - 获取提示词列表
+- `POST /api/v1/api/admin/ai-prompts` - 创建提示词
+- `PUT /api/v1/api/admin/ai-prompts/{id}` - 更新提示词
+- `DELETE /api/v1/api/admin/ai-prompts/{id}` - 删除提示词
+
+**用户接口**：
+- `GET /api/v1/api/ai-models` - 获取可用模型列表
+- `POST /api/v1/api/ai-models/chat` - AI 对话
+
+#### 技术实现
+- 抽象了 `BaseLLM` 基类，统一接口
+- 实现了各厂商的适配器（OpenAI、Anthropic、豆包、通义千问）
+- LLM 工厂模式，根据配置动态创建实例
+- 使用 bcrypt 加密管理员密码
+
+#### 文件变更
+**新增文件**：
+- `backend/app/services/llm/base.py` - LLM 基类
+- `backend/app/services/llm/openai_llm.py` - OpenAI 适配器
+- `backend/app/services/llm/anthropic_llm.py` - Claude 适配器
+- `backend/app/services/llm/doubao_llm.py` - 豆包适配器
+- `backend/app/services/llm/qwen_llm.py` - 通义千问适配器
+- `backend/app/services/llm/factory.py` - LLM 工厂
+- `backend/app/api/admin.py` - 管理员 API
+- `backend/app/api/ai_models.py` - AI 模型管理 API
+- `backend/app/api/ai_prompts.py` - 提示词管理 API
+- `backend/migrations/add_ai_models_and_prompts.py` - 数据库迁移脚本
+- `backend/init_ai_system.py` - 初始化脚本
+
+**修改文件**：
+- `backend/app/models.py` - 新增 AI 相关模型
+- `backend/app/schemas.py` - 新增 AI 相关 schemas
+- `backend/app/dependencies.py` - 新增管理员认证依赖
+- `backend/app/api/__init__.py` - 注册新路由
+- `backend/config.py` - 新增管理员配置
+- `backend/requirements.txt` - 新增 bcrypt 依赖
+
+#### 部署文档
+- 📋 `docs/features/DEPLOY_AI_MODELS_SYSTEM_20251113.md`
+- 更新优先级：🟡 建议
+- 预计停机时间：< 5 分钟
+
+---
+
 ## [0.5.20] - 2025-11-13
 
 ### Fixed - 上传流程修复 🐛
