@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.18] - 2025-11-13
+
+### Changed - 项目结构重构 🏗️
+
+#### 目录结构调整
+- 📁 **小程序代码统一管理**
+  - 创建 `miniprogram/` 目录
+  - 移动所有小程序相关文件到 `miniprogram/`
+  - 为未来多端开发（Web端）做准备
+  
+- 🔄 **移动的文件和目录**
+  - 配置文件：`app.js`, `app.json`, `app.wxss`, `project.config.json`, `project.private.config.json`, `sitemap.json`
+  - 代码目录：`pages/`, `components/`, `utils/`, `assets/`, `styles/`
+  
+- 📦 **保持不变的内容**
+  - `backend/` - 后端服务
+  - `docs/` - 项目文档
+  - `README.md` - 项目说明
+  - `.cursorrules` - 开发规则
+  - 其他配置文件
+
+#### 新的项目结构
+```
+Cshine/
+├── miniprogram/          # 小程序端（新增）
+│   ├── app.js
+│   ├── app.json
+│   ├── app.wxss
+│   ├── pages/
+│   ├── components/
+│   ├── utils/
+│   ├── assets/
+│   ├── styles/
+│   └── project.config.json
+├── backend/              # 后端服务
+├── docs/                 # 项目文档
+└── README.md
+```
+
+#### 优势
+- ✅ 清晰的代码组织，小程序代码统一在 `miniprogram/` 目录
+- ✅ 为未来 Web 端开发预留空间（`web/` 目录）
+- ✅ 使用 `git mv` 保留完整的 Git 历史记录
+- ✅ 不影响现有功能，向后兼容
+
+### Technical - 技术细节
+- 使用 `git mv` 命令移动文件，保留 Git 历史
+- 微信开发者工具需要重新打开 `miniprogram/` 目录
+- 小程序内部的相对路径无需修改
+
+---
+
 ## [0.5.17] - 2025-11-12
 
 ### Fixed - 部署脚本修复
