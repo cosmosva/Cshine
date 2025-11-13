@@ -15,25 +15,26 @@ from app.models import Meeting, MeetingStatus
 from app.services.tingwu_service import tingwu_service
 
 
-def process_meeting_ai_async(meeting_id: str, audio_url: str):
+def process_meeting_ai_async(meeting_id: str, audio_url: str, ai_model_id: str = None):
     """
     后台异步处理会议纪要的 AI 分析
     
     Args:
         meeting_id: 会议ID
         audio_url: 音频文件URL（需要公网可访问）
+        ai_model_id: 使用的AI模型ID（可选）
     """
     # 在新线程中执行
     thread = threading.Thread(
         target=_process_meeting_ai,
-        args=(meeting_id, audio_url),
+        args=(meeting_id, audio_url, ai_model_id),
         daemon=True
     )
     thread.start()
-    logger.info(f"启动会议 AI 处理线程: meeting_id={meeting_id}")
+    logger.info(f"启动会议 AI 处理线程: meeting_id={meeting_id}, model_id={ai_model_id}")
 
 
-def _process_meeting_ai(meeting_id: str, audio_url: str):
+def _process_meeting_ai(meeting_id: str, audio_url: str, ai_model_id: str = None):
     """
     执行会议 AI 处理（在后台线程中）
     
@@ -41,10 +42,15 @@ def _process_meeting_ai(meeting_id: str, audio_url: str):
     1. 提交通义听悟任务（开启说话人分离、章节分段等）
     2. 轮询等待完成
     3. 解析转写文本
-    4. 提取会议要点
-    5. 识别行动项
-    6. 生成结构化纪要
+    4. 提取会议要点（使用LLM或通义听悟）
+    5. 识别行动项（使用LLM或通义听悟）
+    6. 生成结构化纪要（使用LLM或通义听悟）
     7. 更新数据库
+    
+    Args:
+        meeting_id: 会议ID
+        audio_url: 音频URL
+        ai_model_id: AI模型ID（可选）
     """
     db: Session = SessionLocal()
     

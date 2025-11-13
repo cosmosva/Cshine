@@ -45,7 +45,8 @@ async def create_flash(
             keywords=json.dumps(flash_data.keywords, ensure_ascii=False) if flash_data.keywords else None,
             category=flash_data.category,
             audio_url=flash_data.audio_url,
-            audio_duration=flash_data.audio_duration
+            audio_duration=flash_data.audio_duration,
+            ai_model_id=flash_data.ai_model_id  # ✨新增：记录使用的AI模型
         )
         
         db.add(flash)
@@ -57,9 +58,9 @@ async def create_flash(
         # 如果有音频URL，触发 AI 处理
         if flash.audio_url:
             try:
-                # 后台异步处理
-                process_flash_ai_async(flash.id, flash.audio_url)
-                logger.info(f"AI 处理已启动: flash_id={flash.id}")
+                # 后台异步处理（传递 AI 模型 ID）
+                process_flash_ai_async(flash.id, flash.audio_url, ai_model_id=flash_data.ai_model_id)
+                logger.info(f"AI 处理已启动: flash_id={flash.id}, model_id={flash_data.ai_model_id}")
             except Exception as e:
                 logger.error(f"启动 AI 处理失败: {e}")
                 # 不影响创建流程，继续返回

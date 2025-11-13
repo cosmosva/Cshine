@@ -56,6 +56,7 @@ class FlashCreate(BaseModel):
     category: Optional[str] = None
     audio_url: Optional[str] = None
     audio_duration: Optional[int] = None
+    ai_model_id: Optional[str] = Field(None, description="使用的AI模型ID（可选，不传则使用默认模型）")
 
 
 class FlashUpdate(BaseModel):
@@ -123,6 +124,7 @@ class MeetingCreate(BaseModel):
     audio_url: str = Field(..., description="音频文件URL")
     audio_duration: Optional[int] = None
     folder_id: Optional[int] = None  # 知识库ID ✨新增
+    ai_model_id: Optional[str] = Field(None, description="使用的AI模型ID（可选，不传则使用默认模型）")
 
 
 class MeetingUpdate(BaseModel):

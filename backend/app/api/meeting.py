@@ -50,6 +50,7 @@ async def create_meeting(
             audio_url=meeting_data.audio_url,
             audio_duration=meeting_data.audio_duration,
             folder_id=meeting_data.folder_id,  # ✨新增：支持知识库
+            ai_model_id=meeting_data.ai_model_id,  # ✨新增：记录使用的AI模型
             status=MeetingStatus.PENDING
         )
         
@@ -577,9 +578,9 @@ async def reprocess_meeting(
         meeting.status = MeetingStatus.PENDING
         db.commit()
         
-        # 触发 AI 重新处理
-        process_meeting_ai_async(meeting.id, meeting.audio_url)
-        logger.info(f"会议重新处理已启动: meeting_id={meeting_id}")
+        # 触发 AI 重新处理（使用会议记录中保存的 AI 模型）
+        process_meeting_ai_async(meeting.id, meeting.audio_url, ai_model_id=meeting.ai_model_id)
+        logger.info(f"会议重新处理已启动: meeting_id={meeting_id}, model_id={meeting.ai_model_id}")
         
         return ResponseModel(
             code=200,

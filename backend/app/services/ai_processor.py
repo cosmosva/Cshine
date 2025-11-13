@@ -13,27 +13,30 @@ from app.database import SessionLocal
 from app.models import Flash
 from app.services.tingwu_service import tingwu_service
 from app.services.classifier import classifier
+from app.services.llm_classifier import llm_classifier
+import asyncio
 
 
-def process_flash_ai_async(flash_id: str, audio_url: str):
+def process_flash_ai_async(flash_id: str, audio_url: str, ai_model_id: str = None):
     """
     后台异步处理闪记的 AI 分析
     
     Args:
         flash_id: 闪记ID
         audio_url: 音频文件URL（需要公网可访问）
+        ai_model_id: 使用的AI模型ID（可选）
     """
     # 在新线程中执行
     thread = threading.Thread(
         target=_process_flash_ai,
-        args=(flash_id, audio_url),
+        args=(flash_id, audio_url, ai_model_id),
         daemon=True
     )
     thread.start()
-    logger.info(f"启动 AI 处理线程: flash_id={flash_id}")
+    logger.info(f"启动 AI 处理线程: flash_id={flash_id}, model_id={ai_model_id}")
 
 
-def _process_flash_ai(flash_id: str, audio_url: str):
+def _process_flash_ai(flash_id: str, audio_url: str, ai_model_id: str = None):
     """
     执行 AI 处理（在后台线程中）
     
@@ -41,8 +44,13 @@ def _process_flash_ai(flash_id: str, audio_url: str):
     1. 提交通义听悟任务
     2. 轮询等待完成
     3. 解析结果
-    4. 智能分类
+    4. 智能分类（使用LLM或规则）
     5. 更新数据库
+    
+    Args:
+        flash_id: 闪记ID
+        audio_url: 音频URL
+        ai_model_id: AI模型ID（可选）
     """
     db: Session = SessionLocal()
     
@@ -90,15 +98,41 @@ def _process_flash_ai(flash_id: str, audio_url: str):
         
         logger.info(f"转写完成: flash_id={flash_id}, 文本长度={len(transcription)}")
         
-        # 5. 智能分类
-        category = classifier.classify(transcription)
+        # 5. 智能分类（如果指定了AI模型，使用LLM分类，否则使用规则分类）
+        if ai_model_id:
+            try:
+                category = asyncio.run(llm_classifier.classify(transcription, model_id=ai_model_id, db=db))
+                logger.info(f"使用 LLM 分类: {category}")
+            except Exception as e:
+                logger.error(f"LLM 分类失败，降级到规则分类: {e}")
+                category = classifier.classify(transcription)
+        else:
+            category = classifier.classify(transcription)
         
-        # 6. 提取关键词
-        keywords = classifier.extract_keywords(
-            text=transcription,
-            summary=summary,
-            key_sentences=key_sentences
-        )
+        # 6. 提取关键词（如果指定了AI模型，使用LLM提取，否则使用规则提取）
+        if ai_model_id:
+            try:
+                keywords = asyncio.run(llm_classifier.extract_keywords(
+                    text=transcription,
+                    summary=summary,
+                    key_sentences=key_sentences,
+                    model_id=ai_model_id,
+                    db=db
+                ))
+                logger.info(f"使用 LLM 提取关键词: {keywords}")
+            except Exception as e:
+                logger.error(f"LLM 关键词提取失败，降级到规则提取: {e}")
+                keywords = classifier.extract_keywords(
+                    text=transcription,
+                    summary=summary,
+                    key_sentences=key_sentences
+                )
+        else:
+            keywords = classifier.extract_keywords(
+                text=transcription,
+                summary=summary,
+                key_sentences=key_sentences
+            )
         
         # 7. 生成标题（摘要的前20字或转写文本的前20字）
         title = summary[:20] if summary else transcription[:20]
