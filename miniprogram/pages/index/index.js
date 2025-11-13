@@ -20,7 +20,13 @@ Page({
     
     // 分页
     currentPage: 1,
-    hasMore: true
+    hasMore: true,
+    
+    // AI 模型选择 ✨新增
+    showAiModelPicker: false,
+    selectedAiModelId: '',
+    selectedAiModelName: '默认（规则分类）',
+    tempRecordData: null  // 临时存储录音数据
   },
 
   /**
@@ -169,9 +175,39 @@ Page({
   /**
    * 录音结束
    */
-  async onRecordEnd(e) {
+  onRecordEnd(e) {
     console.log('录音结束:', e.detail)
     const { tempFilePath, duration, fileSize } = e.detail
+    
+    // 保存录音数据，显示 AI 模型选择器 ✨修改
+    this.setData({
+      tempRecordData: { tempFilePath, duration, fileSize },
+      showAiModelPicker: true
+    })
+  },
+  
+  // AI 模型选择器确认 ✨新增
+  async onAiModelConfirm(e) {
+    const { id, name } = e.detail
+    
+    this.setData({
+      selectedAiModelId: id,
+      selectedAiModelName: name,
+      showAiModelPicker: false
+    })
+    
+    // 继续创建闪记
+    await this.createFlashWithModel()
+  },
+  
+  // AI 模型选择器关闭 ✨新增
+  onAiModelClose() {
+    this.setData({ showAiModelPicker: false })
+  },
+  
+  // 使用选择的模型创建闪记 ✨新增
+  async createFlashWithModel() {
+    const { tempFilePath, duration, fileSize } = this.data.tempRecordData
     
     try {
       // 1. 显示加载提示
@@ -185,13 +221,16 @@ Page({
       hideLoading()
       showLoading('AI 正在处理...')
       
-      // TODO: 这里应该等待后端 ASR 转写完成
-      // 目前先创建一个临时记录
       const flashData = {
-        content: '语音转写中...',  // TODO: 等待 ASR 结果
+        content: '语音转写中...',
         audio_url: uploadResult.file_url,
         audio_duration: duration,
         category: '工作'
+      }
+      
+      // 添加 AI 模型 ID（如果有选择）✨新增
+      if (this.data.selectedAiModelId) {
+        flashData.ai_model_id = this.data.selectedAiModelId
       }
       
       const createResult = await api.createFlash(flashData)

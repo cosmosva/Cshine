@@ -1,0 +1,81 @@
+<!--AI 模型选择器组件-->
+<view class="ai-model-picker">
+  <!-- 遮罩层 -->
+  <view 
+    class="mask {{show ? 'show' : ''}}" 
+    catchtap="onClose"
+    wx:if="{{show}}"
+  ></view>
+  
+  <!-- 弹窗内容 -->
+  <view class="picker-content {{show ? 'show' : ''}}">
+    <!-- 标题栏 -->
+    <view class="header">
+      <view class="title">选择 AI 模型</view>
+      <view class="close-btn" catchtap="onClose">
+        <text>✕</text>
+      </view>
+    </view>
+    
+    <!-- 模型列表 -->
+    <scroll-view class="model-list" scroll-y>
+      <!-- 默认选项（不使用AI模型） -->
+      <view 
+        class="model-item {{selectedId === '' ? 'selected' : ''}}"
+        catchtap="onSelectModel"
+        data-id=""
+        data-name="默认（规则分类）"
+      >
+        <view class="model-info">
+          <view class="model-name">默认（规则分类）</view>
+          <view class="model-desc">使用传统规则进行分类和处理</view>
+        </view>
+        <view class="check-icon" wx:if="{{selectedId === ''}}">
+          <text>✓</text>
+        </view>
+      </view>
+      
+      <!-- 分隔线 -->
+      <view class="divider" wx:if="{{models.length > 0}}"></view>
+      
+      <!-- AI 模型列表 -->
+      <view 
+        class="model-item {{selectedId === item.id ? 'selected' : ''}}"
+        wx:for="{{models}}"
+        wx:key="id"
+        catchtap="onSelectModel"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}"
+      >
+        <view class="model-info">
+          <view class="model-name">
+            {{item.name}}
+            <text class="default-badge" wx:if="{{item.is_default}}">默认</text>
+          </view>
+          <view class="model-desc">{{providerNames[item.provider]}} · {{item.model_id}}</view>
+        </view>
+        <view class="check-icon" wx:if="{{selectedId === item.id}}">
+          <text>✓</text>
+        </view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{models.length === 0 && !loading}}">
+        <text class="empty-text">暂无可用模型</text>
+        <text class="empty-hint">管理员可在后台添加 AI 模型</text>
+      </view>
+      
+      <!-- 加载中 -->
+      <view class="loading-state" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+    </scroll-view>
+    
+    <!-- 底部按钮 -->
+    <view class="footer">
+      <button class="cancel-btn" catchtap="onClose">取消</button>
+      <button class="confirm-btn" catchtap="onConfirm">确定</button>
+    </view>
+  </view>
+</view>
+

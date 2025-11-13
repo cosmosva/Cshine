@@ -311,6 +311,17 @@ function getMeetingSpeakers(meetingId) {
 }
 
 /**
+ * ==================== AI 模型相关 ====================
+ */
+
+/**
+ * 获取可用的 AI 模型列表（用户端）
+ */
+function getAvailableModels() {
+  return get('/api/v1/ai-models/available')
+}
+
+/**
  * ==================== 导出 ====================
  */
 
@@ -361,6 +372,9 @@ module.exports = {
   getMeetingSpeakers,
   
   // 会议处理
-  reprocessMeeting
+  reprocessMeeting,
+  
+  // AI 模型
+  getAvailableModels
 }
 

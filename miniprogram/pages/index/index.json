@@ -5,6 +5,7 @@
   "usingComponents": {
     "navigation-bar": "/components/navigation-bar/navigation-bar",
     "record-button": "/components/record-button/record-button",
-    "flash-card": "/components/flash-card/flash-card"
+    "flash-card": "/components/flash-card/flash-card",
+    "ai-model-picker": "/components/ai-model-picker/ai-model-picker"
   }
 }

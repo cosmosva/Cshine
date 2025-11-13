@@ -1,7 +1,8 @@
 {
   "usingComponents": {
     "navigation-bar": "/components/navigation-bar/navigation-bar",
-    "upload-modal": "/components/upload-modal/upload-modal"
+    "upload-modal": "/components/upload-modal/upload-modal",
+    "ai-model-picker": "/components/ai-model-picker/ai-model-picker"
   },
   "enablePullDownRefresh": false,
   "navigationStyle": "custom"

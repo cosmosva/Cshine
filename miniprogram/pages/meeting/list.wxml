@@ -315,3 +315,11 @@
   show="{{showUploadModal}}" 
   bind:close="onUploadModalClose"
 />
+
+<!-- AI 模型选择器 -->
+<ai-model-picker
+  show="{{showAiModelPicker}}"
+  value="{{selectedAiModelId}}"
+  bind:confirm="onAiModelConfirm"
+  bind:close="onAiModelClose"
+/>
