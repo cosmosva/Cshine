@@ -15,7 +15,7 @@ from app.schemas import (
     AdminUserResponse,
     ResponseModel
 )
-from app.utils.jwt import create_token
+from app.utils.jwt import create_access_token
 from app.dependencies import get_current_admin, get_current_superuser
 
 router = APIRouter(prefix="/api/admin", tags=["管理员"])
@@ -67,7 +67,7 @@ async def admin_login(
             )
         
         # 生成 Token（存储 admin_id）
-        token = create_token(admin.id)
+        token = create_access_token({"sub": admin.id})
         
         logger.info(f"管理员登录成功: {admin.username} (ID: {admin.id})")
         
