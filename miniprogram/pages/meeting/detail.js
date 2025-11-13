@@ -3,7 +3,7 @@
  */
 
 const API = require('../../utils/api')
-const { showToast, showLoading, hideLoading, showModal } = require('../../utils/toast')
+const { showToast, showLoading, hideLoading, showConfirm } = require('../../utils/toast')
 const { formatDateTime } = require('../../utils/format')
 
 Page({
@@ -146,12 +146,12 @@ Page({
    * 删除会议
    */
   async deleteMeeting() {
-    const res = await showModal(
-      '确认删除',
-      '确定要删除这条会议纪要吗？'
+    const confirmed = await showConfirm(
+      '确定要删除这条会议纪要吗？',
+      '确认删除'
     )
     
-    if (!res.confirm) return
+    if (!confirmed) return
     
     showLoading('删除中...')
     
@@ -267,12 +267,12 @@ Page({
     if (!meeting || !meeting.id) return
 
     // 确认对话框
-    const res = await showModal(
-      '开始处理',
-      '即将开始 AI 分析，生成会议摘要、转录和思维导图，大约需要几分钟时间。'
+    const confirmed = await showConfirm(
+      '即将开始 AI 分析，生成会议摘要、转录和思维导图，大约需要几分钟时间。',
+      '开始处理'
     )
     
-    if (!res.confirm) return
+    if (!confirmed) return
     
     try {
       showLoading('启动处理中...')
@@ -351,12 +351,12 @@ Page({
     const { meeting } = this.data
     if (!meeting || !meeting.id) return
 
-    const res = await showModal(
-      '重新处理',
-      '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。'
+    const confirmed = await showConfirm(
+      '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。',
+      '重新处理'
     )
     
-    if (!res.confirm) return
+    if (!confirmed) return
     
     try {
       showLoading('启动处理中...')
