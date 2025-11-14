@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.8] - 2025-01-14
+
+### Added - 新功能 ✨
+
+#### 思维导图 Markdown 格式支持
+- **功能**：思维导图组件支持 Markdown 格式解析
+- **原因**：LLM 生成的思维导图为 Markdown 格式（# 标题 + - 列表）
+- **兼容性**：保持向后兼容 JSON 格式（通义听悟）
+- **解析规则**：
+  - `# ## ###` 标题 → level 0, 1, 2
+  - `- * +` 列表项 → level++
+  - 缩进识别 → 子层级
+- **影响文件**：`miniprogram/components/mindmap/mindmap.js`
+
+## [0.9.7] - 2025-01-14
+
+### Fixed - Bug 修复 🐛
+
+#### AI 调度逻辑缺陷
+- **问题**：转录完成后没有自动触发 LLM 总结
+- **原因**：`meeting_processor.py` 只更新状态为 COMPLETED，未检查 `ai_model_id`
+- **修复**：转录完成后检查 `ai_model_id`，如果存在则自动触发第二阶段（LLM 总结）
+- **其他修复**：
+  - 上传会议时不触发任何 AI 处理，保持 PENDING 状态
+  - 详情页注册 `ai-model-picker` 组件
+  - 修复组件事件绑定错误（`cancel` → `close`）
+- **影响文件**：
+  - `backend/app/api/upload.py`
+  - `backend/app/services/meeting_processor.py`
+  - `miniprogram/pages/meeting/detail.json`
+  - `miniprogram/pages/meeting/detail.wxml`
+  - `miniprogram/pages/meeting/detail.js`
+  - `miniprogram/components/ai-model-picker/ai-model-picker.js`
+
 ## [0.9.6] - 2025-01-14
 
 ### Fixed - Bug 修复 🐛
