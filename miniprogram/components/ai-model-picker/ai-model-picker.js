@@ -132,7 +132,9 @@ Component({
    */
   observers: {
     'show': function(show) {
+      console.log('[AI 模型选择器] show 属性变化:', show)
       if (show) {
+        console.log('[AI 模型选择器] 开始加载模型列表')
         this.onShow()
       }
     },

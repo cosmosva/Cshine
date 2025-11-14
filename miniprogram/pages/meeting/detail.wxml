@@ -185,5 +185,5 @@
 <ai-model-picker
   show="{{showAiModelPicker}}"
   bind:confirm="onAiModelConfirm"
-  bind:cancel="onAiModelCancel"
+  bind:close="onAiModelCancel"
 />

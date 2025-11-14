@@ -208,27 +208,21 @@ async def upload_audio_and_create_meeting(
             
             # 调用创建会议的逻辑
             from app.models import Meeting, MeetingStatus
-            from app.services.meeting_processor import process_meeting_ai_async
-            
+
             meeting = Meeting(
                 user_id=current_user.id,
                 title=meeting_data.title,
                 audio_url=meeting_data.audio_url,
                 audio_duration=meeting_data.audio_duration,
                 folder_id=meeting_data.folder_id,
-                status=MeetingStatus.PENDING
+                status=MeetingStatus.PENDING  # v0.9.5：保持 PENDING，等待用户点击"立即生成"
             )
-            
+
             db.add(meeting)
             db.commit()
             db.refresh(meeting)
-            
-            logger.info(f"会议记录已创建: {meeting.id}")
-            
-            # ✨ 改动：不再自动触发 AI 处理，等待用户手动点击"立即生成"
-            # 触发 AI 处理
-            # process_meeting_ai_async(meeting.id, meeting.audio_url)
-            # logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
+
+            logger.info(f"会议记录已创建: {meeting.id}，状态: PENDING")
             
             return ResponseModel(
                 code=200,

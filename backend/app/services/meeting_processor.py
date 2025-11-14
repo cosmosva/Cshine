@@ -97,10 +97,22 @@ def _process_meeting_transcription(meeting_id: str, audio_url: str):
         # 5. 更新数据库（仅转录相关字段）
         meeting.transcript = transcription
         meeting.transcript_paragraphs = json.dumps(paragraphs, ensure_ascii=False) if paragraphs else None
-        meeting.status = MeetingStatus.COMPLETED  # 转录完成，等待用户选择 AI 生成总结
-        db.commit()
 
-        logger.info(f"会议转录处理完成: meeting_id={meeting_id}")
+        # 检查是否需要继续生成 LLM 总结
+        ai_model_id = meeting.ai_model_id
+        if ai_model_id:
+            # 用户已选择 AI 模型，转录完成后自动生成总结
+            logger.info(f"会议转录完成，继续生成 LLM 总结: meeting_id={meeting_id}, model_id={ai_model_id}")
+            meeting.status = MeetingStatus.PROCESSING  # 继续处理
+            db.commit()
+
+            # 触发第二阶段：LLM 总结
+            process_meeting_summary_async(meeting_id, ai_model_id)
+        else:
+            # 没有选择 AI 模型，仅转录，等待用户手动触发
+            meeting.status = MeetingStatus.COMPLETED
+            db.commit()
+            logger.info(f"会议转录处理完成: meeting_id={meeting_id}，等待用户选择 AI 生成总结")
 
     except Exception as e:
         logger.error(f"会议转录处理失败: meeting_id={meeting_id}, error={e}", exc_info=True)

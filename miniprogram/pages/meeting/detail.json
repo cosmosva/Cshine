@@ -1,7 +1,8 @@
 {
   "usingComponents": {
     "navigation-bar": "/components/navigation-bar/navigation-bar",
-    "mindmap": "/components/mindmap/mindmap"
+    "mindmap": "/components/mindmap/mindmap",
+    "ai-model-picker": "/components/ai-model-picker/ai-model-picker"
   },
   "navigationStyle": "custom"
 }

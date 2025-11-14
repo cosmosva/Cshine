@@ -274,14 +274,21 @@ Page({
    * v0.9.5：点击"立即生成"，弹出 AI 模型选择器
    */
   async startProcessing() {
+    console.log('[立即生成] 按钮被点击')
     const { meeting } = this.data
+
+    console.log('[立即生成] 会议信息:', meeting)
+
     if (!meeting || !meeting.id) {
+      console.error('[立即生成] 会议信息不完整')
       showToast('会议信息不完整', 'error')
       return
     }
 
     // 弹出 AI 模型选择器
+    console.log('[立即生成] 弹出 AI 模型选择器')
     this.setData({ showAiModelPicker: true })
+    console.log('[立即生成] showAiModelPicker 已设置为 true')
   },
 
   /**
