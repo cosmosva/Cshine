@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.4] - 2025-11-14
+
+### Fixed - Bug 修复 🐛
+
+#### AI 模型选择器数据解析
+- **问题**：模型选择器无法加载模型列表，所有属性显示 undefined
+- **原因**：`request.js` 已将响应解包一层（返回 `res.data.data`），但组件代码期望完整响应
+- **修复**：调整数据解析逻辑，直接从返回值中获取 `items`
+- **影响文件**：`miniprogram/components/ai-model-picker/ai-model-picker.js`
+
+## [0.9.3] - 2025-11-14
+
+### Fixed - Bug 修复 🐛
+
+#### AI 模型 API 数据格式
+- **问题**：前端期望 `res.data.items`，后端返回的是数组
+- **修复**：后端返回标准列表格式 `{ items: [...], total: N }`
+- **改进**：前端增加详细日志便于调试
+- **影响文件**：
+  - `backend/app/api/ai_models.py`
+  - `miniprogram/components/ai-model-picker/ai-model-picker.js`
+
+## [0.9.2] - 2025-11-14
+
+### Fixed - Bug 修复 🐛
+
+#### API 路由 404 错误
+- **问题**：所有 AI 模型相关 API 返回 404 Not Found
+- **原因**：路由定义时重复添加了 `/api` 前缀
+- **修复**：移除重复前缀，确保路径正确
+- **正确路径**：
+  - `/api/v1/admin/login` ✅
+  - `/api/v1/admin/ai-models` ✅
+  - `/api/v1/ai-models/available` ✅
+- **影响文件**：
+  - `backend/app/api/admin.py`
+  - `backend/app/api/ai_models.py`
+  - `backend/app/api/ai_prompts.py`
+
+## [0.9.1] - 2025-11-13
+
+### Fixed - Bug 修复 🐛
+
+#### 会议详情页 showModal 错误
+- **问题**：`TypeError: showModal is not a function`
+- **原因**：`utils/toast.js` 只导出了 `showConfirm`，但 `detail.js` 引用了 `showModal`
+- **修复**：统一使用 `showConfirm` 函数
+- **影响文件**：
+  - `miniprogram/pages/meeting/detail.js`
+  - `miniprogram/utils/toast.js`
+
 ## [0.9.0] - 2025-11-13
 
 ### Added - 小程序端 AI 模型选择 📱
