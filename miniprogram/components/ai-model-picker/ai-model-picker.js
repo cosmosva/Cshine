@@ -58,26 +58,36 @@ Component({
       
       try {
         const res = await api.getAvailableModels()
+        console.log('📡 AI 模型列表 API 响应:', res)
+        
         if (res.code === 200) {
+          const items = res.data?.items || []
+          console.log('✅ 加载到的模型列表:', items)
+          
           this.setData({
-            models: res.data.items || [],
+            models: items,
             loading: false
           })
           
           // 如果有默认模型且当前未选择，自动选择默认模型
-          const defaultModel = res.data.items.find(m => m.is_default)
+          const defaultModel = items.find(m => m.is_default)
           if (!this.data.value && defaultModel) {
+            console.log('🎯 自动选择默认模型:', defaultModel.name)
             this.setData({
               selectedId: defaultModel.id,
               selectedName: defaultModel.name
             })
           }
         } else {
-          console.error('加载模型列表失败:', res.message)
+          console.error('❌ 加载模型列表失败:', {
+            code: res.code,
+            message: res.message,
+            data: res.data
+          })
           this.setData({ loading: false })
         }
       } catch (error) {
-        console.error('加载模型列表异常:', error)
+        console.error('❌ 加载模型列表异常:', error)
         this.setData({ loading: false })
       }
     },

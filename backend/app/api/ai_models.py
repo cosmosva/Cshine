@@ -315,22 +315,27 @@ async def get_available_models(
         ).all()
         
         # 返回简化的信息（不包含 API Key）
+        items = [
+            {
+                "id": model.id,
+                "name": model.name,
+                "provider": model.provider.value,
+                "model_id": model.model_id,
+                "description": model.description,
+                "is_default": model.is_default,
+                "max_tokens": model.max_tokens,
+                "temperature": model.temperature / 100.0,
+            }
+            for model in models
+        ]
+        
         return ResponseModel(
             code=200,
             message="success",
-            data=[
-                {
-                    "id": model.id,
-                    "name": model.name,
-                    "provider": model.provider.value,
-                    "model_id": model.model_id,
-                    "description": model.description,
-                    "is_default": model.is_default,
-                    "max_tokens": model.max_tokens,
-                    "temperature": model.temperature / 100.0,
-                }
-                for model in models
-            ]
+            data={
+                "items": items,
+                "total": len(items)
+            }
         )
         
     except Exception as e:
