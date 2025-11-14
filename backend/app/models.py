@@ -116,13 +116,12 @@ class Meeting(Base):
     meeting_date = Column(DateTime, nullable=True)
     audio_url = Column(Text, nullable=True)
     audio_duration = Column(Integer, nullable=True)  # 秒
-    transcript = Column(Text, nullable=True)
-    transcript_paragraphs = Column(Text, nullable=True)  # 段落级转录数据（JSON格式）✨新增
-    summary = Column(Text, nullable=True)  # 段落摘要
-    conversational_summary = Column(Text, nullable=True)  # 发言总结 ✨新增
-    mind_map = Column(Text, nullable=True)  # 思维导图 ✨新增
-    key_points = Column(Text, nullable=True)  # 存储为 JSON 字符串
-    action_items = Column(Text, nullable=True)  # 存储为 JSON 字符串
+    transcript = Column(Text, nullable=True)  # 通义听悟转录文本
+    transcript_paragraphs = Column(Text, nullable=True)  # 段落级转录数据（JSON格式，含说话人）
+    summary = Column(Text, nullable=True)  # LLM生成的会议摘要
+    mind_map = Column(Text, nullable=True)  # LLM生成的思维导图（Markdown格式）
+    key_points = Column(Text, nullable=True)  # LLM提取的关键要点（JSON格式）
+    action_items = Column(Text, nullable=True)  # LLM提取的行动项（JSON格式）
     is_favorite = Column(Boolean, default=False, nullable=False)  # 收藏状态 ✨新增
     tags = Column(Text, nullable=True)  # AI生成的标签，存储为JSON字符串 ✨新增
     ai_model_id = Column(String(36), ForeignKey("ai_models.id", ondelete="SET NULL"), nullable=True)  # 使用的AI模型 ✨新增

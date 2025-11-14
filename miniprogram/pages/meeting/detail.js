@@ -11,13 +11,13 @@ Page({
     meetingId: '',
     meeting: null,
     loading: true,
-    
+
     // 音频播放状态
     audioContext: null,
     isPlaying: false,
     currentTime: 0,
     duration: 0,
-    
+
     // Tab 切换
     activeTab: 'summary',  // summary / transcript / mindmap
     tabs: [
@@ -25,16 +25,24 @@ Page({
       { id: 'transcript', name: '转录' },
       { id: 'mindmap', name: '思维导图' }
     ],
-    
+
     // 说话人映射
     speakerMap: {},  // { "说话人1": "张三", "说话人2": "李四" }
-    
+
     // 联系人列表（用于标注）
     contacts: [],
-    
+
     // 标注弹窗
     showSpeakerModal: false,
-    currentSpeaker: null
+    currentSpeaker: null,
+
+    // v0.9.5：AI 模型选择
+    showAiModelPicker: false,
+    selectedAiModelId: null,
+    selectedAiModelName: null,
+
+    // 状态轮询定时器
+    statusTimer: null
   },
 
   onLoad(options) {
@@ -262,39 +270,70 @@ Page({
   /**
    * 开始处理会议（立即生成）
    */
+  /**
+   * v0.9.5：点击"立即生成"，弹出 AI 模型选择器
+   */
   async startProcessing() {
     const { meeting } = this.data
-    if (!meeting || !meeting.id) return
+    if (!meeting || !meeting.id) {
+      showToast('会议信息不完整', 'error')
+      return
+    }
 
-    // 确认对话框
-    const confirmed = await showConfirm(
-      '即将开始 AI 分析，生成会议摘要、转录和思维导图，大约需要几分钟时间。',
-      '开始处理'
-    )
-    
-    if (!confirmed) return
-    
+    // 弹出 AI 模型选择器
+    this.setData({ showAiModelPicker: true })
+  },
+
+  /**
+   * v0.9.5：AI 模型选择确认
+   */
+  async onAiModelConfirm(e) {
+    const { id, name } = e.detail
+
+    this.setData({
+      selectedAiModelId: id,
+      selectedAiModelName: name,
+      showAiModelPicker: false
+    })
+
+    console.log('[AI 模型选择] 已确认:', { id, name })
+
+    // 开始生成总结
+    await this.generateSummary(id)
+  },
+
+  /**
+   * v0.9.5：AI 模型选择取消
+   */
+  onAiModelCancel() {
+    this.setData({ showAiModelPicker: false })
+  },
+
+  /**
+   * v0.9.5：生成会议总结
+   */
+  async generateSummary(aiModelId) {
+    const { meeting } = this.data
+
     try {
-      showLoading('启动处理中...')
-      
-      // 调用 reprocess 接口触发处理
-      await API.reprocessMeeting(meeting.id)
-      
+      showLoading('启动中...')
+
+      // 调用新接口 generate-summary
+      await API.generateMeetingSummary(meeting.id, aiModelId)
+
       hideLoading()
-      showToast('处理已启动', 'success')
-      
+      showToast('开始处理', 'success')
+
       // 更新状态为 processing
-      this.setData({
-        'meeting.status': 'processing'
-      })
-      
+      this.setData({ 'meeting.status': 'processing' })
+
       // 开始轮询状态
       this.startStatusPolling()
-      
+
     } catch (error) {
       hideLoading()
       console.error('启动处理失败:', error)
-      showToast('启动失败，请重试', 'error')
+      showToast(error.message || '启动失败，请重试', 'error')
     }
   },
 

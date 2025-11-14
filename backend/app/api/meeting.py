@@ -18,13 +18,18 @@ from app.schemas import (
     MeetingResponse,
     MeetingListResponse,
     MeetingStatusResponse,
+    GenerateSummaryRequest,
     SpeakerMapRequest,
     SpeakerResponse,
     SpeakerListResponse,
     ContactResponse,
     ResponseModel
 )
-from app.services.meeting_processor import process_meeting_ai_async, check_meeting_ai_status
+from app.services.meeting_processor import (
+    process_meeting_transcription_async,
+    process_meeting_summary_async,
+    check_meeting_ai_status
+)
 
 router = APIRouter()
 
@@ -36,9 +41,10 @@ async def create_meeting(
     db: Session = Depends(get_db)
 ):
     """
-    创建会议纪要
-    
-    上传会议音频文件，自动生成结构化纪要
+    创建会议纪要（优化版）
+
+    仅上传音频文件，不进行任何 AI 处理
+    用户需在详情页点击"立即生成"并选择 AI 模型后，才开始处理
     """
     try:
         # 创建会议记录
@@ -49,32 +55,22 @@ async def create_meeting(
             meeting_date=meeting_data.meeting_date,
             audio_url=meeting_data.audio_url,
             audio_duration=meeting_data.audio_duration,
-            folder_id=meeting_data.folder_id,  # ✨新增：支持知识库
-            ai_model_id=meeting_data.ai_model_id,  # ✨新增：记录使用的AI模型
-            status=MeetingStatus.PENDING
+            folder_id=meeting_data.folder_id,
+            status=MeetingStatus.PENDING  # 初始状态：等待处理
         )
-        
+
         db.add(meeting)
         db.commit()
         db.refresh(meeting)
-        
+
         logger.info(f"Meeting created: {meeting.id} by user {current_user.id}")
-        
-        # ✨ 改动：不再自动触发 AI 处理，等待用户手动点击"立即生成"
-        # 触发 AI 处理
-        # try:
-        #     process_meeting_ai_async(meeting.id, meeting.audio_url)
-        #     logger.info(f"会议 AI 处理已启动: meeting_id={meeting.id}")
-        # except Exception as e:
-        #     logger.error(f"启动会议 AI 处理失败: {e}")
-        #     # 不影响创建流程，继续返回
-        
+
         return ResponseModel(
             code=200,
-            message="会议上传成功，请点击「立即生成」开始处理",
+            message="会议上传成功",
             data=MeetingResponse.from_orm(meeting)
         )
-    
+
     except Exception as e:
         db.rollback()
         logger.error(f"Create meeting error: {e}")
@@ -550,6 +546,74 @@ async def get_meeting_speakers(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/{meeting_id}/generate-summary", response_model=ResponseModel)
+async def generate_meeting_summary(
+    meeting_id: str,
+    request_data: GenerateSummaryRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    生成会议总结（新版）
+
+    两阶段处理：
+    1. 如果会议尚未转录，先调用通义听悟转录（仅转录+说话人）
+    2. 使用指定的 AI 模型生成总结（摘要/要点/行动项/思维导图）
+
+    Args:
+        meeting_id: 会议ID
+        request_data: {"ai_model_id": "xxx"}
+    """
+    # 验证会议权限
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id,
+        Meeting.user_id == current_user.id
+    ).first()
+
+    if not meeting:
+        raise HTTPException(status_code=404, detail="会议纪要不存在")
+
+    if not meeting.audio_url:
+        raise HTTPException(status_code=400, detail="该会议没有音频文件")
+
+    try:
+        # 检查是否已有转录文本
+        if meeting.transcript:
+            # 已有转录，直接生成 LLM 总结（第二阶段）
+            logger.info(f"会议已有转录，直接生成总结: meeting_id={meeting_id}")
+
+            meeting.status = MeetingStatus.PROCESSING
+            db.commit()
+
+            process_meeting_summary_async(meeting.id, request_data.ai_model_id)
+
+            return ResponseModel(
+                code=200,
+                message="正在生成 AI 总结，请稍候...",
+                data={"meeting_id": meeting_id, "status": "processing", "stage": "summarizing"}
+            )
+        else:
+            # 尚未转录，先进行转录（第一阶段）
+            logger.info(f"会议尚未转录，启动转录: meeting_id={meeting_id}")
+
+            meeting.status = MeetingStatus.PROCESSING
+            meeting.ai_model_id = request_data.ai_model_id  # 保存 AI 模型，转录完成后使用
+            db.commit()
+
+            process_meeting_transcription_async(meeting.id, meeting.audio_url)
+
+            return ResponseModel(
+                code=200,
+                message="正在转录音频，请稍候...",
+                data={"meeting_id": meeting_id, "status": "processing", "stage": "transcribing"}
+            )
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Generate meeting summary error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/{meeting_id}/reprocess", response_model=ResponseModel)
 async def reprocess_meeting(
     meeting_id: str,
@@ -557,37 +621,38 @@ async def reprocess_meeting(
     db: Session = Depends(get_db)
 ):
     """
-    重新处理会议音频
-    
-    用于为旧会议生成新的摘要类型（发言总结、思维导图等）
+    重新处理会议（兼容旧版接口）
+
+    保留此接口以兼容旧版前端，实际调用转录流程
+    建议使用新版 generate-summary 接口
     """
     # 验证会议权限
     meeting = db.query(Meeting).filter(
         Meeting.id == meeting_id,
         Meeting.user_id == current_user.id
     ).first()
-    
+
     if not meeting:
         raise HTTPException(status_code=404, detail="会议纪要不存在")
-    
+
     if not meeting.audio_url:
         raise HTTPException(status_code=400, detail="该会议没有音频文件")
-    
+
     try:
         # 重置状态为 PENDING
         meeting.status = MeetingStatus.PENDING
         db.commit()
-        
-        # 触发 AI 重新处理（使用会议记录中保存的 AI 模型）
-        process_meeting_ai_async(meeting.id, meeting.audio_url, ai_model_id=meeting.ai_model_id)
-        logger.info(f"会议重新处理已启动: meeting_id={meeting_id}, model_id={meeting.ai_model_id}")
-        
+
+        # 触发转录处理
+        process_meeting_transcription_async(meeting.id, meeting.audio_url)
+        logger.info(f"会议转录已启动: meeting_id={meeting_id}")
+
         return ResponseModel(
             code=200,
-            message="会议重新处理已启动，请稍候刷新查看结果",
+            message="会议转录已启动，完成后请选择 AI 模型生成总结",
             data={"meeting_id": meeting_id, "status": "processing"}
         )
-    
+
     except Exception as e:
         db.rollback()
         logger.error(f"Reprocess meeting error: {e}")

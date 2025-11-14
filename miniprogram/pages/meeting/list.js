@@ -43,11 +43,8 @@ Page({
     // Modal 显示状态 - 上传文件用
     showUploadFolderSelector: false,  // 上传文件的知识库选择器
     showUploadModal: false,           // 上传进度模态框
-    showAiModelPicker: false,         // AI 模型选择器 ✨新增
     tempSelectedFile: null,           // 临时存储选中的文件
     uploadTargetFolderId: null,       // 上传文件的目标知识库ID
-    selectedAiModelId: '',            // 选中的 AI 模型ID ✨新增
-    selectedAiModelName: '默认（规则分类）',  // 选中的 AI 模型名称 ✨新增
     
     // 知识库管理状态 ✨新增
     selectedFolderId: null,     // 当前操作的知识库ID
@@ -533,35 +530,16 @@ Page({
 
   // 确认知识库选择（上传文件用）
   confirmFolderSelection() {
-    // 关闭知识库选择器，打开 AI 模型选择器 ✨修改
-    this.setData({ 
-      showUploadFolderSelector: false,
-      showAiModelPicker: true
-    })
-  },
-  
-  // AI 模型选择器确认 ✨新增
-  onAiModelConfirm(e) {
-    const { id, name } = e.detail
-    
-    this.setData({
-      selectedAiModelId: id,
-      selectedAiModelName: name,
-      showAiModelPicker: false
-    })
-    
+    // v0.9.5：直接上传，不再选择 AI 模型
+    this.setData({ showUploadFolderSelector: false })
+
     // 开始上传
     const file = this.data.tempSelectedFile
     const folderId = this.data.uploadTargetFolderId || ''
-    
-    console.log('确认上传，目标知识库ID:', folderId, 'AI模型ID:', id)
-    
+
+    console.log('确认上传，目标知识库ID:', folderId)
+
     this.uploadAudioFile(file, folderId)
-  },
-  
-  // AI 模型选择器关闭 ✨新增
-  onAiModelClose() {
-    this.setData({ showAiModelPicker: false })
   },
   
   // 上传音频文件（使用上传模态框）
@@ -586,11 +564,8 @@ Page({
       if (folderId && folderId !== '') {
         params.folder_id = String(folderId)
       }
-      
-      // 添加 AI 模型 ID（如果有选择）✨新增
-      if (this.data.selectedAiModelId) {
-        params.ai_model_id = this.data.selectedAiModelId
-      }
+
+      // v0.9.5：不再添加 AI 模型 ID（在详情页选择）
       
       console.log('上传参数:', params)
       const result = await API.uploadAudioAndCreateMeeting(file.path, params)

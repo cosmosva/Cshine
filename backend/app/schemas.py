@@ -123,8 +123,7 @@ class MeetingCreate(BaseModel):
     meeting_date: Optional[datetime] = None
     audio_url: str = Field(..., description="音频文件URL")
     audio_duration: Optional[int] = None
-    folder_id: Optional[int] = None  # 知识库ID ✨新增
-    ai_model_id: Optional[str] = Field(None, description="使用的AI模型ID（可选，不传则使用默认模型）")
+    folder_id: Optional[int] = None  # 知识库ID
 
 
 class MeetingUpdate(BaseModel):
@@ -144,16 +143,15 @@ class MeetingResponse(BaseModel):
     meeting_date: Optional[datetime]
     audio_url: str
     audio_duration: Optional[int]
-    transcript: Optional[str]
-    transcript_paragraphs: Optional[List[dict]] = None  # 段落级转录数据 ✨新增
-    summary: Optional[str]  # 段落摘要
-    conversational_summary: Optional[str] = None  # 发言总结 ✨新增
-    mind_map: Optional[str] = None  # 思维导图 ✨新增
-    key_points: Optional[List[dict]]
-    action_items: Optional[List[dict]]
-    is_favorite: Optional[bool] = False  # 收藏状态 ✨新增
-    tags: Optional[List[str]] = None  # AI生成的标签 ✨新增
-    folder_id: Optional[int] = None  # 知识库ID ✨新增
+    transcript: Optional[str]  # 通义听悟转录文本
+    transcript_paragraphs: Optional[List[dict]] = None  # 段落级转录（含说话人）
+    summary: Optional[str]  # LLM生成的会议摘要
+    mind_map: Optional[str] = None  # LLM生成的思维导图（Markdown）
+    key_points: Optional[List[dict]]  # LLM提取的关键要点
+    action_items: Optional[List[dict]]  # LLM提取的行动项
+    is_favorite: Optional[bool] = False  # 收藏状态
+    tags: Optional[List[str]] = None  # LLM生成的标签
+    folder_id: Optional[int] = None  # 知识库ID
     status: str
     created_at: datetime
     
@@ -174,7 +172,6 @@ class MeetingResponse(BaseModel):
             "transcript": obj.transcript,
             "transcript_paragraphs": json.loads(obj.transcript_paragraphs) if (hasattr(obj, 'transcript_paragraphs') and obj.transcript_paragraphs) else None,
             "summary": obj.summary,
-            "conversational_summary": obj.conversational_summary if hasattr(obj, 'conversational_summary') else None,
             "mind_map": obj.mind_map if hasattr(obj, 'mind_map') else None,
             "key_points": json.loads(obj.key_points) if obj.key_points else None,
             "action_items": json.loads(obj.action_items) if obj.action_items else None,
@@ -202,6 +199,11 @@ class MeetingStatusResponse(BaseModel):
     progress: Optional[int] = None
     message: Optional[str] = None
     error: Optional[str] = None
+
+
+class GenerateSummaryRequest(BaseModel):
+    """生成会议总结请求"""
+    ai_model_id: str = Field(..., description="使用的AI模型ID")
 
 
 # ============ 搜索相关 ============

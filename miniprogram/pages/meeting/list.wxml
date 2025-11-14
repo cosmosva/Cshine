@@ -316,10 +316,4 @@
   bind:close="onUploadModalClose"
 />
 
-<!-- AI 模型选择器 -->
-<ai-model-picker
-  show="{{showAiModelPicker}}"
-  value="{{selectedAiModelId}}"
-  bind:confirm="onAiModelConfirm"
-  bind:close="onAiModelClose"
-/>
+<!-- v0.9.5：移除 AI 模型选择器（移至详情页）-->

@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.5] - 2025-01-14
+
+### Changed - 功能优化 🎨
+
+#### AI 调度逻辑重构
+- **核心变化**：实现两阶段处理架构（转录 → 总结）
+  - 阶段1：通义听悟仅负责转录（转录文本 + 说话人分离）
+  - 阶段2：LLM 负责总结（摘要/要点/行动项/标签/思维导图）
+- **用户体验优化**：
+  - 上传会议时不再选择 AI 模型，上传速度更快
+  - 在详情页点击"立即生成"时选择 AI 模型
+  - 用户可选择是否生成总结，更灵活
+- **技术改进**：
+  - 通义听悟关闭摘要/章节/行动项等智能功能，仅保留转录+说话人
+  - 新增 LLM 总结服务 ([llm_summary_service.py](../../backend/app/services/llm_summary_service.py))
+  - 重构会议处理器 ([meeting_processor.py](../../backend/app/services/meeting_processor.py))
+  - 新增 API 接口：`POST /api/v1/meeting/{id}/generate-summary`
+- **数据库变更**：
+  - 移除 `meetings.conversational_summary` 字段（通义听悟发言总结）
+  - 所有总结相关字段改为 LLM 生成
+  - 迁移脚本：[remove_conversational_summary_field.py](../../backend/migrations/remove_conversational_summary_field.py)
+- **影响文件**：
+  - **新增**：`backend/app/services/llm_summary_service.py`
+  - **新增**：`backend/migrations/remove_conversational_summary_field.py`
+  - **新增**：`docs/features/FRONTEND_CHANGES_GUIDE_v095.md`
+  - **修改**：`backend/app/models.py`
+  - **修改**：`backend/app/schemas.py`
+  - **修改**：`backend/app/services/meeting_processor.py`
+  - **修改**：`backend/app/api/meeting.py`
+  - **待修改**：前端文件（参见 [FRONTEND_CHANGES_GUIDE_v095.md](../features/FRONTEND_CHANGES_GUIDE_v095.md)）
+
+### Deployment - 部署说明 📦
+- **优先级**：建议 🟡
+- **需要数据库迁移**：是（移除 conversational_summary 字段）
+- **需要重启服务**：是
+- **需要前端更新**：是
+- **详细文档**：[DEPLOY_AI_SCHEDULING_20250114.md](../features/DEPLOY_AI_SCHEDULING_20250114.md)
+
 ## [0.9.4] - 2025-11-14
 
 ### Fixed - Bug 修复 🐛

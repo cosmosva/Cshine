@@ -181,3 +181,9 @@
   </view>
 </view>
 
+<!-- v0.9.5：AI 模型选择器 -->
+<ai-model-picker
+  show="{{showAiModelPicker}}"
+  bind:confirm="onAiModelConfirm"
+  bind:cancel="onAiModelCancel"
+/>

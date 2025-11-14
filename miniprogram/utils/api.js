@@ -230,6 +230,17 @@ function reprocessMeeting(meetingId) {
 }
 
 /**
+ * v0.9.5：生成会议总结（新版）
+ * @param {string} meetingId 会议ID
+ * @param {string} aiModelId AI 模型ID
+ */
+function generateMeetingSummary(meetingId, aiModelId) {
+  return post(`/api/v1/meeting/${meetingId}/generate-summary`, {
+    ai_model_id: aiModelId
+  })
+}
+
+/**
  * 查询会议处理状态
  * @param {string} meetingId 会议ID
  */
@@ -373,7 +384,8 @@ module.exports = {
   
   // 会议处理
   reprocessMeeting,
-  
+  generateMeetingSummary,  // v0.9.5 新增
+
   // AI 模型
   getAvailableModels
 }
