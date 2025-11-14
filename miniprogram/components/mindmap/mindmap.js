@@ -26,24 +26,91 @@ Component({
       }
 
       try {
-        // 如果是字符串，先解析为对象
-        const mindMapData = typeof data === 'string' ? JSON.parse(data) : data
-        
-        // 通义听悟返回的格式是数组
-        if (Array.isArray(mindMapData)) {
+        // 如果是字符串，尝试判断格式
+        if (typeof data === 'string') {
+          // 如果以 # 开头，可能是 Markdown 格式
+          if (data.trim().startsWith('#') || data.trim().startsWith('-') || data.trim().startsWith('*')) {
+            console.log('[思维导图] 检测到 Markdown 格式，进行解析')
+            const nodes = this.parseMarkdown(data)
+            this.setData({ nodes })
+            return
+          }
+
+          // 否则尝试解析为 JSON
+          try {
+            const mindMapData = JSON.parse(data)
+            if (Array.isArray(mindMapData)) {
+              const nodes = []
+              mindMapData.forEach(root => {
+                this.flattenNode(root, 0, nodes)
+              })
+              this.setData({ nodes })
+              return
+            }
+          } catch (e) {
+            console.warn('[思维导图] JSON 解析失败，尝试作为纯文本处理')
+          }
+        } else if (Array.isArray(data)) {
+          // JSON 数组格式（通义听悟）
           const nodes = []
-          mindMapData.forEach(root => {
+          data.forEach(root => {
             this.flattenNode(root, 0, nodes)
           })
           this.setData({ nodes })
-        } else {
-          console.warn('思维导图数据格式不正确:', mindMapData)
-          this.setData({ nodes: [] })
+          return
         }
+
+        console.warn('思维导图数据格式不正确:', data)
+        this.setData({ nodes: [] })
       } catch (error) {
         console.error('解析思维导图数据失败:', error)
         this.setData({ nodes: [] })
       }
+    },
+
+    /**
+     * 解析 Markdown 格式的思维导图
+     */
+    parseMarkdown(markdown) {
+      const lines = markdown.split('\n')
+      const nodes = []
+      let currentLevel = 0
+
+      lines.forEach(line => {
+        const trimmed = line.trim()
+        if (!trimmed) return
+
+        // 检测标题（# ## ###）
+        const headerMatch = trimmed.match(/^(#{1,6})\s+(.+)$/)
+        if (headerMatch) {
+          const level = headerMatch[1].length - 1 // # = level 0, ## = level 1
+          const title = headerMatch[2].trim()
+          nodes.push({
+            id: `h-${nodes.length}`,
+            title: title,
+            level: level
+          })
+          currentLevel = level
+          return
+        }
+
+        // 检测列表项（- * 或数字）
+        const listMatch = trimmed.match(/^[-*+]\s+(.+)$/) || trimmed.match(/^\d+\.\s+(.+)$/)
+        if (listMatch) {
+          const title = listMatch[1].trim()
+          // 计算缩进层级
+          const indent = line.match(/^(\s*)/)[1].length
+          const level = currentLevel + 1 + Math.floor(indent / 2)
+
+          nodes.push({
+            id: `l-${nodes.length}`,
+            title: title,
+            level: level
+          })
+        }
+      })
+
+      return nodes
     },
 
     /**
