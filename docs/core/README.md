@@ -1,13 +1,13 @@
 # Cshine 微信小程序
 
-[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](https://github.com/cosmosva/Cshine)
+[![Version](https://img.shields.io/badge/version-0.9.1-blue.svg)](https://github.com/cosmosva/Cshine)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![WeChat](https://img.shields.io/badge/WeChat-MiniProgram-07C160.svg)](https://mp.weixin.qq.com/)
 
 > **Let Your Ideas Shine. ✨**
 > AI 驱动的语音记录与灵感管理工具
 >
-> **当前版本**: v0.4.0 | **发布日期**: 2025-11-08
+> **当前版本**: v0.9.1 | **发布日期**: 2025-11-13
 
 ## 📱 项目简介
 
@@ -26,17 +26,27 @@ Cshine 是一款基于微信小程序的智能语音记录工具，帮助用户�
 - ✏️ **编辑功能**：修改标题、内容和分类 ✅
 - 🗑️ **删除功能**：删除不需要的记录 ✅
 
-#### 会议纪要功能 ✨ 新增
+#### 会议纪要功能
 - 📋 **会议上传**：上传会议音频文件（支持 mp3/m4a/wav，最大 500MB）✅
 - 🎯 **智能转写**：自动将会议音频转为文字 ✅
 - 📑 **章节划分**：自动识别不同议题，生成章节目录 ✅
 - 👥 **说话人分离**：自动区分不同发言人 ✅
 - 💡 **要点提取**：按章节或发言人提取会议讨论要点 ✅
 - ✅ **行动项识别**：智能识别待办事项和负责人 ✅
-- 📝 **5种智能摘要**：段落摘要、发言总结、思维导图、问答总结 ✨
+- 📝 **5种智能摘要**：段落摘要、发言总结、思维导图、问答总结 ✅
 - 📄 **结构化纪要**：生成完整的会议纪要文档 ✅
 - 🔄 **实时进度**：显示 AI 处理进度 ✅
 - 📊 **多维展示**：摘要、要点、行动项、全文分 Tab 展示 ✅
+- 🗂️ **知识库管理**：支持创建文件夹分类管理会议 ✅
+- 🔄 **会议操作**：复制、移动、重新处理 ✅
+
+#### AI 模型管理系统 ✨ 最新
+- 🤖 **多模型支持**：OpenAI (GPT)、Anthropic (Claude)、字节豆包、阿里通义千问 ✅
+- 🎯 **模型选择**：会议和闪记创建时可选择不同 AI 模型 ✅
+- 🔧 **Web 管理后台**：可视化配置和管理 AI 模型 ✅
+- 📝 **提示词管理**：支持自定义不同场景的提示词模板 ✅
+- 🛡️ **自动降级**：AI 模型调用失败时自动降级到规则分类器 ✅
+- 👨‍💼 **管理员系统**：独立的管理员账号体系和 JWT 认证 ✅
 
 ## 🎨 设计特色
 
@@ -69,7 +79,9 @@ Cshine 是一款基于微信小程序的智能语音记录工具，帮助用户�
 ### AI 服务
 - **语音识别**：阿里云通义听悟（ASR）
 - **文本分析**：通义听悟（摘要、关键词）
-- **智能分类**：基于关键词的规则分类器
+- **智能分类**：规则分类器 + LLM 智能分类
+- **多模型支持**：OpenAI、Anthropic、字节豆包、阿里通义
+- **统一接口**：LLM 抽象层 + 工厂模式
 - **异步处理**：Python Threading
 
 ## 📁 项目结构
@@ -83,14 +95,15 @@ Cshine/
 │   ├── components/         # 组件目录
 │   │   ├── navigation-bar/ # 导航栏组件
 │   │   ├── record-button/  # 录音按钮组件（支持长按、波形动画）
-│   │   └── flash-card/     # 闪记卡片组件
+│   │   ├── flash-card/     # 闪记卡片组件
+│   │   ├── upload-modal/   # 上传进度模态框
+│   │   └── ai-model-picker/# AI 模型选择器组件 ✨ 新增
 │   ├── pages/              # 页面目录
 │   │   ├── index/          # Cshine 主页（列表、录音、筛选）✨ Tab
 │   │   ├── detail/         # 闪记详情页（查看、播放、操作）
 │   │   ├── edit/           # 编辑页（修改内容）
 │   │   ├── meeting/        # 会议纪要页面
 │   │   │   ├── list/       # 知识库页面（会议列表）✨ Tab
-│   │   │   ├── upload/     # 上传会议音频
 │   │   │   └── detail/     # 会议详情
 │   │   └── profile/        # 我的页面（个人中心）✨ Tab
 │   ├── styles/             # 样式系统
@@ -108,15 +121,38 @@ Cshine/
 ├── backend/                # 后端服务
 │   ├── app/                # 应用目录
 │   │   ├── api/            # API 路由
-│   │   ├── models.py       # 数据模型
+│   │   │   ├── admin.py    # 管理员 API ✨
+│   │   │   ├── ai_models.py# AI 模型管理 API ✨
+│   │   │   ├── ai_prompts.py# 提示词管理 API ✨
+│   │   │   ├── auth.py     # 认证 API
+│   │   │   ├── flash.py    # 闪记 API
+│   │   │   ├── meeting.py  # 会议 API
+│   │   │   ├── folder.py   # 知识库 API
+│   │   │   └── upload.py   # 上传 API
+│   │   ├── models.py       # 数据模型（含 AI 模型配置）✨
 │   │   ├── schemas.py      # 数据验证
 │   │   ├── database.py     # 数据库连接
-│   │   ├── dependencies.py # 依赖注入
+│   │   ├── dependencies.py # 依赖注入（含管理员认证）✨
 │   │   ├── services/       # 业务服务
+│   │   │   ├── llm/        # LLM 统一调用层 ✨
+│   │   │   │   ├── base.py          # LLM 基类
+│   │   │   │   ├── factory.py       # LLM 工厂
+│   │   │   │   ├── openai_llm.py    # OpenAI 适配器
+│   │   │   │   ├── anthropic_llm.py # Anthropic 适配器
+│   │   │   │   ├── doubao_llm.py    # 豆包适配器
+│   │   │   │   └── qwen_llm.py      # 通义适配器
+│   │   │   ├── llm_classifier.py    # LLM 智能分类器 ✨
 │   │   │   ├── tingwu_service.py    # 通义听悟服务
-│   │   │   ├── classifier.py        # 智能分类器
-│   │   │   └── ai_processor.py      # AI 处理器
+│   │   │   ├── classifier.py        # 规则分类器
+│   │   │   ├── ai_processor.py      # 闪记 AI 处理器
+│   │   │   └── meeting_processor.py # 会议 AI 处理器
 │   │   └── utils/          # 工具函数
+│   ├── static/             # 静态文件
+│   │   └── admin/          # Web 管理后台 ✨
+│   │       ├── login.html
+│   │       ├── index.html
+│   │       └── app.js
+│   ├── migrations/         # 数据库迁移脚本 ✨
 │   ├── main.py             # 入口文件
 │   ├── config.py           # 配置管理
 │   ├── requirements.txt    # 依赖列表
@@ -164,24 +200,35 @@ Cshine/
 
 ### 4. 后端服务
 
-详见 `backend/README.md` 和 `backend/快速开始.md`
+详见 `backend/README.md` 和相关部署文档
 
 **快速启动：**
 ```bash
 cd backend
-source venv/bin/activate  # 激活虚拟环境
-python main.py             # 启动服务
+source venv/bin/activate     # 激活虚拟环境
+pip install -r requirements.txt  # 安装依赖
+python main.py               # 启动服务（默认 http://127.0.0.1:8000）
 ```
 
 **配置说明：**
-- 修改 `utils/config.js` 中的 `API_BASE_URL`
+- 修改 `miniprogram/utils/config.js` 中的 `API_BASE_URL`
 - 模拟器测试：`http://localhost:8000`
 - 真机测试：`http://<你的IP>:8000`
+- 生产环境：`https://cshine.xuyucloud.com`
 
 **登录配置：**
-- 查看 [LOGIN.md](LOGIN.md) 了解完整登录流程
+- 查看 `docs/deployment/LOGIN.md` 了解完整登录流程
 - 配置微信小程序 AppID 和 AppSecret
 - 小程序启动时自动完成静默登录
+
+**AI 模型配置：** ✨ 新增
+1. 启动后端服务
+2. 访问 Web 管理后台：`http://127.0.0.1:8000/static/admin/login.html`
+3. 使用默认账号登录（admin / admin123456）
+4. 添加 AI 模型配置（OpenAI、Anthropic、豆包、通义等）
+5. 小程序端即可选择使用不同的 AI 模型
+
+详见：`docs/features/DEPLOY_AI_MODELS_SYSTEM_20251113.md`
 
 ### 5. 当前状态
 
@@ -210,13 +257,18 @@ python main.py             # 启动服务
 - **操作功能**：删除、分享（开发中）
 
 **后端服务**
-- **认证系统**：微信登录、JWT Token ✨ 已打通
-- **闪记 API**：完整的 CRUD 接口
-- **会议纪要 API**：创建、查询、更新、删除接口
-- **AI 集成**：语音转写、智能摘要、关键词提取、自动分类
-- **会议 AI**：要点提取、行动项识别、说话人分离
-- **云服务**：阿里云 OSS 存储、通义听悟 ASR
-- **真机测试**：通过 ✅
+- **认证系统**：微信登录、JWT Token ✅
+- **管理员系统**：独立的管理员认证和权限管理 ✅
+- **闪记 API**：完整的 CRUD 接口 ✅
+- **会议纪要 API**：创建、查询、更新、删除、重新处理 ✅
+- **知识库 API**：文件夹 CRUD、会议分类管理 ✅
+- **AI 模型管理**：多模型配置、测试、切换 ✅
+- **提示词管理**：自定义场景化提示词模板 ✅
+- **AI 集成**：语音转写、智能摘要、关键词提取、LLM 分类 ✅
+- **会议 AI**：要点提取、行动项识别、说话人分离、多种摘要 ✅
+- **云服务**：阿里云 OSS 存储、通义听悟 ASR ✅
+- **Web 管理后台**：可视化配置界面 ✅
+- **线上部署**：已部署到生产环境 ✅
 
 ⏳ **待开发功能**
 - 搜索功能（全文搜索、语义搜索）
@@ -225,7 +277,8 @@ python main.py             # 启动服务
 - 标签系统（自定义标签）
 - 分享功能（分享到微信好友）
 - 会议纪要导出与分享
-- 文件夹功能完善（业务逻辑）
+- 提示词模板的 Web 管理界面（目前只读）
+- AI 对话功能（基于会议内容的 Q&A）
 
 ## 📸 界面预览
 
@@ -255,21 +308,31 @@ python main.py             # 启动服务
 - [x] Week 5：联调测试
 - [x] Week 6：真机测试 + Bug 修复
 
-**🎉 当前进度：Phase 1 已完成，核心功能全部实现！**
-
-### Phase 2：功能完善
-- [x] 会议纪要功能 ✅ **已完成**
-- [x] 智能分类（已完成基础版）
+### Phase 2：功能完善 ✅ **已完成**
+- [x] 会议纪要功能 ✅
+- [x] 智能分类（规则 + LLM 双模式）✅
+- [x] 知识库文件夹管理 ✅
+- [x] AI 模型管理系统 ✅
+- [x] Web 管理后台 ✅
+- [x] 用户体验优化（波形播放器、模态框、操作菜单）✅
 - [ ] 搜索功能
-- [ ] 用户体验优化（骨架屏、更好的加载动画）
 - [ ] 数据导出
 
-### Phase 3：上线运营（待规划）
-- [ ] 申请微信小程序账号
-- [ ] 配置生产环境（域名、HTTPS、服务器）
+**🎉 当前进度：Phase 2 核心功能已完成，AI 系统全面升级！**
+
+### Phase 3：上线运营 🚀 **进行中**
+- [x] 申请微信小程序账号 ✅
+- [x] 配置生产环境（域名、HTTPS、服务器）✅
+- [x] 后端服务部署 ✅
 - [ ] 小程序审核
 - [ ] 灰度发布
 - [ ] 正式上线
+
+**当前环境**：
+- **生产后端**：https://cshine.xuyucloud.com
+- **管理后台**：https://cshine.xuyucloud.com/static/admin/login.html
+- **数据库**：PostgreSQL（生产）
+- **部署方式**：Systemd 服务 + Nginx 反向代理
 
 ## 🎨 设计规范
 
@@ -328,11 +391,15 @@ chore: 构建/工具相关
 ### 核心接口（已实现）
 
 **认证接口**
-- `POST /api/v1/auth/login` - 微信登录
-- `GET /api/v1/auth/me` - 获取当前用户信息
+- `POST /api/v1/auth/login` - 微信登录 ✅
+- `GET /api/v1/auth/me` - 获取当前用户信息 ✅
+
+**管理员接口** ✨ 新增
+- `POST /api/v1/admin/login` - 管理员登录 ✅
+- `GET /api/v1/admin/me` - 获取管理员信息 ✅
 
 **闪记接口**
-- `POST /api/v1/flash/create` - 创建闪记 ✅
+- `POST /api/v1/flash/create` - 创建闪记（支持指定 AI 模型）✅
 - `GET /api/v1/flash/list` - 获取闪记列表 ✅
 - `GET /api/v1/flash/{id}` - 获取闪记详情 ✅
 - `PUT /api/v1/flash/{id}` - 更新闪记 ✅
@@ -340,13 +407,34 @@ chore: 构建/工具相关
 - `PUT /api/v1/flash/{id}/favorite` - 收藏/取消收藏 ✅
 - `GET /api/v1/flash/{id}/ai-status` - 查询 AI 处理状态 ✅
 
-**会议纪要接口** ✨
-- `POST /api/v1/meeting/create` - 创建会议纪要 ✅
+**会议纪要接口**
+- `POST /api/v1/meeting/create` - 创建会议纪要（支持指定 AI 模型）✅
 - `GET /api/v1/meeting/list` - 获取会议列表 ✅
 - `GET /api/v1/meeting/{id}` - 获取会议详情 ✅
 - `PUT /api/v1/meeting/{id}` - 更新会议纪要 ✅
 - `DELETE /api/v1/meeting/{id}` - 删除会议纪要 ✅
+- `POST /api/v1/meeting/{id}/reprocess` - 重新处理会议 ✅
 - `GET /api/v1/meeting/{id}/status` - 查询处理状态 ✅
+
+**知识库接口** ✨ 新增
+- `POST /api/v1/folders` - 创建文件夹 ✅
+- `GET /api/v1/folders` - 获取文件夹列表 ✅
+- `PUT /api/v1/folders/{id}` - 更新文件夹 ✅
+- `DELETE /api/v1/folders/{id}` - 删除文件夹 ✅
+
+**AI 模型管理接口** ✨ 新增
+- `GET /api/v1/ai-models/available` - 获取可用模型列表（用户端）✅
+- `POST /api/v1/admin/ai-models` - 创建 AI 模型（管理员）✅
+- `GET /api/v1/admin/ai-models` - 获取模型列表（管理员）✅
+- `PUT /api/v1/admin/ai-models/{id}` - 更新模型配置（管理员）✅
+- `DELETE /api/v1/admin/ai-models/{id}` - 删除模型（管理员）✅
+- `POST /api/v1/admin/ai-models/{id}/test` - 测试模型连接（管理员）✅
+
+**提示词管理接口** ✨ 新增
+- `GET /api/v1/admin/prompts` - 获取提示词列表（管理员）✅
+- `POST /api/v1/admin/prompts` - 创建提示词（管理员）✅
+- `PUT /api/v1/admin/prompts/{id}` - 更新提示词（管理员）✅
+- `DELETE /api/v1/admin/prompts/{id}` - 删除提示词（管理员）✅
 
 **文件上传接口**
 - `POST /api/v1/upload/audio` - 上传音频文件 ✅
@@ -377,7 +465,52 @@ chore: 构建/工具相关
 
 ## 🔖 版本历史
 
-查看 [CHANGELOG.md](CHANGELOG.md) 了解详细的版本更新记录。
+查看 [docs/core/CHANGELOG.md](docs/core/CHANGELOG.md) 了解详细的版本更新记录。
+
+### v0.9.1 (2025-11-13) - 当前版本
+
+**🎉 AI 模型管理系统完整发布！**
+
+核心更新：
+- ✅ 多 AI 模型支持（OpenAI、Anthropic、豆包、通义）
+- ✅ Web 管理后台（可视化配置）
+- ✅ 小程序端 AI 模型选择
+- ✅ LLM 智能分类器
+- ✅ 管理员认证系统
+- ✅ 提示词模板管理
+- ✅ 自动降级机制
+
+### v0.6.0 (2025-11-13)
+
+**🔧 AI 模型统一管理系统**
+
+核心功能：
+- ✅ 数据库新增 AI 模型配置表
+- ✅ LLM 抽象层设计
+- ✅ 多模型工厂模式
+- ✅ 闪记和会议支持 AI 模型选择
+
+### v0.5.0 (2025-11-10)
+
+**📚 知识库管理增强**
+
+核心功能：
+- ✅ 知识库文件夹 CRUD
+- ✅ 会议分类管理
+- ✅ 会议复制和移动
+- ✅ 会议重新处理
+- ✅ 波形播放器组件
+
+### v0.4.0 (2025-11-08)
+
+**🎙️ 会议纪要功能**
+
+核心功能：
+- ✅ 会议音频上传
+- ✅ 智能转写和摘要
+- ✅ 说话人分离
+- ✅ 章节划分
+- ✅ 要点和行动项提取
 
 ### v0.1.0 (2025-11-07)
 
@@ -393,13 +526,6 @@ chore: 构建/工具相关
 - ✅ 编辑与删除
 - ✅ 详情页面
 - ✅ 响应式设计与安全区域适配
-
-技术亮点：
-- 统一的 CSS 变量设计系统
-- scroll-view 滚动优化
-- 固定定位按钮与安全区域处理
-- 录音波形动画
-- 完整的 FastAPI 后端
 
 ---
 
