@@ -44,11 +44,22 @@ def run_sqlite_migration():
     """SQLite 迁移"""
     import sqlite3
 
-    # SQLite 数据库路径
-    db_path = "app.db"
+    # SQLite 数据库路径（尝试多个可能的位置）
+    possible_paths = [
+        "backend/cshine.db",  # 从项目根目录运行
+        "cshine.db",          # 从 backend 目录运行
+        "app.db"              # 默认位置
+    ]
 
-    if not os.path.exists(db_path):
-        logger.warning(f"数据库文件不存在: {db_path}，跳过迁移")
+    db_path = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            db_path = path
+            logger.info(f"找到数据库文件: {db_path}")
+            break
+
+    if not db_path:
+        logger.warning(f"数据库文件不存在，尝试过的路径: {possible_paths}，跳过迁移")
         return
 
     conn = None
