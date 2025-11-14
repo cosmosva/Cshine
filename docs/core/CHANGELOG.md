@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2025-01-14
+
+### Fixed - Bug 修复 🐛
+
+#### 数据库迁移脚本路径检测
+- **问题**：开发环境数据库迁移失败，脚本查找 `app.db` 而实际文件是 `backend/cshine.db`
+- **修复**：支持多路径检测逻辑
+  - 优先查找 `backend/cshine.db`（项目根目录运行）
+  - 其次查找 `cshine.db`（backend 目录运行）
+  - 最后查找 `app.db`（默认位置）
+- **改进**：添加详细日志输出路径检测结果
+- **影响文件**：`backend/migrations/remove_conversational_summary_field.py`
+
 ## [0.9.5] - 2025-01-14
 
 ### Changed - 功能优化 🎨
