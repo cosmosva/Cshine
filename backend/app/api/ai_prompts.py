@@ -19,7 +19,7 @@ from app.schemas import (
 )
 from app.dependencies import get_current_admin
 
-router = APIRouter(prefix="/api/admin/ai-prompts", tags=["AI提示词管理"])
+router = APIRouter(prefix="/admin/ai-prompts", tags=["AI提示词管理"])
 
 
 @router.get("", response_model=ResponseModel)

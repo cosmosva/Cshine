@@ -23,11 +23,11 @@ from app.schemas import (
 from app.dependencies import get_current_admin, get_current_user
 from app.services.llm import get_llm, test_llm_connection, LLMMessage
 
-# 管理员路由
-admin_router = APIRouter(prefix="/api/admin/ai-models", tags=["AI模型管理"])
+# 管理员路由（不加 /api 前缀，因为在 __init__.py 中已经有 /api/v1）
+admin_router = APIRouter(prefix="/admin/ai-models", tags=["AI模型管理"])
 
-# 用户路由
-user_router = APIRouter(prefix="/api/ai-models", tags=["AI模型"])
+# 用户路由（不加 /api 前缀，因为在 __init__.py 中已经有 /api/v1）
+user_router = APIRouter(prefix="/ai-models", tags=["AI模型"])
 
 
 # ============ 管理员接口 ============
@@ -298,7 +298,7 @@ async def test_ai_model(
 
 # ============ 用户接口 ============
 
-@user_router.get("", response_model=ResponseModel)
+@user_router.get("/available", response_model=ResponseModel)
 async def get_available_models(
     db: Session = Depends(get_db),
     user = Depends(get_current_user)

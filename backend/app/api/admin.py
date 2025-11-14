@@ -18,7 +18,7 @@ from app.schemas import (
 from app.utils.jwt import create_access_token
 from app.dependencies import get_current_admin, get_current_superuser
 
-router = APIRouter(prefix="/api/admin", tags=["管理员"])
+router = APIRouter(prefix="/admin", tags=["管理员"])
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
