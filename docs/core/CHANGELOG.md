@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.9] - 2025-01-14
+
+### Changed - 重构优化 🔧
+
+#### 统一"重新生成"和"立即生成"逻辑
+- **核心变化**：删除旧的 `/reprocess` 接口，统一使用 `generate-summary`
+- **用户体验**：
+  - "重新生成"现在也会弹出 AI 模型选择器（和"立即生成"一致）
+  - 按钮文案从"重新处理"改为"重新生成"
+  - 图标从 🔄 改为 ✨（与"立即生成"保持一致）
+- **性能优化**：
+  - 智能判断：已有转录文本则直接重新生成总结（节省时间）
+  - 无转录文本则先转录再生成总结
+- **代码简化**：
+  - 前端删除 `reprocessMeeting()` API 调用
+  - 后端删除 `/reprocess` 接口（~45 行代码）
+  - 统一接口，减少维护成本
+- **影响文件**：
+  - `miniprogram/pages/meeting/detail.js`
+  - `miniprogram/pages/meeting/detail.wxml`
+  - `miniprogram/utils/api.js`
+  - `backend/app/api/meeting.py`
+
 ## [0.9.8] - 2025-01-14
 
 ### Added - 新功能 ✨
