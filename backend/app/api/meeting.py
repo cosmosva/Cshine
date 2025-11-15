@@ -614,49 +614,9 @@ async def generate_meeting_summary(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/{meeting_id}/reprocess", response_model=ResponseModel)
-async def reprocess_meeting(
-    meeting_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    重新处理会议（兼容旧版接口）
-
-    保留此接口以兼容旧版前端，实际调用转录流程
-    建议使用新版 generate-summary 接口
-    """
-    # 验证会议权限
-    meeting = db.query(Meeting).filter(
-        Meeting.id == meeting_id,
-        Meeting.user_id == current_user.id
-    ).first()
-
-    if not meeting:
-        raise HTTPException(status_code=404, detail="会议纪要不存在")
-
-    if not meeting.audio_url:
-        raise HTTPException(status_code=400, detail="该会议没有音频文件")
-
-    try:
-        # 重置状态为 PENDING
-        meeting.status = MeetingStatus.PENDING
-        db.commit()
-
-        # 触发转录处理
-        process_meeting_transcription_async(meeting.id, meeting.audio_url)
-        logger.info(f"会议转录已启动: meeting_id={meeting_id}")
-
-        return ResponseModel(
-            code=200,
-            message="会议转录已启动，完成后请选择 AI 模型生成总结",
-            data={"meeting_id": meeting_id, "status": "processing"}
-        )
-
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Reprocess meeting error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# v0.9.9：已移除 /reprocess 接口，统一使用 /generate-summary
+# 前端"重新生成"和"立即生成"现在都调用同一个接口
+# 后端会智能判断：已有转录则直接生成总结，无转录则先转录再生成
 
 
 

@@ -391,38 +391,22 @@ Page({
   },
 
   /**
-   * 重新处理会议
+   * 重新处理会议（v0.9.9：统一为 AI 模型选择 + 智能生成）
    */
   async reprocessMeeting() {
     const { meeting } = this.data
     if (!meeting || !meeting.id) return
 
     const confirmed = await showConfirm(
-      '确定要重新处理这个会议吗？这将重新生成摘要、思维导图等内容。',
-      '重新处理'
+      '确定要重新生成会议总结吗？请选择 AI 模型。',
+      '重新生成'
     )
-    
+
     if (!confirmed) return
-    
-    try {
-      showLoading('启动处理中...')
-      await API.reprocessMeeting(meeting.id)
-      hideLoading()
-      showToast('处理已启动', 'success')
-      
-      // 更新状态为 processing
-      this.setData({
-        'meeting.status': 'processing'
-      })
-      
-      // 开始轮询状态
-      this.startStatusPolling()
-      
-    } catch (error) {
-      hideLoading()
-      console.error('重新处理失败:', error)
-      showToast('启动失败，请重试', 'error')
-    }
+
+    // v0.9.9：统一逻辑，弹出 AI 模型选择器（和"立即生成"一样）
+    console.log('[重新生成] 弹出 AI 模型选择器')
+    this.setData({ showAiModelPicker: true })
   },
 
   /**

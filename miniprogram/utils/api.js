@@ -222,15 +222,8 @@ function deleteMeeting(meetingId) {
 }
 
 /**
- * 重新处理会议
- * @param {string} meetingId 会议ID
- */
-function reprocessMeeting(meetingId) {
-  return post(`/api/v1/meeting/${meetingId}/reprocess`, {})
-}
-
-/**
  * v0.9.5：生成会议总结（新版）
+ * 适用于"立即生成"和"重新生成"两个场景
  * @param {string} meetingId 会议ID
  * @param {string} aiModelId AI 模型ID
  */
@@ -381,10 +374,9 @@ module.exports = {
   // 说话人标注
   mapSpeaker,
   getMeetingSpeakers,
-  
+
   // 会议处理
-  reprocessMeeting,
-  generateMeetingSummary,  // v0.9.5 新增
+  generateMeetingSummary,  // v0.9.5 新增，适用于立即生成和重新生成
 
   // AI 模型
   getAvailableModels

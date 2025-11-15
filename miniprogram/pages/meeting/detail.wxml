@@ -45,10 +45,10 @@
           <text class="tip-text">AI 处理中，请稍候...</text>
         </view>
         
-        <!-- 重新处理按钮（completed/failed 状态） -->
+        <!-- 重新生成按钮（completed/failed 状态）v0.9.9 -->
         <view class="reprocess-btn" wx:if="{{meeting.status === 'completed' || meeting.status === 'failed'}}" bindtap="reprocessMeeting">
-          <text class="btn-icon">🔄</text>
-          <text class="btn-text">重新处理</text>
+          <text class="btn-icon">✨</text>
+          <text class="btn-text">重新生成</text>
         </view>
       </view>
     </view>
