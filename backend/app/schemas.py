@@ -150,6 +150,7 @@ class MeetingResponse(BaseModel):
     key_points: Optional[List[dict]]  # LLM提取的关键要点
     action_items: Optional[List[dict]]  # LLM提取的行动项
     is_favorite: Optional[bool] = False  # 收藏状态
+    is_viewed: Optional[bool] = False  # 已查看状态 (v0.9.10新增)
     tags: Optional[List[str]] = None  # LLM生成的标签
     folder_id: Optional[int] = None  # 知识库ID
     status: str
@@ -176,6 +177,7 @@ class MeetingResponse(BaseModel):
             "key_points": json.loads(obj.key_points) if obj.key_points else None,
             "action_items": json.loads(obj.action_items) if obj.action_items else None,
             "is_favorite": obj.is_favorite if hasattr(obj, 'is_favorite') else False,
+            "is_viewed": obj.is_viewed if hasattr(obj, 'is_viewed') else False,
             "tags": json.loads(obj.tags) if (hasattr(obj, 'tags') and obj.tags) else None,
             "folder_id": obj.folder_id if hasattr(obj, 'folder_id') else None,
             "status": obj.status.value if hasattr(obj.status, 'value') else obj.status,

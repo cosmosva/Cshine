@@ -1,0 +1,86 @@
+/**
+ * 状态徽章 WXS 模块 (v0.9.10)
+ * 用于在 WXML 中动态计算会议卡片的状态显示
+ */
+
+/**
+ * 判断是否应该显示状态徽章
+ * @param {Object} meeting - 会议对象
+ * @returns {Boolean} 是否显示徽章
+ */
+function shouldShow(meeting) {
+  if (!meeting) return false
+
+  var status = meeting.status
+
+  // pending 状态不显示
+  if (status === 'pending') return false
+
+  // completed 且已查看不显示
+  if (status === 'completed' && meeting.is_viewed) return false
+
+  // 其他情况都显示（processing, failed, completed+未查看）
+  return true
+}
+
+/**
+ * 获取状态类型（用于CSS类名）
+ * @param {Object} meeting - 会议对象
+ * @returns {String} 状态类型
+ */
+function getType(meeting) {
+  if (!meeting) return ''
+
+  var status = meeting.status
+  var transcript = meeting.transcript
+
+  // processing 状态：区分转录中和生成中
+  if (status === 'processing') {
+    if (!transcript || transcript.length === 0) {
+      return 'transcribing'  // 转录中（蓝色）
+    } else {
+      return 'generating'  // 生成中（橙色）
+    }
+  }
+
+  // completed 状态：未查看显示红点
+  if (status === 'completed' && !meeting.is_viewed) {
+    return 'new'  // 新完成（绿色+红点）
+  }
+
+  // failed 状态
+  if (status === 'failed') {
+    return 'failed'  // 失败（灰色）
+  }
+
+  return ''
+}
+
+/**
+ * 获取状态文本
+ * @param {Object} meeting - 会议对象
+ * @returns {String} 状态文本
+ */
+function getText(meeting) {
+  if (!meeting) return ''
+
+  var type = getType(meeting)
+
+  if (type === 'transcribing') {
+    return '转录中'
+  } else if (type === 'generating') {
+    return '生成中'
+  } else if (type === 'new') {
+    return '已完成 🔴'  // 红点表示未查看
+  } else if (type === 'failed') {
+    return '失败'
+  }
+
+  return ''
+}
+
+module.exports = {
+  shouldShow: shouldShow,
+  getType: getType,
+  getText: getText
+}

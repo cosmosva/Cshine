@@ -318,6 +318,38 @@ page {
   letter-spacing: -0.05px;
 }
 
+/* v0.9.10: 状态徽章 */
+.status-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: -0.05px;
+  flex-shrink: 0;
+}
+
+.status-transcribing {
+  background-color: #E3F2FD;
+  color: #1976D2;
+}
+
+.status-generating {
+  background-color: #FFF3E0;
+  color: #F57C00;
+}
+
+.status-new {
+  background-color: #E8F5E9;
+  color: #388E3C;
+}
+
+.status-failed {
+  background-color: #F5F5F5;
+  color: #9E9E9E;
+}
+
 /* ========== 空状态（TicNote 风格） ========== */
 .empty-state {
   display: flex;

@@ -72,12 +72,17 @@
             <text class="duration" wx:if="{{item.audio_duration}}">{{utils.formatDuration(item.audio_duration)}}</text>
           </view>
 
-          <!-- 第三行：扬声器图标 + 标签 -->
+          <!-- 第三行：扬声器图标 + 标签 + 状态标识 -->
           <view class="card-row-3">
             <text class="audio-icon">🔊</text>
             <text class="source-label">扬声器</text>
             <view class="tags-container" wx:if="{{item.tags && item.tags.length > 0}}">
               <text class="tag" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag">{{tag}}</text>
+            </view>
+            <!-- v0.9.10: 状态标识 -->
+            <wxs module="badge" src="./badge.wxs"></wxs>
+            <view class="status-badge status-{{badge.getType(item)}}" wx:if="{{badge.shouldShow(item)}}">
+              <text class="status-text">{{badge.getText(item)}}</text>
             </view>
           </view>
         </view>

@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.10] - 2025-01-15
+
+### Added - 新功能 ✨
+
+#### 会议列表状态指示器
+- **功能**：会议卡片显示实时处理状态和未读提示
+- **状态类型**：
+  - 🔵 **转录中**（Transcribing）- 通义听悟转录进行中
+  - 🟠 **生成中**（Generating）- LLM 总结生成中
+  - 🟢 **已完成 🔴**（Completed + Unviewed）- 已完成但未查看（红点提示）
+  - ⚪ **失败**（Failed）- 处理失败
+  - 无显示 - PENDING 状态或已查看的完成会议
+- **交互逻辑**：
+  - 状态徽章显示在卡片第三行最右侧（标签之后）
+  - 打开会议详情页自动标记为已查看
+  - 已查看的会议不再显示红点
+- **技术实现**：
+  - 新增 `meetings.is_viewed` 字段（Boolean）
+  - 新增 API 接口：`PATCH /api/v1/meeting/{id}/mark-viewed`
+  - WXS 模块实现状态计算逻辑（[badge.wxs](../../miniprogram/pages/meeting/badge.wxs)）
+  - 状态区分逻辑：根据 `transcript` 字段判断是转录中还是生成中
+- **设计细节**：
+  - 转录中：`#E3F2FD` 背景 + `#1976D2` 文字
+  - 生成中：`#FFF3E0` 背景 + `#F57C00` 文字
+  - 已完成（未读）：`#E8F5E9` 背景 + `#388E3C` 文字 + 🔴 红点
+  - 失败：`#F5F5F5` 背景 + `#9E9E9E` 文字
+- **影响文件**：
+  - **Backend**：
+    - `backend/app/models.py` - 新增 `is_viewed` 字段
+    - `backend/app/schemas.py` - MeetingResponse 新增字段
+    - `backend/app/api/meeting.py` - 新增 mark-viewed 接口
+    - `backend/migrations/add_is_viewed_field.py` - 数据库迁移脚本
+  - **Frontend**：
+    - `miniprogram/pages/meeting/list.wxml` - 新增状态徽章 UI
+    - `miniprogram/pages/meeting/list.wxss` - 新增徽章样式
+    - `miniprogram/pages/meeting/badge.wxs` - 状态计算逻辑
+    - `miniprogram/pages/meeting/detail.js` - 查看时调用 mark-viewed
+    - `miniprogram/utils/api.js` - 新增 `markMeetingViewed()` 方法
+    - `miniprogram/utils/request.js` - 新增 `patch()` 方法
+
 ## [0.9.9] - 2025-01-14
 
 ### Changed - 重构优化 🔧

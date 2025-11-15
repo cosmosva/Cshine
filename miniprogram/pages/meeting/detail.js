@@ -48,13 +48,16 @@ Page({
   onLoad(options) {
     console.log('=== 详情页 onLoad ===')
     console.log('options:', options)
-    
+
     if (options.id) {
       console.log('开始加载会议:', options.id)
       this.setData({ meetingId: options.id })
       this.loadMeetingDetail()
       this.loadSpeakerMap()
       this.loadContacts()
+
+      // v0.9.10: 标记会议为已查看
+      this.markAsViewed(options.id)
     } else {
       console.error('❌ 缺少会议ID参数')
     }
@@ -106,17 +109,17 @@ Page({
    */
   async loadMeetingDetail() {
     this.setData({ loading: true })
-    
+
     try {
       const meeting = await API.getMeetingDetail(this.data.meetingId)
       console.log('会议详情（已解包）:', meeting)
-      
+
       if (meeting) {
         this.setData({
           meeting: meeting,
           loading: false
         })
-        
+
         // 设置音频地址
         if (meeting.audio_url && this.data.audioContext) {
           this.data.audioContext.src = meeting.audio_url
@@ -126,6 +129,19 @@ Page({
       console.error('加载会议详情失败:', error)
       this.setData({ loading: false })
       showToast('加载失败', 'error')
+    }
+  },
+
+  /**
+   * 标记会议为已查看 (v0.9.10新增)
+   */
+  async markAsViewed(meetingId) {
+    try {
+      await API.markMeetingViewed(meetingId)
+      console.log('[v0.9.10] 会议已标记为已查看:', meetingId)
+    } catch (error) {
+      // 静默失败，不影响用户体验
+      console.warn('[v0.9.10] 标记会议已查看失败:', error)
     }
   },
 

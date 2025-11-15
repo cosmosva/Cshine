@@ -175,6 +175,18 @@ function del(url, options = {}) {
 }
 
 /**
+ * PATCH 请求 (v0.9.10新增)
+ */
+function patch(url, data = {}, options = {}) {
+  return request({
+    url,
+    method: 'PATCH',
+    data,
+    ...options
+  })
+}
+
+/**
  * 上传文件
  */
 function upload(url, filePath, formData = {}, options = {}) {
@@ -277,6 +289,7 @@ module.exports = {
   get,
   post,
   put,
+  patch,  // v0.9.10 新增
   del,
   upload
 }

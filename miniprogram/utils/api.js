@@ -250,6 +250,15 @@ function toggleMeetingFavorite(meetingId) {
 }
 
 /**
+ * 标记会议为已查看 (v0.9.10新增)
+ * @param {string} meetingId 会议ID
+ */
+function markMeetingViewed(meetingId) {
+  const { patch } = require('./request')
+  return patch(API_ENDPOINTS.MEETING_UPDATE + meetingId + '/mark-viewed')
+}
+
+/**
  * ==================== 联系人相关 ====================
  */
 
@@ -352,6 +361,7 @@ module.exports = {
   deleteMeeting,
   getMeetingStatus,
   toggleMeetingFavorite,
+  markMeetingViewed,  // v0.9.10 新增
   
   // 文件上传
   uploadAudio,

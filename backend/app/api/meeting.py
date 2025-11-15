@@ -614,6 +614,48 @@ async def generate_meeting_summary(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.patch("/{meeting_id}/mark-viewed", response_model=ResponseModel)
+async def mark_meeting_as_viewed(
+    meeting_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    标记会议为已查看 (v0.9.10新增)
+
+    当用户打开会议详情页时，自动调用此接口标记为已查看
+    已查看的会议不再显示红点提示
+    """
+    try:
+        # 查询会议
+        meeting = db.query(Meeting).filter(
+            Meeting.id == meeting_id,
+            Meeting.user_id == current_user.id
+        ).first()
+
+        if not meeting:
+            raise HTTPException(status_code=404, detail="会议不存在")
+
+        # 标记为已查看
+        if not meeting.is_viewed:
+            meeting.is_viewed = True
+            db.commit()
+            logger.info(f"会议已标记为已查看: {meeting_id}")
+
+        return ResponseModel(
+            code=200,
+            message="已标记为已查看",
+            data={"meeting_id": meeting_id, "is_viewed": True}
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Mark meeting as viewed error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # v0.9.9：已移除 /reprocess 接口，统一使用 /generate-summary
 # 前端"重新生成"和"立即生成"现在都调用同一个接口
 # 后端会智能判断：已有转录则直接生成总结，无转录则先转录再生成

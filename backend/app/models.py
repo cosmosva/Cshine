@@ -123,6 +123,7 @@ class Meeting(Base):
     key_points = Column(Text, nullable=True)  # LLM提取的关键要点（JSON格式）
     action_items = Column(Text, nullable=True)  # LLM提取的行动项（JSON格式）
     is_favorite = Column(Boolean, default=False, nullable=False)  # 收藏状态 ✨新增
+    is_viewed = Column(Boolean, default=False, nullable=False)  # 已查看状态 ✨v0.9.10新增
     tags = Column(Text, nullable=True)  # AI生成的标签，存储为JSON字符串 ✨新增
     ai_model_id = Column(String(36), ForeignKey("ai_models.id", ondelete="SET NULL"), nullable=True)  # 使用的AI模型 ✨新增
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
